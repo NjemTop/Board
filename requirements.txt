@@ -1,0 +1,8 @@
+python-telegram-bot==13.7
+requests==2.26.0
+pandas==1.5.1
+beautifulsoup4==4.11.1
+pathlib==1.0.1
+xmltodict==0.13.0
+pyTelegram==0.0.1
+pyTelegramBotAPI==4.7.1
