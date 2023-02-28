@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('./logs/bot-error.log')
+handler = logging.FileHandler('bot-error.log')
 handler.setLevel(logging.ERROR)
 
 # создаем форматирование
@@ -46,7 +46,6 @@ TOKEN = '5666985174:AAHyF7DQa2iQ5QeFTil8ltLtYwR3cGbfEHw'
 auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
 headers = {'Content-Type': 'application/json'}
 
-# УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 bot=telebot.TeleBot(TOKEN)
 
 #alert_chat_id = 320851571
@@ -61,6 +60,7 @@ def send_telegram_message(alert_chat_id, alert_text):
     print(response)
     print('*--*--*'*60)
     
+# УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
     """Функция для проверки наличия данных в файле data.xml"""
     try:
@@ -640,7 +640,8 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
         button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
         bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
    
-# Функция запуска телебота
+
 def start_telegram_bot():
+    """"Функция запуска телебота"""
     # запуск бота
     bot.polling(none_stop=True, interval=0)
