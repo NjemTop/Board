@@ -5,3 +5,5 @@ pathlib==1.0.1
 xmltodict==0.13.0
 pyTelegram==0.0.1
 pyTelegramBotAPI==4.7.1
+Flask==2.2.2
+flask-restx=1.0.3
