@@ -602,4 +602,4 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
 # Функция запуска телебота
 def start_telegram_bot():
     # запуск бота
-    bot.polling(none_stop=True, interval=0)
+    bot.infinity_polling()
