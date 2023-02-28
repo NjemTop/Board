@@ -5,7 +5,7 @@ FROM python:3.10
 COPY . /app
 
 # Создаем директорию. logs внутри контейнера
-RUN mkdir /app/logs
+RUN mkdir -p /app/logs
 
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r /app/requirements.txt
