@@ -3,12 +3,11 @@ import logging
 from flask import Flask, request
 from flask import Response
 from telegram_bot import send_telegram_message
-from check_tickets import get_tickets
 
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('web-errors.log')
+error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 error_handler.setFormatter(formatter)
@@ -17,7 +16,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('web-info.log')
+info_handler = logging.FileHandler('./logs/web-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
@@ -72,11 +71,6 @@ def get_app():
                 alert_chat_id = -1001760725213
                 send_telegram_message(alert_chat_id, ticket_message)
                 info_logger.info('Отправлена следующая информация в группу: %s', ticket_message)
-                try:
-                    get_tickets()
-                    info_logger.info('Отправлена следующая информация в группу: %s')
-                except Exception as e:
-                    error_logger.error("Ошибка отправления информации в группу: %s", e)
             else:
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
@@ -115,10 +109,13 @@ def get_app():
                 ticket_id = json_data.get("ticket_id")
                 subject = json_data.get("subject")
                 priority_name = json_data.get("priority_name")
+                assigned_name = json_data.get("assigned_name")
+                # загрузка JSON файла
+                client_name = json_data['client_details']['name']
                 agent_ticket_url = json_data.get("agent_ticket_url")
                 print('**'*60)
                 # отправляем сообщение в телеграм-бот
-                ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+                ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\n Имя клиента: {client_name}\nНазначен: {assigned_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
                 # Чат айди, куда отправляем алерты
                 alert_chat_id = -1001760725213
