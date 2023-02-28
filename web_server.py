@@ -26,7 +26,7 @@ def get_app():
     app = Flask(__name__)
 
     @app.route('/', methods=['GET'])
-    def handle_ticket():
+    def handle_get():
         """Функция обработки вэбхуков из HappyFox"""
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
@@ -34,6 +34,16 @@ def get_app():
         info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
         info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Чё пришёл сюда?', mimetype='text/plain')
+    
+    @app.route('/create_ticket', methods=['GET'])
+    def handle_get_create_ticket():
+        """Функция обработки вэбхуков из HappyFox"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получение вэбхуков(создание)', mimetype='text/plain')
     
     @app.route('/create_ticket', methods=['POST'])
     def create_ticket():
@@ -71,10 +81,51 @@ def get_app():
         
         return "OK", 200
 
+    @app.route('/update_ticket', methods=['GET'])
+    def handle_get_update_ticket():
+        """Функция обработки вэбхуков из HappyFox"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получение вэбхуков (обнова)', mimetype='text/plain')
+    
     @app.route('/update_ticket', methods=['POST'])
     def update_ticket():
         """Функция обработки обновления тикета из HappyFox"""
-        # Код сюда
+        message = ""
+        message = request.data.decode('utf-8')
+        try:
+            # находим JSON в сообщении
+            json_start = message.find('{')
+            if json_start != -1:
+                json_str = message[json_start:]
+                print('--'*60)
+                # парсим JSON
+                json_data = json.loads(json_str)
+                info_logger.info('Парсинг JSON из update_ticket: %s', (json.dumps(json_data, indent=4)))
+                # находим значения для ключей
+                ticket_id = json_data.get("ticket_id")
+                subject = json_data.get("subject")
+                priority_name = json_data.get("priority_name")
+                agent_ticket_url = json_data.get("agent_ticket_url")
+                print('**'*60)
+                # отправляем сообщение в телеграм-бот
+                ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+                print(ticket_message)
+                # Чат айди, куда отправляем алерты
+                alert_chat_id = -1001760725213
+                send_telegram_message(alert_chat_id, ticket_message)
+                info_logger.info('Отправлена следующая информация в группу: %s', ticket_message)
+            else:
+                print('JSON не найден в сообщении.')
+                error_logger.error("JSON не найден в сообщении. %s")
+        except json.decoder.JSONDecodeError:
+            print('Не удалось распарсить JSON в запросе.')
+            error_logger.error("Не удалось распарсить JSON в запросе. %s")
+            return 'Не удалось распарсить JSON в запросе.', 400
+        
         return "OK", 200
     
     return app
