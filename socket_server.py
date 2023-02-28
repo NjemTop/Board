@@ -35,7 +35,6 @@ try:
     sock.bind(server_address)
 except socket.error as e:
     error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", e)
-    error_logger.error(str(e))
     raise e
 
 # Слушаем входящие подключения
