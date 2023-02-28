@@ -1,12 +1,13 @@
 ﻿import json
 import logging
 from flask import Flask, request
+from flask import Response
 from telegram_bot import send_telegram_message
 
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('web-errors.log')
+error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 error_handler.setFormatter(formatter)
@@ -15,7 +16,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('web-info.log')
+info_handler = logging.FileHandler('./logs/web-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
@@ -27,6 +28,13 @@ def get_app():
     @app.route('/', methods=['POST'])
     def handle_ticket():
         """Функция обработки вэбхуков из HappyFox"""
+        ip_address = (f"Request from {request.remote_addr}: {request.url}")
+        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        return Response('Чё пришёл сюда?', mimetype='text/plain')
+    
+    @app.route('/create_ticket', methods=['POST'])
+    def create_ticket():
+        """Функция обработки создания тикета из HappyFox"""
         message = ""
         message = request.data.decode('utf-8')
         try:
@@ -57,17 +65,26 @@ def get_app():
             print('Не удалось распарсить JSON в запросе.')
             error_logger.error("Не удалось распарсить JSON в запросе. %s")
             return 'Не удалось распарсить JSON в запросе.', 400
-
+        
         return "OK", 200
+
+    @app.route('/update_ticket', methods=['POST'])
+    def update_ticket():
+        """Функция обработки обновления тикета из HappyFox"""
+        # Код сюда
+        return "OK", 200
+    
     return app
 
-def run_server(use_port):
+def run_server():
     """Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты"""
     try:
-        server_address = ('0.0.0.0', 3031)
+        server_address = ('0.0.0.0', 3030)
         app = get_app()
         info_logger.info('Сервер запущен на порту %s', server_address[1])
-        app.run(host=server_address[0], port=use_port, debug=True)
+        app.run(host=server_address[0], port=server_address[1], debug=True)
     except Exception as e:
         error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", e)
         raise e
+
+run_server()
