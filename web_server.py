@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 from flask import Flask, request
 from telegram_bot import send_telegram_message
@@ -6,7 +6,7 @@ from telegram_bot import send_telegram_message
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('web-errors.log')
+error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 error_handler.setFormatter(formatter)
@@ -15,7 +15,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('web-info.log')
+info_handler = logging.FileHandler('./logs/web-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)

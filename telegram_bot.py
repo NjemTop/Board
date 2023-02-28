@@ -640,7 +640,8 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
         button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
         bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
    
-# Функция запуска телебота
+
 def start_telegram_bot():
+    """"Функция запуска телебота"""
     # запуск бота
     bot.polling(none_stop=True, interval=0)
