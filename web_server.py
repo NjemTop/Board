@@ -25,7 +25,7 @@ def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
 
-    @app.route('/', methods=['POST'])
+    @app.route('/', methods=['GET'])
     def handle_ticket():
         """Функция обработки вэбхуков из HappyFox"""
         ip_address = f"Request from {request.remote_addr}: {request.url}"
