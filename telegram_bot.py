@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('./logs/bot-error.log')
+handler = logging.FileHandler('bot-error.log')
 handler.setLevel(logging.ERROR)
 
 # создаем форматирование
