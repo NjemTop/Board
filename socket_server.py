@@ -9,7 +9,7 @@ from telegram_bot import send_telegram_message
 error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
 # создаем обработчик, который будет записывать ошибки в файл Web-error.log
-error_handler = logging.FileHandler('./logs/Web-errors.log')
+error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)
 # создаем форматирование
 error_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M'))
