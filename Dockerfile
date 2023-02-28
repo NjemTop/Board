@@ -4,8 +4,8 @@ FROM python:3.10
 # Копируем файлы проекта в контейнер
 COPY . /app
 
-# Обновляем библиотеку requests
-RUN pip install --no-cache-dir --upgrade requests
+# Создаем директорию. logs внутри контейнера
+RUN mkdir /app/logs
 
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r /app/requirements.txt
