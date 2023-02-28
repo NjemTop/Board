@@ -1,5 +1,4 @@
-python-telegram-bot==13.7
-requests==2.26.0
+requests==2.6.0
 pandas==1.5.1
 beautifulsoup4==4.11.1
 pathlib==1.0.1

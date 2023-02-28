@@ -12,11 +12,33 @@ import random
 import smtplib
 import multiprocessing
 import xml.etree.ElementTree as ET
+import logging
+import os
+import platform
 from writexml import create_xml
 
-# модуль ведения журнала логов
-import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+# создаем логгер
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+# создаем обработчик, который будет записывать ошибки в файл bot-error.log
+handler = logging.FileHandler('bot-error.log')
+handler.setLevel(logging.ERROR)
+
+# создаем форматирование
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
+handler.setFormatter(formatter)
+
+# добавляем обработчик в логгер
+logger.addHandler(handler)
+
+# Проверяем систему, где запускается скрипт
+if platform.system() == 'Windows':
+    # получаем путь к директории AppData\Local для текущего пользователя
+    local_appdata_path = os.environ['LOCALAPPDATA']
+else:
+    local_appdata_path = os.environ['HOME']
+
 # Создаем бота
 TOKEN = '5666985174:AAHyF7DQa2iQ5QeFTil8ltLtYwR3cGbfEHw'
 
@@ -292,13 +314,32 @@ def inline_button(call):
     elif call.data == "button_tele2":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_Теле2.ps1'
-        result_tele2 = subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script,
-          ],
-          stdout=sys.stdout)
-        bot.send_document(call.message.chat.id, open('C:/Users/Adena/AppData/Local/Отчёт_клиента_Теле2.docx', 'rb'))  
+        try:
+            result_tele2 = subprocess.run([
+                "pwsh", 
+                "-File", 
+                setup_script,
+            ],
+            stdout=sys.stdout)
+            # Записываем в лог информацию о пользователе, сформировавшем отчет
+            with open('data.xml') as f:
+                xml_data = f.read()
+                root = ET.fromstring(xml_data)
+                chat_id = root.find('chat_id').text
+                if str(call.message.chat.id) == chat_id:
+                    name = root.find('header_footer/name').text
+                    logger.info(f"Пользователь {name} сформировал отчет.")
+        except subprocess.CalledProcessError as e:
+            logger.error("Ошибка при запуске скрипта %s: %s", setup_script, e)
+            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
+        else:
+            if platform.system() == 'Windows':
+                # формируем путь к файлу отчета в директории AppData\Local
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx').replace('\\', '/')
+            elif platform.system() == 'Linux':
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx')
+            bot.send_document(call.message.chat.id, open(report_path, 'rb'))
+    
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -602,4 +643,4 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
 # Функция запуска телебота
 def start_telegram_bot():
     # запуск бота
-    bot.infinity_polling()
+    bot.polling(none_stop=True, interval=0)
