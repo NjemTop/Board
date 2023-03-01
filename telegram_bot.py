@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 import logging
 import os
 import platform
+import configparser
 from writexml import create_xml
 
 # создаем логгер
@@ -39,13 +40,25 @@ if platform.system() == 'Windows':
 else:
     local_appdata_path = os.environ['HOME']
 
-# Создаем бота
-TOKEN = '5666985174:AAHyF7DQa2iQ5QeFTil8ltLtYwR3cGbfEHw'
+
+# Создаем объект configparser
+config = configparser.ConfigParser()
+# Читаем данные из файла
+config.read('system_info.config')
+# Получаем значение ключа BOT_TOKEN из секции BOT
+BOT_TOKEN = config.get('BOT', 'BOT_TOKEN')
+# Сохраняем значение в переменную TOKEN
+TOKEN = BOT_TOKEN
 
 ## Авторизация в HappyFox
-auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
+# Получаем значение ключа API и API_KEY из секции API
+API_KEY = config.get('API', 'API_KEY')
+API_SECRET = config.get('API', 'API_SECRET')
+# Сохраняем значение в переменную auth
+auth = (API_KEY, API_SECRET)
 headers = {'Content-Type': 'application/json'}
 
+# Создаем бота
 bot=telebot.TeleBot(TOKEN)
 
 #alert_chat_id = 320851571
@@ -650,4 +663,4 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
 def start_telegram_bot():
     """"Функция запуска телебота"""
     # запуск бота
-    bot.polling(none_stop=True, interval=0)
+    bot.infinity_polling()
