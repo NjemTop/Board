@@ -1,5 +1,4 @@
-# Board
-Board_bot
+# Bot_tg
 
 Дефолтно билдим образ командой: 
 - docker build -t hf_bot_tg .
