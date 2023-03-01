@@ -148,7 +148,7 @@ def send_verification_code(email_access):
                         </body>
                     </html>
                 '''
-                message = f'From: {EMAIL_FROM}\nTo: {dest_email}\nSubject: {subject}\n\n{email_text}'
+                message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)
                 ## Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, message)
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
@@ -156,14 +156,6 @@ def send_verification_code(email_access):
                 bot.register_next_step_handler(password_message, check_pass_answer)
                 # Ищем полученную почту в системе HappyFox
                 try:
-                    ### Авторизация в HappyFox
-                    # извлекаем значения API_KEY и API_SECRET
-                    API_KEY = DATA['HAPPYFOX_SETTINGS']['API_KEY']
-                    API_SECRET = DATA['HAPPYFOX_SETTINGS']['API_SECRET']
-                    # сохраняем значения в переменную auth
-                    auth = (API_KEY, API_SECRET)
-                    API_ENDPOINT = DATA['HAPPYFOX_SETTINGS']['API_ENDPOINT']
-                    headers = {'Content-Type': 'application/json'}
                     staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
                     for staff_member in staff:
                         if staff_member['email'] == email_access.text:
