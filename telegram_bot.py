@@ -212,7 +212,8 @@ def check_pass_answer(password_message):
             main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
         else:
-            bot.send_message(password_message.chat.id, 'Неправильный пароль.')
+            bot.send_message(password_message.chat.id, 'Неправильный пароль. Нажмите ещё раз /start')
+            logger.error("Ведён неправильный пароль сотрудником: {password_message.chat.id} %s")
     except Exception as e:
         logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", e)
