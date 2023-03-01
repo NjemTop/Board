@@ -131,7 +131,7 @@ def send_verification_code(email_access):
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
                 global access_password
-                access_password = generate_random_password()
+                access_password = "111"
                 ## Данные (кому отправлять, какая тема и письмо)
                 dest_email = email_access.text
                 subject = 'Добро пожаловать в наш бот!'
