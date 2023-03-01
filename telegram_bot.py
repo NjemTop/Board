@@ -126,7 +126,7 @@ def send_verification_code(email_access):
         try:
             print('111')
             ## Настройки SMTP сервера
-            server = smtplib.SMTP(SMTP_SERVER, 587)
+            server = smtplib.SMTP('smtp.yandex.ru', 587)
             print('222')
             server.ehlo()
             server.starttls()
