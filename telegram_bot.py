@@ -136,19 +136,7 @@ def send_verification_code(email_access):
                 dest_email = email_access.text
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
-                email_text = f'''\
-                    <html>
-                        <body style="background-color: lightblue">
-                            <h2>Здравствуйте!</h2>
-                            <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
-                            <ul>
-                                <li>Пароль: {access_password}</li>
-                            </ul>
-                            <p>Пожалуйста, введите его в окне чатбота и не сообщайте его никому.</p>
-                            <p>С уважением,<br>Администратор бота</p>
-                        </body>
-                    </html>
-                '''
+                email_text = access_password
                 message = ('From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)).encode('utf-8')
                 ## Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, message)
