@@ -164,7 +164,7 @@ def check_email(email_access):
                 find_role = res_i.get('role') 
                 find_role_id = find_role.get('id')
             else:
-                continue     
+                continue
         else:
             bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
 ## Проверяем введенный пользователем пароль
@@ -521,13 +521,12 @@ def inline_button(call):
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('bot-tg', 'BM_bot', 'Automatic_email_GP(OLD_TEXT).ps1')
-        subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script,
-            str(version_GP) ],
-        stdout=sys.stdout)
+        setup_script = Path('Automatic_email_GP(OLD_TEXT).ps1')
+        try:
+            subprocess.run(["pwsh", "-File", setup_script,str(version_GP) ],stdout=sys.stdout)
+        except Exception as e:
+            logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            print("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
         button_choise_yes_GP = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
