@@ -719,5 +719,9 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
    
 def start_telegram_bot():
     """"Функция запуска телебота"""
-    # запуск бота
-    bot.infinity_polling()
+    try:
+        # запуск бота
+        info_logger.info("Телеграмм бот запустился.")
+        bot.polling(none_stop=True, interval=0)
+    except Exception as e:
+        error_logger.error("Ошибка запуска телеграмм бота: %s", e)
