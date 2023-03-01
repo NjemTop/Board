@@ -10,7 +10,6 @@ import pathlib
 from pathlib import Path
 import random
 import smtplib
-import multiprocessing
 import xml.etree.ElementTree as ET
 import logging
 import os
@@ -87,7 +86,7 @@ def check_user_in_file(chat_id):
     """Функция для проверки наличия данных в файле data.xml"""
     try:
         # Открываем файл и ищем chat_id
-        with open(Path('data.xml')) as user_access:
+        with open(Path('data.xml'), encoding="utf-8") as user_access:
             root = ET.parse(user_access).getroot()
             for user in root.findall('user'):
                 header_footer = user.find('header_footer')
@@ -226,89 +225,98 @@ def check_pass_answer(password_message):
 #уведомления о новых тикетах
 @bot.message_handler(commands=['alert'])
 def alert_message(message_alert):
-    if message_alert.chat.id not in users:
-        bot.send_message(message_alert.chat.id,"К сожалению, у Вас отсутствует доступ.")
+    """Функция отправки алерта"""
+    if check_user_in_file(message_alert.chat.id):
+        if message_alert.chat.id == 1:
+            ######## АЛЕРТЫ ПО НОВЫМ ТИКЕТАМ БЕЗ ОТВЕТА
+            ### ЗАДАЁМ ПАРАМЕТРЫ ЗАПРОСА, ЧТОБЫ СРАЗУ ВЫДАТЬ ИНФУ О НОВОМ СОЗДАННОМ ТИКЕТЕ СО СТАТУСОМ NEW В КАТЕГОРИИ СТАНДАРТНОЙ И БЕЗ НАЗНАЧЕННОГО НА ДАННЫЙ ТИКЕТ
+            query_params = { "status": '1', "category": '1', "unresponded": 'true', "q": 'assignee:"none"'}
+            ### ЗАДАЁМ ENDPOINTS, ПАРОЛИ И ВЫТЯГИВАЕМ ВСЮ ИНФУ ИЗ ЗАПРОСА
+            url_0 = API_ENDPOINT + '/tickets/?size=50&page=1'
+            res_0 = requests.get(url_0,auth=auth, headers=headers, params=query_params).json()
+            ### ВЫТАСКИВАЕМ ИНФУ о количестве отфильтрованных тикетов ИЗ МАССИВА page_info
+            page_info = res_0.get('page_info')
+            last_index = page_info.get('last_index')
+            # делаем проверку по количеству найденных тикетов
+            if last_index == 0:
+                print('No tickets')
+                # если тикеты есть. если 1, то проверяем один. Если больше, то запускается цикл перебора тикетов с выводом инфы для каждого тикета построчно
+            elif last_index >= 1:
+                for page in range(len(str(last_index))):
+                    if page == 0:
+                        url = url_0
+                        res = res_0
+                    # каждый тикет будет на отдельной странице, т.е. № тикета = номеру страницы. перебираем стр по тикетам
+                    else:
+                        url = API_ENDPOINT + ('/tickets/?size=50&page=' + (page + 1))
+                        res = requests.get(url,auth=auth, headers=headers, params=query_params).json()
+                ### ВЫТАСКИВАЕМ всю ИНФУ по тикету ИЗ МАССИВА DATA и из вложенного в него списка
+                data = res.get('data')
+                for i in range (len(data)):
+                    ticket_data = data[i]
+                    # находим тему
+                    ticket_subject = ticket_data.get('subject')
+                    # находим тикет айди
+                    ticket_id=ticket_data.get('id')
+                    ticket_url = str('https://boardmaps.happyfox.com/staff/ticket/' + str(ticket_id))
+                    ticket_link = '[' + str(ticket_id) + '](' + ticket_url + ')'
+                    # находим приоритет из дата - приорити инфо - приорити нейм
+                    priority_info = ticket_data.get('priority')
+                    priority_name = priority_info.get('name')
+                    # ищем название клиента внутри юзер инфо - контакт инфо - нейм
+                    user_info = ticket_data.get('user')
+                    contact_info = user_info.get('contact_groups')
+                    ## ищем имя внутри списка контакт инфо []
+                    for k in range(len(contact_info)):
+                        name_info = contact_info[k].get('name')
+                    # выводим на печать искомые данные
+                    bot.send_message(message_alert.chat.id, 'Новый тикет: ' + ticket_link + '\nКлиент: ' + str(name_info) + '\nПриоритет: ' + str(priority_name) + '\nТема: ' + str(ticket_subject), parse_mode='Markdown')
+        else:
+            bot.send_message(message_alert.chat.id,"Кнопка на ремонте.")
     else:
-######## АЛЕРТЫ ПО НОВЫМ ТИКЕТАМ БЕЗ ОТВЕТА
-### ЗАДАЁМ ПАРАМЕТРЫ ЗАПРОСА, ЧТОБЫ СРАЗУ ВЫДАТЬ ИНФУ О НОВОМ СОЗДАННОМ ТИКЕТЕ СО СТАТУСОМ NEW В КАТЕГОРИИ СТАНДАРТНОЙ И БЕЗ НАЗНАЧЕННОГО НА ДАННЫЙ ТИКЕТ
-        query_params = { "status": '1', "category": '1', "unresponded": 'true', "q": 'assignee:"none"'}
-        ### ЗАДАЁМ ENDPOINTS, ПАРОЛИ И ВЫТЯГИВАЕМ ВСЮ ИНФУ ИЗ ЗАПРОСА
-        url_0 = API_ENDPOINT + '/tickets/?size=50&page=1'
-        res_0 = requests.get(url_0,auth=auth, headers=headers, params=query_params).json()
-        ### ВЫТАСКИВАЕМ ИНФУ о количестве отфильтрованных тикетов ИЗ МАССИВА page_info
-        page_info = res_0.get('page_info')
-        last_index = page_info.get('last_index')
-        # делаем проверку по количеству найденных тикетов
-        if last_index == 0:
-            print('No tickets')
-            # если тикеты есть. если 1, то проверяем один. Если больше, то запускается цикл перебора тикетов с выводом инфы для каждого тикета построчно
-        elif last_index >= 1:
-            for page in range(len(str(last_index))):
-                if page == 0:
-                    url = url_0
-                    res = res_0
-                # каждый тикет будет на отдельной странице, т.е. № тикета = номеру страницы. перебираем стр по тикетам
-                else:
-                    url = API_ENDPOINT + ('/tickets/?size=50&page=' + (page + 1))
-                    res = requests.get(url,auth=auth, headers=headers, params=query_params).json()
-            ### ВЫТАСКИВАЕМ всю ИНФУ по тикету ИЗ МАССИВА DATA и из вложенного в него списка
-            data = res.get('data')
-            for i in range (len(data)):
-                ticket_data = data[i]
-                # находим тему
-                ticket_subject = ticket_data.get('subject')
-                # находим тикет айди
-                ticket_id=ticket_data.get('id')
-                ticket_url = str('https://boardmaps.happyfox.com/staff/ticket/' + str(ticket_id))
-                ticket_link = '[' + str(ticket_id) + '](' + ticket_url + ')'
-                # находим приоритет из дата - приорити инфо - приорити нейм
-                priority_info = ticket_data.get('priority')
-                priority_name = priority_info.get('name')
-                # ищем название клиента внутри юзер инфо - контакт инфо - нейм
-                user_info = ticket_data.get('user')
-                contact_info = user_info.get('contact_groups')
-                ## ищем имя внутри списка контакт инфо []
-                for k in range(len(contact_info)):
-                    name_info = contact_info[k].get('name')
-                # выводим на печать искомые данные
-                bot.send_message(message_alert.chat.id, 'Новый тикет: ' + ticket_link + '\nКлиент: ' + str(name_info) + '\nПриоритет: ' + str(priority_name) + '\nТема: ' + str(ticket_subject), parse_mode='Markdown')
-
+        bot.send_message(message_alert.chat.id,"К сожалению, у Вас отсутствует доступ.")
+# Обработчик вызова /clients
 @bot.message_handler(commands=['clients'])
 def clients_message(message_clients):
-    if message_clients.chat.id not in users:
-        bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
-    else:
+    """Функция вызова кнопки /clients"""
+    if check_user_in_file(message_clients.chat.id):
         button_clients = types.InlineKeyboardMarkup()
         button_list_of_clients = types.InlineKeyboardButton(text='Список клиентов', callback_data='button_list_of_clients')
         button_clients_version = types.InlineKeyboardButton(text='Версии клиентов', callback_data='button_clients_version')
         button_templates = types.InlineKeyboardButton(text='Статистика по тикетам за период (шаблоны)', callback_data='button_templates')
         button_clients.add(button_list_of_clients, button_clients_version, button_templates, row_width=2)
         bot.send_message(message_clients.chat.id, 'Какую информацию хотите получить?', reply_markup=button_clients)
+    else:
+        bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
+# Обработчик вызова /sd_sb
 @bot.message_handler(commands=['sd_sb'])
 def sd_sb_message(message_sd_sb):
-    if message_sd_sb.chat.id not in users:
-        bot.send_message(message_sd_sb.chat.id,"К сожалению, у Вас отсутствует доступ.")
-    else:
+    """Функция вызова кнопки /sd_sb"""
+    if check_user_in_file(message_sd_sb.chat.id):
         button_SD_Silver_Bronze = types.InlineKeyboardMarkup()
         button_update_tickets_SB = types.InlineKeyboardButton(text='Обновление версии приложения (S&B)', callback_data='button_update_tickets_SB')
         button_else_SB = types.InlineKeyboardButton(text= 'Остальные тикеты (S&B)', callback_data='button_else_SB')
         button_SD_Silver_Bronze.add(button_update_tickets_SB, button_else_SB, row_width=1)
         bot.send_message(message_sd_sb.chat.id, 'Выберите раздел:', reply_markup=button_SD_Silver_Bronze)
+    else:
+        bot.send_message(message_sd_sb.chat.id,"К сожалению, у Вас отсутствует доступ.")
+# Обработчик вызова /sd_gp
 @bot.message_handler(commands=['sd_gp'])
 def sd_gp_message(message_sd_gp):
-    if message_sd_gp.chat.id not in users:
-        bot.send_message(message_sd_gp.chat.id,"К сожалению, у Вас отсутствует доступ.")
-    else:
+    """Функция вызова кнопки /sd_gp"""
+    if check_user_in_file(message_sd_gp.chat.id):
         button_SD_Gold_Platinum = types.InlineKeyboardMarkup()
         button_update_tickets_GP = types.InlineKeyboardButton(text='Обновление версии приложения (G&P)', callback_data='button_update_tickets_GP')
         button_else_GP = types.InlineKeyboardButton(text= 'Остальные тикеты (G&P)', callback_data='button_else_GP')
         button_SD_Gold_Platinum.add(button_update_tickets_GP, button_else_GP, row_width=1)
         bot.send_message(message_sd_gp.chat.id,"Выберите раздел:", reply_markup=button_SD_Gold_Platinum)
+    else:
+        bot.send_message(message_sd_gp.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
 # Добавляем подуровни к кнопкам выше
 @bot.callback_query_handler(func=lambda call: True)
 def inline_button(call):
-# Возврат в главное меню. Кнопки [Клиенты] / [ServiceDesk (Gold & Platinum)] / [ServiceDesk (Silver & Bronze)]
+    """Функция возврата в главное меню. Кнопки [Клиенты] / [ServiceDesk (Gold & Platinum)] / [ServiceDesk (Silver & Bronze)]"""
     if call.data == "mainmenu":
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
@@ -590,8 +598,8 @@ def inline_button(call):
 # УРОВЕНЬ 3 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА" - ФОРМИРОВАНИЕ СПИСКА И ВЫЗОВ ФУНКЦИИ:
 @bot.chosen_inline_handler(func=lambda result_client_version: True)
 # ФУНКЦИИ К КНОПКЕ ВЕРСИИ КЛИЕНТА
-## Функция по созданию списка версий и формирования ответа
 def send_text_version(result_client_version):
+    """Функция по созданию списка версий и формирования ответа"""
     bot.add_poll_answer_handler
     url = API_ENDPOINT + '/contact_groups/'
     res = requests.get(url,auth=auth, headers=headers).json()
@@ -641,8 +649,8 @@ def send_text_version(result_client_version):
 
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
 @bot.chosen_inline_handler(func=lambda result_GP_update_version: True)
-## Функция по обработке номера версии от пользака (G&P) и подтверждению темы
 def send_text_for_create_GP(result_GP_update_version):
+    """Функция по обработке номера версии от пользака (G&P) и подтверждению темы"""
     global version_GP
     version_GP = result_GP_update_version.text 
     if '.' in version_GP:
@@ -662,8 +670,9 @@ def send_text_for_create_GP(result_GP_update_version):
         bot.send_message(result_GP_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_create_tickets_GP) 
 
 @bot.chosen_inline_handler(func=lambda result_SB_update_version: True) 
-## Функция по обработке номера версии от пользака (S&B) и подтверждению темы
+
 def send_text_for_create_SB(result_SB_update_version):
+    """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
     global version_SB
     version_SB = result_SB_update_version.text
     if '.' in version_SB:
@@ -684,8 +693,9 @@ def send_text_for_create_SB(result_SB_update_version):
 
 # ФУНКЦИИ К КНОПКЕ ФОРМИРОВАНИЯ СТАТИСТИКИ []
 @bot.chosen_inline_handler(func=lambda result_SB_update_statistic: True) 
-## Функция по обработке номера версии от пользака (S&B) и подтверждению темы
+
 def send_text_for_stat_update_SB(result_SB_update_statistic):
+    """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
     global version_stat
     version_stat = result_SB_update_statistic.text 
     if '.' in version_stat:

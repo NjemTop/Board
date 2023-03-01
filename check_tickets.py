@@ -48,8 +48,8 @@ def get_tickets():
             API_KEY, API_SECRET), headers=HEADERS, params=params, timeout=10)
         response.raise_for_status()
         response.raise_for_status()
-        data = response.json()
-        page_info = data.get('page_info')
+        data_res = response.json()
+        page_info = data_res.get('page_info')
         last_index = page_info.get('last_index')
         if last_index == 0:
             print('No tickets')
