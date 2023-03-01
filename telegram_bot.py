@@ -526,13 +526,16 @@ def inline_button(call):
     ## ДЛЯ SB
     elif call.data == "button_choise_yes_SB":
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('bot-tg', 'BM_bot', 'Automatic_email_BS.ps1')
+        setup_script = Path('Automatic_email_BS.ps1')
         setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
         try:
-            subprocess.run(["pwsh", "-File", setup_script,str(version_SB) ],stdout=sys.stdout)
+            result_SB = subprocess.run(["pwsh", "-File", setup_script,str(version_SB) ],stdout=subprocess.PIPE).stdout.decode('utf-8')
         except Exception as e:
             logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
             print("Ошибка запуска скрипта по отправке рассылки BS:", e)
+        
+        # Отправить output в телеграмм бота
+        bot.send_message(chat_id, result_SB)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
