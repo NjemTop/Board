@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(mes
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('app-error.log')
+error_handler = logging.FileHandler('./logs/app-error.log')
 error_handler.setLevel(logging.ERROR)
 error_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M'))
 error_logger.addHandler(error_handler)
@@ -19,7 +19,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('app-info.log')
+info_handler = logging.FileHandler('./logs/app-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M'))
 info_logger.addHandler(info_handler)

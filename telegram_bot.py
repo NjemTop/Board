@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('bot-error.log')
+handler = logging.FileHandler('./logs/bot-error.log')
 handler.setLevel(logging.ERROR)
 
 # создаем форматирование
@@ -698,4 +698,7 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
         button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
         bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
    
-bot.infinity_polling()
+def start_telegram_bot():
+    """"Функция запуска телебота"""
+    # запуск бота
+    bot.infinity_polling()
