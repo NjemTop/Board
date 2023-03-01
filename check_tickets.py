@@ -1,6 +1,24 @@
 import requests
 import json
-from telegram_bot import send_telegram_message
+import logging
+import xml.etree.ElementTree as ET
+
+# Создание объекта логгера для ошибок и критических событий
+error_logger = logging.getLogger(__name__)
+error_logger.setLevel(logging.ERROR)
+error_handler = logging.FileHandler('check_ticket-errors.log')
+error_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
+error_handler.setFormatter(formatter)
+error_logger.addHandler(error_handler)
+
+# Создание объекта логгера для информационных сообщений
+info_logger = logging.getLogger('info_logger')
+info_logger.setLevel(logging.INFO)
+info_handler = logging.FileHandler('check_ticket-info.log')
+info_handler.setLevel(logging.INFO)
+info_handler.setFormatter(formatter)
+info_logger.addHandler(info_handler)
 
 ### Авторизация в HappyFox
 # Указываем путь к файлу с данными
@@ -18,10 +36,10 @@ HEADERS = {'Content-Type': 'application/json'}
 def get_tickets():
     """Функция проверки тикетов, у которых нет ответа"""
     params = {
-        'status': '2',
+        #'status': '2',
         'category': '1',
         # 'unresponded': 'true',
-        'q': 'unresponded:"true"',
+        'q': 'duedate:"today"',
     }
     url = API_ENDPOINT + '/tickets/?size=1&page=1'
     # проверка на доступность сервера, если сервер недоступен, выводит ошибку
@@ -65,11 +83,34 @@ def get_tickets():
                             else:
                                 assigned_name = "Нет исполнителя"
 
-                    ticket_message = (f'Новое сообщение в тикете: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
-                    # Чат айди, куда отправляем алерты
-                    alert_chat_id = -1001760725213
-                    send_telegram_message(alert_chat_id, ticket_message)
-                    print(ticket_message)
+                    ticket_message = (f'Тикет с сегоднядшим due_date: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
+                    # Разбор XML-файла и получение корневого элемента
+                    tree = ET.parse('data.xml')
+                    root = tree.getroot()
+                    # Находим все элементы header_footer внутри элемента user
+                    header_footer_elements = root.findall('.//user/header_footer')
+                    # Задаем начальное значение alert_chat_id
+                    alert_chat_id = None
+                    # Проходим циклом по всем найденным элементам header_footer
+                    for hf in header_footer_elements:
+                        # Сравниваем значение элемента name с assignee_name
+                        if hf.find('name').text == assigned_name:
+                            # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
+                            alert_chat_id = hf.find('chat_id').text
+                            break  # Выходим из цикла, т.к. нужный элемент уже найден
+
+                    # Если alert_chat_id не был найден, выводим ошибку
+                    if alert_chat_id is None:
+                        print(f"Не удалось найти chat_id для пользователя {assigned_name}.")
+                        error_logger.error("Не удалось найти chat_id для пользователя {assigned_name} %s")
+                    else:
+                        # Отправляем сообщение в телеграм-бот
+                        print(ticket_message)
+                        print(alert_chat_id)
+                        #send_telegram_message(alert_chat_id, ticket_message)
+                    info_logger.info('Отправлена следующая информация в группу: %s', 'Тикет с сегоднядшим due_date: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+                    #alert_chat_id = -1001760725213
+                    #send_telegram_message(alert_chat_id, ticket_message)
                 except requests.exceptions.Timeout:
                     print("Timeout error: request timed out")
                 except requests.exceptions.RequestException as exception:

@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
 # Создание объекта логгера для ошибок и критических событий
-error_logger = logging.getLogger('error_logger')
+error_logger = logging.getLogger(__name__)
 error_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)

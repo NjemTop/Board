@@ -9,7 +9,7 @@ from telegram_bot import start_telegram_bot
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 
 # Создание объекта логгера для ошибок и критических событий
-error_logger = logging.getLogger('error_logger')
+error_logger = logging.getLogger(__name__)
 error_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler('./logs/app-error.log')
 error_handler.setLevel(logging.ERROR)

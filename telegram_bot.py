@@ -19,19 +19,24 @@ import string
 from writexml import create_xml
 
 # создаем логгер
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
-
+error_logger = logging.getLogger(__name__)
+error_logger.setLevel(logging.ERROR)
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('./logs/bot-error.log')
-handler.setLevel(logging.ERROR)
-
+error_handler = logging.FileHandler('./logs/bot-error.log')
+error_handler.setLevel(logging.ERROR)
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-handler.setFormatter(formatter)
-
+error_handler.setFormatter(formatter)
 # добавляем обработчик в логгер
-logger.addHandler(handler)
+error_logger.addHandler(error_handler)
+
+# Создание объекта логгера для информационных сообщений
+info_logger = logging.getLogger('info_logger')
+info_logger.setLevel(logging.INFO)
+info_handler = logging.FileHandler('./logs/bot-info.log')
+info_handler.setLevel(logging.INFO)
+info_handler.setFormatter(formatter)
+info_logger.addHandler(info_handler)
 
 # Проверяем систему, где запускается скрипт
 if platform.system() == 'Windows':
@@ -90,10 +95,10 @@ def check_user_in_file(chat_id):
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     return True
     except FileNotFoundError as e:
-        logger.error("Файл data.xml не найден: %s", e)
+        error_logger.error("Файл data.xml не найден: %s", e)
         print("Файл data.xml не найден")
     except Exception as e:
-        logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
         print("Ошибка чтения файла data.xml")
     return False
 
@@ -174,13 +179,13 @@ def send_verification_code(email_access):
                             global find_role_id
                             find_role_id = find_role.get('id')
                             return find_id_HF, email_access_id, find_name, find_role_id
-                    logger.info("Почты в системе HappyFox - нет: %s")
+                    info_logger.info("Почты в системе HappyFox - нет: %s")
                     print("Почты в системе HappyFox - нет")
                 except Exception as e:
-                    logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
+                    error_logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
                     print("Произошла ошибка при поиске почты в системе HappyFox:", e)
         except Exception as e:
-            logger.error("Произошла ошибка отправки пароля на почту: %s", e)
+            error_logger.error("Произошла ошибка отправки пароля на почту: %s", e)
             print("Произошла ошибка отправки пароля на почту:", e)
     else:
         bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
@@ -213,9 +218,9 @@ def check_pass_answer(password_message):
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
         else:
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Нажмите ещё раз /start')
-            logger.error("Ведён неправильный пароль сотрудником: {password_message.chat.id} %s")
+            error_logger.error("Ведён неправильный пароль сотрудником: {password_message.chat.id} %s")
     except Exception as e:
-        logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
+        error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", e)
 
 #уведомления о новых тикетах
@@ -386,9 +391,9 @@ def inline_button(call):
                 chat_id = root.find('chat_id').text
                 if str(call.message.chat.id) == chat_id:
                     name = root.find('header_footer/name').text
-                    logger.info(f"Пользователь {name} сформировал отчет.")
+                    info_logger.info(f"Пользователь {name} сформировал отчет.")
         except subprocess.CalledProcessError as e:
-            logger.error("Ошибка при запуске скрипта %s: %s", setup_script, e)
+            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, e)
             bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
         else:
             if platform.system() == 'Windows':
@@ -541,7 +546,7 @@ def inline_button(call):
         try:
             result_SB = subprocess.run(["pwsh.exe", "-File", setup_script,str(version_SB) ],stdout=subprocess.PIPE).stdout.decode('utf-8')
         except Exception as e:
-            logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
+            error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
             print("Ошибка запуска скрипта по отправке рассылки BS:", e)
         
         # Отправить output в телеграмм бота
@@ -559,7 +564,7 @@ def inline_button(call):
         try:
             subprocess.run(["pwsh", "-File", setup_script,str(version_GP) ],stdout=sys.stdout)
         except Exception as e:
-            logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
             print("Ошибка запуска скрипта по отправке рассылки GP:", e)
         button_choise_yes_GP = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
@@ -574,7 +579,7 @@ def inline_button(call):
         try:
             result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout)
         except Exception as e:
-            logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
             print("Ошибка запуска скрипта по отправке рассылки GP:", e)
         button_update_statistics_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_update_statistics_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_update_statistics_SB')
