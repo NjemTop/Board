@@ -126,7 +126,7 @@ def get_app():
                 json_message_type = json_data.get("update", {}).get("message_type")
                 # если ответ был дан не со стороны клиента, пропустим дальнейшее действие
                 if json_message_type != "Client Reply":
-                    return
+                    return "OK", 200
                 # находим значения для ключей
                 ticket_id = json_data.get("ticket_id")
                 subject = json_data.get("subject")
