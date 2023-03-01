@@ -19,13 +19,12 @@ def indent(elem, level=0):
 
 def create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, chat_id):
     """Функция записи данных в XML файл"""
-    root = ET.Element('data')
-
-    access = ET.Element('access', email=str(email_access_id))
-    root.append(access)
+    root = ET.ElementTree(ET.Element('data'))
+    user = ET.Element('user')
+    root.getroot().append(user)
 
     header_footer = ET.Element('header_footer', id=str(find_id_HF))
-    root.append(header_footer)
+    user.append(header_footer)
 
     name = ET.Element('name')
     name.text = str(find_name)
@@ -35,17 +34,21 @@ def create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, 
     role.text = str(find_role)
     header_footer.append(role)
 
+    access = ET.Element('access', email=str(email_access_id))
+    user.append(access)
+
     chat = ET.Element('chat_id')
     chat.text = str(chat_id)
-    root.append(chat)
+    header_footer.append(chat)
 
-    indent(root)
-    xml_str = ET.tostring(root, encoding="utf-8", method="xml")
+    indent(header_footer)
+    xml_str = ET.tostring(root.getroot(), encoding="utf-8", method="xml")
     print(xml_str.decode(encoding="utf-8"))
 
-    etree = ET.ElementTree(root)
+    etree = ET.ElementTree(root.getroot())
     myfile = open("data.xml" , "wb")
     etree.write(myfile, encoding='utf-8', xml_declaration=True)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create XML file with arguments')

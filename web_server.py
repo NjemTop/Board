@@ -2,6 +2,7 @@
 import logging
 from flask import Flask, request
 from flask import Response
+import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
 # Создание объекта логгера для ошибок и критических событий
@@ -21,16 +22,32 @@ info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
 
-    @app.route('/', methods=['POST'])
-    def handle_ticket():
+    @app.route('/', methods=['GET'])
+    def handle_get():
         """Функция обработки вэбхуков из HappyFox"""
-        ip_address = (f"Request from {request.remote_addr}: {request.url}")
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
         info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Чё пришёл сюда?', mimetype='text/plain')
+    
+    @app.route('/create_ticket', methods=['GET'])
+    def handle_get_create_ticket():
+        """Функция обработки вэбхуков из HappyFox"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получение вэбхуков(создание)', mimetype='text/plain')
     
     @app.route('/create_ticket', methods=['POST'])
     def create_ticket():
@@ -54,24 +71,105 @@ def get_app():
                 # отправляем сообщение в телеграм-бот
                 ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
-                # Чат айди, куда отправляем алерты
-                alert_chat_id = -1001760725213
+                # открываем файл и загружаем данные
+                with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+                    data = json.load(f)
+                # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+                alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
                 send_telegram_message(alert_chat_id, ticket_message)
-                info_logger.info('Отправлена следующая информация в группу: %s', ticket_message)
+                info_logger.info('Отправлена следующая информация в группу: %s', 'Новый тикет: {ticket_id}Тема: {subject}Приоритет: {priority_name}Ссылка: {agent_ticket_url}')
             else:
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
-        except json.decoder.JSONDecodeError:
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as e:
             print('Не удалось распарсить JSON в запросе.')
             error_logger.error("Не удалось распарсить JSON в запросе. %s")
             return 'Не удалось распарсить JSON в запросе.', 400
         
         return "OK", 200
 
+    @app.route('/update_ticket', methods=['GET'])
+    def handle_get_update_ticket():
+        """Функция обработки вэбхуков из HappyFox"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получение вэбхуков (обнова)', mimetype='text/plain')
+    
     @app.route('/update_ticket', methods=['POST'])
     def update_ticket():
         """Функция обработки обновления тикета из HappyFox"""
-        # Код сюда
+        message = ""
+        message = request.data.decode('utf-8')
+        try:
+            # проверяем наличие JSON в сообщении
+            if '{' not in message:
+                print('JSON не найден в сообщении.')
+                error_logger.error("JSON не найден в сообщении. %s")
+                return 'JSON не найден в сообщении.', 400
+            # находим JSON в сообщении
+            json_start = message.find('{')
+            if json_start != -1:
+                json_str = message[json_start:]
+                print('--'*60)
+                # парсим JSON
+                try:
+                    json_data = json.loads(json_str)
+                except json.decoder.JSONDecodeError:
+                    print('Не удаётся распарсить JSON в запросе.')
+                    error_logger.error("Не удаётся распарсить JSON в запросе. %s")
+                    return 'Не удаётся распарсить JSON в запросе.', 400
+                # находим значения кто ответил
+                json_message_type = json_data.get("update", {}).get("message_type")
+                # если ответ был дан не со стороны клиента, пропустим дальнейшее действие
+                if json_message_type != "Client Reply":
+                    return "OK", 200
+                # находим значения для ключей
+                ticket_id = json_data.get("ticket_id")
+                subject = json_data.get("subject")
+                priority_name = json_data.get("priority_name")
+                assignee_name = json_data.get("assignee_name")
+                client_name = json_data['client_details']['name']
+                agent_ticket_url = json_data.get("agent_ticket_url")
+                print('**'*60)
+                # Формируем сообщение в текст отправки
+                ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nИмя клиента: {client_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+                print(ticket_message)
+                # Разбор XML-файла и получение корневого элемента
+                tree = ET.parse('data.xml')
+                root = tree.getroot()
+                # Находим все элементы header_footer внутри элемента user
+                header_footer_elements = root.findall('.//user/header_footer')
+                # Задаем начальное значение alert_chat_id
+                alert_chat_id = None
+                # Проходим циклом по всем найденным элементам header_footer
+                for hf in header_footer_elements:
+                    # Сравниваем значение элемента name с assignee_name
+                    if hf.find('name').text == assignee_name:
+                        # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
+                        alert_chat_id = hf.find('chat_id').text
+                        break  # Выходим из цикла, т.к. нужный элемент уже найден
+
+                # Если alert_chat_id не был найден, выводим ошибку
+                if alert_chat_id is None:
+                    print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
+                    error_logger.error("Не удалось найти chat_id для пользователя {assignee_name} %s")
+                else:
+                    # Отправляем сообщение в телеграм-бот
+                    send_telegram_message(alert_chat_id, ticket_message)
+                info_logger.info('Отправлена следующая информация в группу: %s', 'Новое сообщение в тикете: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+            else:
+                print('JSON не найден в сообщении.')
+                error_logger.error("JSON не найден в сообщении. %s")
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as e:
+            print('Не удалось распарсить JSON в запросе.')
+            error_logger.error("Не удалось распарсить JSON в запросе. %s", e)
+            return 'Не удалось распарсить JSON в запросе.', 400
+        
         return "OK", 200
     
     return app
