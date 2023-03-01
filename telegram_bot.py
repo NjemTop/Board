@@ -118,6 +118,7 @@ def send_verification_code(email_access):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if '@boardmaps.ru' in email_access.text:
+        print('111')
         # Открытие файла и чтение его содержимого
         # Получение информации о почте, пароле и SMTP настройках
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
@@ -125,10 +126,14 @@ def send_verification_code(email_access):
         SMTP_SERVER = DATA["MAIL_SETTINGS"]["SMTP"]
         try:
             ## Настройки SMTP сервера
+            print('222')
             with smtplib.SMTP(SMTP_SERVER, 587) as server:
+                print('333')
                 server.ehlo()
                 server.starttls()
+                print('444')
                 server.login(EMAIL_FROM, PASSWORD)
+                print('555')
                 ## Генерируем рандомный пароль для доступа к боту
                 global access_password
                 access_password = "111"
@@ -137,11 +142,15 @@ def send_verification_code(email_access):
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
                 email_text = access_password
+                print('666')
                 message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)
                 ## Отправляем сообщение
+                print('777')
                 server.sendmail(EMAIL_FROM, dest_email, message)
+                print('888')
                 server.quit()
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
+                print('999')
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer)
                 # Ищем полученную почту в системе HappyFox
