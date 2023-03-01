@@ -122,6 +122,11 @@ def get_app():
                     print('Не удаётся распарсить JSON в запросе.')
                     error_logger.error("Не удаётся распарсить JSON в запросе. %s")
                     return 'Не удаётся распарсить JSON в запросе.', 400
+                # находим значения кто ответил
+                json_message_type = json_data.get("update", {}).get("message_type")
+                # если ответ был дан не со стороны клиента, пропустим дальнейшее действие
+                if json_message_type != "Client Reply":
+                    return
                 # находим значения для ключей
                 ticket_id = json_data.get("ticket_id")
                 subject = json_data.get("subject")
