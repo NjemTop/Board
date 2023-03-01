@@ -15,6 +15,10 @@ import logging
 import os
 import platform
 import string
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+from email.header import Header
 from writexml import create_xml
 
 # создаем логгер
@@ -69,7 +73,8 @@ headers = {'Content-Type': 'application/json'}
 # Создаем бота
 bot=telebot.TeleBot(TOKEN)
 
-#alert_chat_id = 320851571
+# Создаем объект сообщения
+msg = MIMEMultipart()
 
 # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
 def send_telegram_message(alert_chat_id, alert_text):
@@ -128,10 +133,8 @@ def send_verification_code(email_access):
         PASSWORD = DATA["MAIL_SETTINGS"]["PASSWORD"]
         SMTP_SERVER = DATA["MAIL_SETTINGS"]["SMTP"]
         try:
-            print('111')
             ## Настройки SMTP сервера
             with smtplib.SMTP(SMTP_SERVER, 587) as server:
-                print('222')
                 server.ehlo()
                 server.starttls()
                 server.login(EMAIL_FROM, PASSWORD)
@@ -155,9 +158,14 @@ def send_verification_code(email_access):
                         </body>
                     </html>
                 '''
-                message = ('From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)).encode('utf-8')
-                ## Отправляем сообщение
-                server.sendmail(EMAIL_FROM, dest_email, message)
+                # Указываем заголовки
+                msg['From'] = EMAIL_FROM
+                msg['To'] = dest_email
+                msg['Subject'] = subject
+                # Добавляем текст сообщения в формате HTML
+                msg.attach(MIMEText(email_text, 'html', 'utf-8'))
+                # Отправляем сообщение
+                server.sendmail(EMAIL_FROM, dest_email, msg.as_string())
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer)
@@ -476,12 +484,7 @@ def inline_button(call):
     elif call.data == "button_reply_request_GP_yes":
         bot.send_message(call.message.chat.id, text='Процесс запущен, ожидайте.')
         setup_script = 'Auto_ping_test.ps1'
-        subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script
-          ],
-          stdout=sys.stdout)
+        subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout)
         bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
     
     # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (G&P) ///////////////////////////////////////////////// в работе
