@@ -114,7 +114,7 @@ def start_message(message_start):
         bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
-def send_verification_code(email_access, API_ENDPOINT, auth, headers):
+def send_verification_code(email_access):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if '@boardmaps.ru' in email_access.text:
