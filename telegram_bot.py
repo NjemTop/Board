@@ -114,7 +114,7 @@ def start_message(message_start):
         bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
-def send_verification_code(email_access, api_endpoint, auth, headers):
+def send_verification_code(email_access, API_ENDPOINT, auth, headers):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if '@boardmaps.ru' in email_access.text:
@@ -156,7 +156,7 @@ def send_verification_code(email_access, api_endpoint, auth, headers):
                 bot.register_next_step_handler(password_message, check_pass_answer)
                 # Ищем полученную почту в системе HappyFox
                 try:
-                    staff = requests.get(api_endpoint + '/staff/', auth=auth, headers=headers).json()
+                    staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
                     for staff_member in staff:
                         if staff_member['email'] == email_access.text:
                             find_id_HF = staff_member['id']
