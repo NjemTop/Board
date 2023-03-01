@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('bot-error.log')
+handler = logging.FileHandler('./logs/bot-error.log')
 handler.setLevel(logging.ERROR)
 
 # создаем форматирование
@@ -39,14 +39,32 @@ if platform.system() == 'Windows':
 else:
     local_appdata_path = os.environ['HOME']
 
-# Создаем бота
-TOKEN = '5666985174:AAHyF7DQa2iQ5QeFTil8ltLtYwR3cGbfEHw'
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
 
-## Авторизация в HappyFox
-auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
+# Читаем данные из файла
+with open(CONFIG_FILE) as f:
+    data = json.load(f)
+
+# Получаем значение ключа BOT_TOKEN в TELEGRAM_SETTINGS
+BOT_TOKEN = data['TELEGRAM_SETTINGS']['BOT_TOKEN']
+
+# Сохраняем значение в переменную TOKEN
+TOKEN = BOT_TOKEN
+
+### Авторизация в HappyFox
+# открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    data = json.load(f)
+# извлекаем значения API_KEY и API_SECRET
+API_KEY = data['HAPPYFOX_SETTINGS']['API_KEY']
+API_SECRET = data['HAPPYFOX_SETTINGS']['API_SECRET']
+# сохраняем значения в переменную auth
+auth = (API_KEY, API_SECRET)
+API_ENDPOINT = data['HAPPYFOX_SETTINGS']['API_ENDPOINT']
 headers = {'Content-Type': 'application/json'}
 
-# УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
+# Создаем бота
 bot=telebot.TeleBot(TOKEN)
 
 #alert_chat_id = 320851571
@@ -60,19 +78,25 @@ def send_telegram_message(alert_chat_id, alert_text):
     response = requests.post(url, headers=headers_server, data=json.dumps(data))
     print(response)
     print('*--*--*'*60)
-    
+
+# УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
     """Функция для проверки наличия данных в файле data.xml"""
     try:
         # Открываем файл и ищем chat_id
         with open(Path('data.xml')) as user_access:
             root = ET.parse(user_access).getroot()
-            chat_id_list = [c.text for c in root.findall('chat_id')]
-            if str(chat_id) in chat_id_list:
-                return True
-    except:
-        print("Нет УЗ в XML файле")
-        pass
+            for user in root.findall('user'):
+                header_footer = user.find('header_footer')
+                chat_id_elem = header_footer.find('chat_id')
+                if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
+                    return True
+    except FileNotFoundError as e:
+        logger.error("Файл data.xml не найден: %s", e)
+        print("Файл data.xml не найден")
+    except Exception as e:
+        logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+        print("Ошибка чтения файла data.xml")
     return False
 
 # Обработчик команды /start
@@ -93,51 +117,54 @@ def start_message(message_start):
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def check_email(email_access):
-        """Функция отправки кода проверки на почту"""
-        ## Если почтовый адрес содержит "@boardmaps.ru"
-        if '@boardmaps.ru' in email_access.text:
-            ## Отправляем сообщение
-            ## Логин и пароль от почты, которой отправляется письмо
-            email = 'sup-smtp@boardmaps.ru'
-            password_0 = 'rcjtcxvjzfsjglko'
-            ## Настройки SMTP сервера
-            server = smtplib.SMTP('smtp.yandex.ru', 587)
-            server.ehlo()
-            server.starttls()
-            server.login(email, password_0)
-            ## Генерируем рандомный пароль для доступа к боту
-            global password
-            password = ''
-            for _ in range(12):
-                password = password + random.choice(list('1234567890abcdefghigklmnopqrstuvyxwzABCDEFGHIGKLMNOPQRSTUVYXWZ!@#$%^&*()_+'))
-            ## Данные (кому отправлять, какая тема и письмо)
-            dest_email = email_access.text
-            subject = 'Message from chatbot'
-            email_text = password
-            message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
-            ## Сама отправка письма используя ранее разначенные аргументы
-            server.sendmail(email, dest_email, message)
-            server.quit()
-            ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
-            password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
-            bot.register_next_step_handler(password_message, check_pass_answer)
-            url = ('https://boardmaps.happyfox.com/api/1.1/json/staff/')
-            res = requests.get(url, auth=auth, headers=headers).json()
-            for i in range(len(res)):
-                res_i = res[i]
-                find_email = res_i.get('email')
-                if find_email == email_access.text:
-                    global find_id_HF
-                    find_id_HF = res_i.get('id')
-                    global email_access_id
-                    email_access_id = find_email
-                    global find_name
-                    find_name = res_i.get('name')
-                    global find_role_id
-                    find_role = res_i.get('role') 
-                    find_role_id = find_role.get('id')
-                else:
-                    continue     
+    """Функция отправки кода проверки на почту"""
+    ## Если почтовый адрес содержит "@boardmaps.ru"
+    if '@boardmaps.ru' in email_access.text:
+        # Открытие файла и чтение его содержимого
+        with open(CONFIG_FILE) as f:
+            data = json.load(f)
+        # Получение информации о почте, пароле и SMTP настройках
+        email = data["MAIL_SETTINGS"]["USER"]
+        password_0 = data["MAIL_SETTINGS"]["PASSWORD"]
+        smtp_server = data["MAIL_SETTINGS"]["SMTP"]
+        ## Настройки SMTP сервера
+        server = smtplib.SMTP(smtp_server, 587)
+        server.ehlo()
+        server.starttls()
+        server.login(email, password_0)
+        ## Генерируем рандомный пароль для доступа к боту
+        global password
+        password = ''
+        for _ in range(12):
+            password = password + random.choice(list('1234567890abcdefghigklmnopqrstuvyxwzABCDEFGHIGKLMNOPQRSTUVYXWZ!@#$%^&*()_+'))
+        ## Данные (кому отправлять, какая тема и письмо)
+        dest_email = email_access.text
+        subject = 'Message from chatbot'
+        email_text = password
+        message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
+        ## Отправляем сообщение
+        server.sendmail(email, dest_email, message)
+        server.quit()
+        ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
+        password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
+        bot.register_next_step_handler(password_message, check_pass_answer)
+        url = API_ENDPOINT + '/staff/'
+        res = requests.get(url, auth=auth, headers=headers).json()
+        for i in range(len(res)):
+            res_i = res[i]
+            find_email = res_i.get('email')
+            if find_email == email_access.text:
+                global find_id_HF
+                find_id_HF = res_i.get('id')
+                global email_access_id
+                email_access_id = find_email
+                global find_name
+                find_name = res_i.get('name')
+                global find_role_id
+                find_role = res_i.get('role') 
+                find_role_id = find_role.get('id')
+            else:
+                continue
         else:
             bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
 ## Проверяем введенный пользователем пароль
@@ -170,7 +197,7 @@ def alert_message(message_alert):
 ### ЗАДАЁМ ПАРАМЕТРЫ ЗАПРОСА, ЧТОБЫ СРАЗУ ВЫДАТЬ ИНФУ О НОВОМ СОЗДАННОМ ТИКЕТЕ СО СТАТУСОМ NEW В КАТЕГОРИИ СТАНДАРТНОЙ И БЕЗ НАЗНАЧЕННОГО НА ДАННЫЙ ТИКЕТ
         query_params = { "status": '1', "category": '1', "unresponded": 'true', "q": 'assignee:"none"'}
         ### ЗАДАЁМ ENDPOINTS, ПАРОЛИ И ВЫТЯГИВАЕМ ВСЮ ИНФУ ИЗ ЗАПРОСА
-        url_0 = ('https://boardmaps.happyfox.com/api/1.1/json/tickets/?size=50&page=1')
+        url_0 = API_ENDPOINT + '/tickets/?size=50&page=1'
         res_0 = requests.get(url_0,auth=auth, headers=headers, params=query_params).json()
         ### ВЫТАСКИВАЕМ ИНФУ о количестве отфильтрованных тикетов ИЗ МАССИВА page_info
         page_info = res_0.get('page_info')
@@ -186,7 +213,7 @@ def alert_message(message_alert):
                     res = res_0
                 # каждый тикет будет на отдельной странице, т.е. № тикета = номеру страницы. перебираем стр по тикетам
                 else:
-                    url = ('https://boardmaps.happyfox.com/api/1.1/json/tickets/?size=50&page=' + (page + 1))
+                    url = API_ENDPOINT + ('/tickets/?size=50&page=' + (page + 1))
                     res = requests.get(url,auth=auth, headers=headers, params=query_params).json()
             ### ВЫТАСКИВАЕМ всю ИНФУ по тикету ИЗ МАССИВА DATA и из вложенного в него списка
             data = res.get('data')
@@ -479,12 +506,12 @@ def inline_button(call):
     elif call.data == "button_choise_yes_SB":
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('bot-tg', 'BM_bot', 'Automatic_email_BS.ps1')
-        subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script,
-            str(version_SB) ],
-        stdout=sys.stdout)
+        setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
+        try:
+            subprocess.run(["pwsh", "-File", setup_script,str(version_SB) ],stdout=sys.stdout)
+        except Exception as e:
+            logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
+            print("Ошибка запуска скрипта по отправке рассылки BS:", e)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
@@ -494,13 +521,12 @@ def inline_button(call):
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('bot-tg', 'BM_bot', 'Automatic_email_GP(OLD_TEXT).ps1')
-        subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script,
-            str(version_GP) ],
-        stdout=sys.stdout)
+        setup_script = Path('Automatic_email_GP(OLD_TEXT).ps1')
+        try:
+            subprocess.run(["pwsh", "-File", setup_script,str(version_GP) ],stdout=sys.stdout)
+        except Exception as e:
+            logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            print("Ошибка запуска скрипта по отправке рассылки GP:", e)
         button_choise_yes_GP = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
@@ -510,13 +536,12 @@ def inline_button(call):
 #### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update
     elif call.data == "button_update_statistics_yes_SB":
         bot.edit_message_text('Отлично! Произвожу расчеты. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('bot-tg', 'BM_bot', 'Ticket_Check_SB_update_statistics.ps1')
-        result=subprocess.run([
-            "pwsh", 
-            "-File", 
-            setup_script,
-            str(version_stat)], capture_output=True, text=True
-        )
+        setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
+        try:
+            result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout)
+        except Exception as e:
+            logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            print("Ошибка запуска скрипта по отправке рассылки GP:", e)
         button_update_statistics_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_update_statistics_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_update_statistics_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
@@ -529,7 +554,7 @@ def inline_button(call):
 ## Функция по созданию списка версий и формирования ответа
 def send_text_version(result_client_version):
     bot.add_poll_answer_handler
-    url = "https://boardmaps.happyfox.com/api/1.1/json/contact_groups/"
+    url = API_ENDPOINT + '/contact_groups/'
     res = requests.get(url,auth=auth, headers=headers).json()
     global list_info_zero
     list_info_zero = []
@@ -644,4 +669,4 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
 def start_telegram_bot():
     """"Функция запуска телебота"""
     # запуск бота
-    bot.polling(none_stop=True, interval=0)
+    bot.infinity_polling()
