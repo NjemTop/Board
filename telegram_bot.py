@@ -137,7 +137,7 @@ def send_verification_code(email_access):
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
                 email_text = access_password
-                message = ('From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)).encode('utf-8')
+                message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)
                 ## Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, message)
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
