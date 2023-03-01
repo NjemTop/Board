@@ -545,7 +545,7 @@ def inline_button(call):
             print("Ошибка запуска скрипта по отправке рассылки BS:", e)
         
         # Отправить output в телеграмм бота
-        bot.send_message(chat_id, result_SB)
+        bot.send_message(call.message.chat.id, result_SB)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
