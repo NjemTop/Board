@@ -117,54 +117,54 @@ def start_message(message_start):
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def check_email(email_access):
-        """Функция отправки кода проверки на почту"""
-        ## Если почтовый адрес содержит "@boardmaps.ru"
-        if '@boardmaps.ru' in email_access.text:
-            # Открытие файла и чтение его содержимого
-            with open(CONFIG_FILE) as f:
-                data = json.load(f)
-            # Получение информации о почте, пароле и SMTP настройках
-            email = data["MAIL_SETTINGS"]["USER"]
-            password_0 = data["MAIL_SETTINGS"]["PASSWORD"]
-            smtp_server = data["MAIL_SETTINGS"]["SMTP"]
-            ## Настройки SMTP сервера
-            server = smtplib.SMTP(smtp_server, 587)
-            server.ehlo()
-            server.starttls()
-            server.login(email, password_0)
-            ## Генерируем рандомный пароль для доступа к боту
-            global password
-            password = ''
-            for _ in range(12):
-                password = password + random.choice(list('1234567890abcdefghigklmnopqrstuvyxwzABCDEFGHIGKLMNOPQRSTUVYXWZ!@#$%^&*()_+'))
-            ## Данные (кому отправлять, какая тема и письмо)
-            dest_email = email_access.text
-            subject = 'Message from chatbot'
-            email_text = password
-            message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
-            ## Отправляем сообщение
-            server.sendmail(email, dest_email, message)
-            server.quit()
-            ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
-            password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
-            bot.register_next_step_handler(password_message, check_pass_answer)
-            url = API_ENDPOINT + '/staff/'
-            res = requests.get(url, auth=auth, headers=headers).json()
-            for i in range(len(res)):
-                res_i = res[i]
-                find_email = res_i.get('email')
-                if find_email == email_access.text:
-                    global find_id_HF
-                    find_id_HF = res_i.get('id')
-                    global email_access_id
-                    email_access_id = find_email
-                    global find_name
-                    find_name = res_i.get('name')
-                    global find_role_id
-                    find_role = res_i.get('role') 
-                    find_role_id = find_role.get('id')
-                else:
-                    continue     
+    """Функция отправки кода проверки на почту"""
+    ## Если почтовый адрес содержит "@boardmaps.ru"
+    if '@boardmaps.ru' in email_access.text:
+        # Открытие файла и чтение его содержимого
+        with open(CONFIG_FILE) as f:
+            data = json.load(f)
+        # Получение информации о почте, пароле и SMTP настройках
+        email = data["MAIL_SETTINGS"]["USER"]
+        password_0 = data["MAIL_SETTINGS"]["PASSWORD"]
+        smtp_server = data["MAIL_SETTINGS"]["SMTP"]
+        ## Настройки SMTP сервера
+        server = smtplib.SMTP(smtp_server, 587)
+        server.ehlo()
+        server.starttls()
+        server.login(email, password_0)
+        ## Генерируем рандомный пароль для доступа к боту
+        global password
+        password = ''
+        for _ in range(12):
+            password = password + random.choice(list('1234567890abcdefghigklmnopqrstuvyxwzABCDEFGHIGKLMNOPQRSTUVYXWZ!@#$%^&*()_+'))
+        ## Данные (кому отправлять, какая тема и письмо)
+        dest_email = email_access.text
+        subject = 'Message from chatbot'
+        email_text = password
+        message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
+        ## Отправляем сообщение
+        server.sendmail(email, dest_email, message)
+        server.quit()
+        ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
+        password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
+        bot.register_next_step_handler(password_message, check_pass_answer)
+        url = API_ENDPOINT + '/staff/'
+        res = requests.get(url, auth=auth, headers=headers).json()
+        for i in range(len(res)):
+            res_i = res[i]
+            find_email = res_i.get('email')
+            if find_email == email_access.text:
+                global find_id_HF
+                find_id_HF = res_i.get('id')
+                global email_access_id
+                email_access_id = find_email
+                global find_name
+                find_name = res_i.get('name')
+                global find_role_id
+                find_role = res_i.get('role') 
+                find_role_id = find_role.get('id')
+            else:
+                continue     
         else:
             bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
 ## Проверяем введенный пользователем пароль
