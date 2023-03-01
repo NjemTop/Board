@@ -111,7 +111,7 @@ def start_message(message_start):
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
     else:
         question_email = bot.send_message(message_start.chat.id,"Привет! Пожалуйста, введите адрес рабочей почты.")
-        bot.register_next_step_handler(question_email, check_email)
+        bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def send_verification_code(email_access, api_endpoint, auth, headers):
