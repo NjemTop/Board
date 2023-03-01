@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 import logging
 import os
 import platform
-import configparser
 from writexml import create_xml
 
 # создаем логгер
@@ -40,22 +39,29 @@ if platform.system() == 'Windows':
 else:
     local_appdata_path = os.environ['HOME']
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
 
-# Создаем объект configparser
-config = configparser.ConfigParser()
 # Читаем данные из файла
-config.read('system_info.config')
-# Получаем значение ключа BOT_TOKEN из секции BOT
-BOT_TOKEN = config.get('BOT', 'BOT_TOKEN')
+with open(CONFIG_FILE) as f:
+    data = json.load(f)
+
+# Получаем значение ключа BOT_TOKEN в TELEGRAM_SETTINGS
+BOT_TOKEN = data['TELEGRAM_SETTINGS']['BOT_TOKEN']
+
 # Сохраняем значение в переменную TOKEN
 TOKEN = BOT_TOKEN
 
-## Авторизация в HappyFox
-# Получаем значение ключа API и API_KEY из секции API
-API_KEY = config.get('API', 'API_KEY')
-API_SECRET = config.get('API', 'API_SECRET')
-# Сохраняем значение в переменную auth
+### Авторизация в HappyFox
+# открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    data = json.load(f)
+# извлекаем значения API_KEY и API_SECRET
+API_KEY = data['HAPPYFOX_SETTINGS']['API_KEY']
+API_SECRET = data['HAPPYFOX_SETTINGS']['API_SECRET']
+# сохраняем значения в переменную auth
 auth = (API_KEY, API_SECRET)
+API_ENDPOINT = data['HAPPYFOX_SETTINGS']['API_ENDPOINT']
 headers = {'Content-Type': 'application/json'}
 
 # Создаем бота
@@ -73,7 +79,6 @@ def send_telegram_message(alert_chat_id, alert_text):
     print(response)
     print('*--*--*'*60)
 
-    
 # УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
     """Функция для проверки наличия данных в файле data.xml"""
@@ -115,12 +120,15 @@ def check_email(email_access):
         """Функция отправки кода проверки на почту"""
         ## Если почтовый адрес содержит "@boardmaps.ru"
         if '@boardmaps.ru' in email_access.text:
-            ## Отправляем сообщение
-            ## Логин и пароль от почты, которой отправляется письмо
-            email = 'sup-smtp@boardmaps.ru'
-            password_0 = 'rcjtcxvjzfsjglko'
+            # Открытие файла и чтение его содержимого
+            with open(CONFIG_FILE) as f:
+                data = json.load(f)
+            # Получение информации о почте, пароле и SMTP настройках
+            email = data["MAIL_SETTINGS"]["USER"]
+            password_0 = data["MAIL_SETTINGS"]["PASSWORD"]
+            smtp_server = data["MAIL_SETTINGS"]["SMTP"]
             ## Настройки SMTP сервера
-            server = smtplib.SMTP('smtp.yandex.ru', 587)
+            server = smtplib.SMTP(smtp_server, 587)
             server.ehlo()
             server.starttls()
             server.login(email, password_0)
@@ -134,13 +142,13 @@ def check_email(email_access):
             subject = 'Message from chatbot'
             email_text = password
             message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
-            ## Сама отправка письма используя ранее разначенные аргументы
+            ## Отправляем сообщение
             server.sendmail(email, dest_email, message)
             server.quit()
             ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
             password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
             bot.register_next_step_handler(password_message, check_pass_answer)
-            url = ('https://boardmaps.happyfox.com/api/1.1/json/staff/')
+            url = API_ENDPOINT + '/staff/'
             res = requests.get(url, auth=auth, headers=headers).json()
             for i in range(len(res)):
                 res_i = res[i]
@@ -189,7 +197,7 @@ def alert_message(message_alert):
 ### ЗАДАЁМ ПАРАМЕТРЫ ЗАПРОСА, ЧТОБЫ СРАЗУ ВЫДАТЬ ИНФУ О НОВОМ СОЗДАННОМ ТИКЕТЕ СО СТАТУСОМ NEW В КАТЕГОРИИ СТАНДАРТНОЙ И БЕЗ НАЗНАЧЕННОГО НА ДАННЫЙ ТИКЕТ
         query_params = { "status": '1', "category": '1', "unresponded": 'true', "q": 'assignee:"none"'}
         ### ЗАДАЁМ ENDPOINTS, ПАРОЛИ И ВЫТЯГИВАЕМ ВСЮ ИНФУ ИЗ ЗАПРОСА
-        url_0 = ('https://boardmaps.happyfox.com/api/1.1/json/tickets/?size=50&page=1')
+        url_0 = API_ENDPOINT + '/tickets/?size=50&page=1'
         res_0 = requests.get(url_0,auth=auth, headers=headers, params=query_params).json()
         ### ВЫТАСКИВАЕМ ИНФУ о количестве отфильтрованных тикетов ИЗ МАССИВА page_info
         page_info = res_0.get('page_info')
@@ -205,7 +213,7 @@ def alert_message(message_alert):
                     res = res_0
                 # каждый тикет будет на отдельной странице, т.е. № тикета = номеру страницы. перебираем стр по тикетам
                 else:
-                    url = ('https://boardmaps.happyfox.com/api/1.1/json/tickets/?size=50&page=' + (page + 1))
+                    url = API_ENDPOINT + ('/tickets/?size=50&page=' + (page + 1))
                     res = requests.get(url,auth=auth, headers=headers, params=query_params).json()
             ### ВЫТАСКИВАЕМ всю ИНФУ по тикету ИЗ МАССИВА DATA и из вложенного в него списка
             data = res.get('data')
@@ -548,7 +556,7 @@ def inline_button(call):
 ## Функция по созданию списка версий и формирования ответа
 def send_text_version(result_client_version):
     bot.add_poll_answer_handler
-    url = "https://boardmaps.happyfox.com/api/1.1/json/contact_groups/"
+    url = API_ENDPOINT + '/contact_groups/'
     res = requests.get(url,auth=auth, headers=headers).json()
     global list_info_zero
     list_info_zero = []

@@ -2,8 +2,8 @@
 import logging
 from flask import Flask, request
 from flask import Response
-from telegram_bot import send_telegram_message
 import xml.etree.ElementTree as ET
+from telegram_bot import send_telegram_message
 
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
@@ -21,6 +21,9 @@ info_handler = logging.FileHandler('./logs/web-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
+
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
 
 def get_app():
     """Функция приложения ВЭБ-сервера"""
@@ -68,8 +71,11 @@ def get_app():
                 # отправляем сообщение в телеграм-бот
                 ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
-                # Чат айди, куда отправляем алерты
-                alert_chat_id = -1001760725213
+                # открываем файл и загружаем данные
+                with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+                    data = json.load(f)
+                # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+                alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
                 send_telegram_message(alert_chat_id, ticket_message)
                 info_logger.info('Отправлена следующая информация в группу: %s', 'Новый тикет: {ticket_id}Тема: {subject}Приоритет: {priority_name}Ссылка: {agent_ticket_url}')
             else:

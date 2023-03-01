@@ -1,11 +1,19 @@
 import requests
+import json
 from telegram_bot import send_telegram_message
 
-TICKET_URL = 'https://boardmaps.happyfox.com/api/1.1/json/tickets/'
-API_KEY = '45357d176a5f4e25b740aebae58f189c'
-API_SECRET = '3b9e5c6cc6f34802ad5ae82bafdab3bd'
+### Авторизация в HappyFox
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+# открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    data = json.load(f)
+# извлекаем значения API_KEY и API_SECRET
+API_ENDPOINT = data['HAPPYFOX_SETTINGS']['API_ENDPOINT']
+API_KEY = data['HAPPYFOX_SETTINGS']['API_KEY']
+API_SECRET = data['HAPPYFOX_SETTINGS']['API_SECRET']
+# сохраняем значения в переменную auth
 HEADERS = {'Content-Type': 'application/json'}
-
 
 def get_tickets():
     """Функция проверки тикетов, у которых нет ответа"""
@@ -15,7 +23,7 @@ def get_tickets():
         # 'unresponded': 'true',
         'q': 'unresponded:"true"',
     }
-    url = TICKET_URL + '?size=1&page=1'
+    url = API_ENDPOINT + '/tickets/?size=1&page=1'
     # проверка на доступность сервера, если сервер недоступен, выводит ошибку
     try:
         response = requests.get(url, auth=(
@@ -29,7 +37,7 @@ def get_tickets():
             print('No tickets')
         else:
             for page in range(last_index):
-                url = TICKET_URL + f'?size=1&page={page + 1}'
+                url = API_ENDPOINT + f'/tickets/?size=1&page={page + 1}'
                 # проверка на доступность сервера, если сервер недоступен, выводит ошибку
                 try:
                     response = requests.get(url, auth=(
@@ -57,7 +65,7 @@ def get_tickets():
                             else:
                                 assigned_name = "Нет исполнителя"
 
-                    ticket_message = (f'Ticket ID: {ticket_id}, Priority: {priority_name}, Contact Group Name: {name_info}, assignee: {assigned_name}')
+                    ticket_message = (f'Новое сообщение в тикете: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
                     # Чат айди, куда отправляем алерты
                     alert_chat_id = -1001760725213
                     send_telegram_message(alert_chat_id, ticket_message)
@@ -71,3 +79,5 @@ def get_tickets():
     except requests.exceptions.RequestException as exception:
                     print(f"Error occurred: {exception}")
 
+if __name__ == '__main__':
+    get_tickets()
