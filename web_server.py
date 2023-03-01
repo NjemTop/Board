@@ -3,6 +3,7 @@ import logging
 from flask import Flask, request
 from flask import Response
 from telegram_bot import send_telegram_message
+import xml.etree.ElementTree as ET
 
 # Создание объекта логгера для ошибок и критических событий
 error_logger = logging.getLogger('error_logger')
@@ -70,11 +71,12 @@ def get_app():
                 # Чат айди, куда отправляем алерты
                 alert_chat_id = -1001760725213
                 send_telegram_message(alert_chat_id, ticket_message)
-                info_logger.info('Отправлена следующая информация в группу: %s', ticket_message)
+                info_logger.info('Отправлена следующая информация в группу: %s', 'Новый тикет: {ticket_id}Тема: {subject}Приоритет: {priority_name}Ссылка: {agent_ticket_url}')
             else:
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
-        except json.decoder.JSONDecodeError:
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as e:
             print('Не удалось распарсить JSON в запросе.')
             error_logger.error("Не удалось распарсить JSON в запросе. %s")
             return 'Не удалось распарсить JSON в запросе.', 400
@@ -97,36 +99,64 @@ def get_app():
         message = ""
         message = request.data.decode('utf-8')
         try:
+            # проверяем наличие JSON в сообщении
+            if '{' not in message:
+                print('JSON не найден в сообщении.')
+                error_logger.error("JSON не найден в сообщении. %s")
+                return 'JSON не найден в сообщении.', 400
             # находим JSON в сообщении
             json_start = message.find('{')
             if json_start != -1:
                 json_str = message[json_start:]
                 print('--'*60)
                 # парсим JSON
-                json_data = json.loads(json_str)
-                info_logger.info('Парсинг JSON из update_ticket: %s', (json.dumps(json_data, indent=4)))
+                try:
+                    json_data = json.loads(json_str)
+                except json.decoder.JSONDecodeError:
+                    print('Не удаётся распарсить JSON в запросе.')
+                    error_logger.error("Не удаётся распарсить JSON в запросе. %s")
+                    return 'Не удаётся распарсить JSON в запросе.', 400
                 # находим значения для ключей
                 ticket_id = json_data.get("ticket_id")
                 subject = json_data.get("subject")
                 priority_name = json_data.get("priority_name")
-                assigned_name = json_data.get("assigned_name")
-                # загрузка JSON файла
+                assignee_name = json_data.get("assignee_name")
                 client_name = json_data['client_details']['name']
                 agent_ticket_url = json_data.get("agent_ticket_url")
                 print('**'*60)
-                # отправляем сообщение в телеграм-бот
-                ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\n Имя клиента: {client_name}\nНазначен: {assigned_name}\nСсылка: {agent_ticket_url}")
+                # Формируем сообщение в текст отправки
+                ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nИмя клиента: {client_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
-                # Чат айди, куда отправляем алерты
-                alert_chat_id = -1001760725213
-                send_telegram_message(alert_chat_id, ticket_message)
-                info_logger.info('Отправлена следующая информация в группу: %s', ticket_message)
+                # Разбор XML-файла и получение корневого элемента
+                tree = ET.parse('data.xml')
+                root = tree.getroot()
+                # Находим все элементы header_footer внутри элемента user
+                header_footer_elements = root.findall('.//user/header_footer')
+                # Задаем начальное значение alert_chat_id
+                alert_chat_id = None
+                # Проходим циклом по всем найденным элементам header_footer
+                for hf in header_footer_elements:
+                    # Сравниваем значение элемента name с assignee_name
+                    if hf.find('name').text == assignee_name:
+                        # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
+                        alert_chat_id = hf.find('chat_id').text
+                        break  # Выходим из цикла, т.к. нужный элемент уже найден
+
+                # Если alert_chat_id не был найден, выводим ошибку
+                if alert_chat_id is None:
+                    print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
+                    error_logger.error("Не удалось найти chat_id для пользователя {assignee_name} %s")
+                else:
+                    # Отправляем сообщение в телеграм-бот
+                    send_telegram_message(alert_chat_id, ticket_message)
+                info_logger.info('Отправлена следующая информация в группу: %s', 'Новое сообщение в тикете: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
             else:
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
-        except json.decoder.JSONDecodeError:
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as e:
             print('Не удалось распарсить JSON в запросе.')
-            error_logger.error("Не удалось распарсить JSON в запросе. %s")
+            error_logger.error("Не удалось распарсить JSON в запросе. %s", e)
             return 'Не удалось распарсить JSON в запросе.', 400
         
         return "OK", 200

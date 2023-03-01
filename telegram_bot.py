@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-handler = logging.FileHandler('./logs/bot-error.log')
+handler = logging.FileHandler('bot-error.log')
 handler.setLevel(logging.ERROR)
 
 # создаем форматирование
@@ -59,6 +59,7 @@ def send_telegram_message(alert_chat_id, alert_text):
     response = requests.post(url, headers=headers_server, data=json.dumps(data))
     print(response)
     print('*--*--*'*60)
+
     
 # УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
@@ -67,12 +68,17 @@ def check_user_in_file(chat_id):
         # Открываем файл и ищем chat_id
         with open(Path('data.xml')) as user_access:
             root = ET.parse(user_access).getroot()
-            chat_id_list = [c.text for c in root.findall('chat_id')]
-            if str(chat_id) in chat_id_list:
-                return True
-    except:
-        print("Нет УЗ в XML файле")
-        pass
+            for user in root.findall('user'):
+                header_footer = user.find('header_footer')
+                chat_id_elem = header_footer.find('chat_id')
+                if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
+                    return True
+    except FileNotFoundError as e:
+        logger.error("Файл data.xml не найден: %s", e)
+        print("Файл data.xml не найден")
+    except Exception as e:
+        logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+        print("Ошибка чтения файла data.xml")
     return False
 
 # Обработчик команды /start
