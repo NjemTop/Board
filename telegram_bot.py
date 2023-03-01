@@ -123,53 +123,63 @@ def send_verification_code(email_access):
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
         PASSWORD = DATA["MAIL_SETTINGS"]["PASSWORD"]
         SMTP_SERVER = DATA["MAIL_SETTINGS"]["SMTP"]
-
-        ## Настройки SMTP сервера
-        with smtplib.SMTP(SMTP_SERVER, 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(EMAIL_FROM, PASSWORD)
-            ## Генерируем рандомный пароль для доступа к боту
-            access_password = generate_random_password()
-            ## Данные (кому отправлять, какая тема и письмо)
-            dest_email = email_access.text
-            subject = 'Добро пожаловать в наш бот!'
-            # Формируем текст письма, включая сгенерированный пароль
-            email_text = f'''\
-                <html>
-                    <body style="background-color: lightblue">
-                        <h2>Здравствуйте!</h2>
-                        <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
-                        <ul>
-                            <li>Пароль: {access_password}</li>
-                        </ul>
-                        <p>Пожалуйста, введите его в окне чатбота и не сообщайте его никому.</p>
-                        <p>С уважением,<br>Администратор бота</p>
-                    </body>
-                </html>
-            '''
-            message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)
-            ## Отправляем сообщение
-            server.sendmail(EMAIL_FROM, dest_email, message)
-            ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
-            password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
-            bot.register_next_step_handler(password_message, check_pass_answer)
-            # Ищем полученную почту в системе HappyFox
-            try:
-                staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
-                for staff_member in staff:
-                    if staff_member['email'] == email_access.text:
-                        find_id_HF = staff_member['id']
-                        email_access_id = staff_member['email']
-                        find_name = staff_member['name']
-                        find_role_id = staff_member['role']['id']
-                        return find_id_HF, email_access_id, find_name, find_role_id
-                    else:
-                        print("Почты в системе HappyFox - нет")
-                        continue
-            except Exception as e:
-                logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
-                print("Произошла ошибка при поиске почты в системе HappyFox:", e)
+        try:
+            ## Настройки SMTP сервера
+            with smtplib.SMTP(SMTP_SERVER, 587) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(EMAIL_FROM, PASSWORD)
+                ## Генерируем рандомный пароль для доступа к боту
+                global access_password
+                access_password = generate_random_password()
+                ## Данные (кому отправлять, какая тема и письмо)
+                dest_email = email_access.text
+                subject = 'Добро пожаловать в наш бот!'
+                # Формируем текст письма, включая сгенерированный пароль
+                email_text = f'''\
+                    <html>
+                        <body style="background-color: lightblue">
+                            <h2>Здравствуйте!</h2>
+                            <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
+                            <ul>
+                                <li>Пароль: {access_password}</li>
+                            </ul>
+                            <p>Пожалуйста, введите его в окне чатбота и не сообщайте его никому.</p>
+                            <p>С уважением,<br>Администратор бота</p>
+                        </body>
+                    </html>
+                '''
+                message = ('From: %s\nTo: %s\nSubject: %s\n\n%s' % (EMAIL_FROM, dest_email, subject, email_text)).encode('utf-8')
+                ## Отправляем сообщение
+                server.sendmail(EMAIL_FROM, dest_email, message)
+                ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
+                password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
+                bot.register_next_step_handler(password_message, check_pass_answer)
+                # Ищем полученную почту в системе HappyFox
+                try:
+                    staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
+                    for i in range(len(staff)):
+                        res_i = staff[i]
+                        find_email = res_i.get('email')
+                        if find_email == email_access.text:
+                            global find_id_HF
+                            find_id_HF = res_i.get('id')
+                            global email_access_id
+                            email_access_id = find_email
+                            global find_name
+                            find_name = res_i.get('name')
+                            find_role = res_i.get('role') 
+                            global find_role_id
+                            find_role_id = find_role.get('id')
+                            return find_id_HF, email_access_id, find_name, find_role_id
+                    logger.info("Почты в системе HappyFox - нет: %s")
+                    print("Почты в системе HappyFox - нет")
+                except Exception as e:
+                    logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
+                    print("Произошла ошибка при поиске почты в системе HappyFox:", e)
+        except Exception as e:
+            logger.error("Произошла ошибка отправки пароля на почту: %s", e)
+            print("Произошла ошибка отправки пароля на почту:", e)
     else:
         bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
 
@@ -183,7 +193,7 @@ def generate_random_password(length=12):
     return access_password
 
 ## Проверяем введенный пользователем пароль
-def check_pass_answer(password_message, access_password, find_id_HF, email_access_id, find_name, find_role_id):
+def check_pass_answer(password_message):
     """Функция проверки пароля и записи УЗ в data.xml"""
     try:
         ## Если пароль подходит
@@ -686,7 +696,6 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
         button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
         bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
    
-
 def start_telegram_bot():
     """"Функция запуска телебота"""
     # запуск бота
