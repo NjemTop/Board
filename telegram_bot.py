@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 import logging
 import os
 import platform
+import string
 from writexml import create_xml
 
 # создаем логгер
@@ -43,25 +44,22 @@ else:
 CONFIG_FILE = "Main.config"
 
 # Читаем данные из файла
-with open(CONFIG_FILE) as f:
-    data = json.load(f)
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    DATA = json.load(f)
 
 # Получаем значение ключа BOT_TOKEN в TELEGRAM_SETTINGS
-BOT_TOKEN = data['TELEGRAM_SETTINGS']['BOT_TOKEN']
+BOT_TOKEN = DATA['TELEGRAM_SETTINGS']['BOT_TOKEN']
 
 # Сохраняем значение в переменную TOKEN
 TOKEN = BOT_TOKEN
 
 ### Авторизация в HappyFox
-# открываем файл и загружаем данные
-with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
-    data = json.load(f)
 # извлекаем значения API_KEY и API_SECRET
-API_KEY = data['HAPPYFOX_SETTINGS']['API_KEY']
-API_SECRET = data['HAPPYFOX_SETTINGS']['API_SECRET']
+API_KEY = DATA['HAPPYFOX_SETTINGS']['API_KEY']
+API_SECRET = DATA['HAPPYFOX_SETTINGS']['API_SECRET']
 # сохраняем значения в переменную auth
 auth = (API_KEY, API_SECRET)
-API_ENDPOINT = data['HAPPYFOX_SETTINGS']['API_ENDPOINT']
+API_ENDPOINT = DATA['HAPPYFOX_SETTINGS']['API_ENDPOINT']
 headers = {'Content-Type': 'application/json'}
 
 # Создаем бота
@@ -116,76 +114,99 @@ def start_message(message_start):
         bot.register_next_step_handler(question_email, check_email)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
-def check_email(email_access):
-    """Функция отправки кода проверки на почту"""
+def send_verification_code(email_access, api_endpoint, auth, headers):
+    """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if '@boardmaps.ru' in email_access.text:
         # Открытие файла и чтение его содержимого
-        with open(CONFIG_FILE) as f:
-            data = json.load(f)
         # Получение информации о почте, пароле и SMTP настройках
-        email = data["MAIL_SETTINGS"]["USER"]
-        password_0 = data["MAIL_SETTINGS"]["PASSWORD"]
-        smtp_server = data["MAIL_SETTINGS"]["SMTP"]
-        ## Настройки SMTP сервера
-        server = smtplib.SMTP(smtp_server, 587)
-        server.ehlo()
-        server.starttls()
-        server.login(email, password_0)
-        ## Генерируем рандомный пароль для доступа к боту
-        global password
-        password = ''
-        for _ in range(12):
-            password = password + random.choice(list('1234567890abcdefghigklmnopqrstuvyxwzABCDEFGHIGKLMNOPQRSTUVYXWZ!@#$%^&*()_+'))
-        ## Данные (кому отправлять, какая тема и письмо)
-        dest_email = email_access.text
-        subject = 'Message from chatbot'
-        email_text = password
-        message = 'From: %s\nTo: %s\nSubject: %s\n\n%s' % (email, dest_email, subject, email_text)
-        ## Отправляем сообщение
-        server.sendmail(email, dest_email, message)
-        server.quit()
-        ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
-        password_message = bot.send_message(email_access.chat.id,"Пожалуйста, введите пароль, отправленный на указанную почту.")
-        bot.register_next_step_handler(password_message, check_pass_answer)
-        url = API_ENDPOINT + '/staff/'
-        res = requests.get(url, auth=auth, headers=headers).json()
-        for i in range(len(res)):
-            res_i = res[i]
-            find_email = res_i.get('email')
-            if find_email == email_access.text:
-                global find_id_HF
-                find_id_HF = res_i.get('id')
-                global email_access_id
-                email_access_id = find_email
-                global find_name
-                find_name = res_i.get('name')
-                global find_role_id
-                find_role = res_i.get('role') 
-                find_role_id = find_role.get('id')
-            else:
-                continue
-        else:
-            bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
-## Проверяем введенный пользователем пароль
-def check_pass_answer(password_message):
-    """Функция проверки пароля и записи УЗ в data.xml"""
-    ## Если пароль подходит
-    if password_message.text == password:
-        ## ВРЕМЕННЫЙ АРГУМЕНТ роли
-        find_role = 'Admin'
-        ## Создаем XML файл и записываем данные
-        create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
-        
-        ## Показываем пользователю главное меню
-        main_menu = types.InlineKeyboardMarkup()
-        button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
-        button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
-        button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
-        main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
-        bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
+        EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
+        PASSWORD = DATA["MAIL_SETTINGS"]["PASSWORD"]
+        SMTP_SERVER = DATA["MAIL_SETTINGS"]["SMTP"]
+        try:
+            ## Настройки SMTP сервера
+            with smtplib.SMTP(SMTP_SERVER, 587) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(EMAIL_FROM, PASSWORD)
+                ## Генерируем рандомный пароль для доступа к боту
+                access_password = generate_random_password()
+                ## Данные (кому отправлять, какая тема и письмо)
+                dest_email = email_access.text
+                subject = 'Добро пожаловать в наш бот!'
+                # Формируем текст письма, включая сгенерированный пароль
+                email_text = f'''\
+                    <html>
+                        <body style="background-color: lightblue">
+                            <h2>Здравствуйте!</h2>
+                            <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
+                            <ul>
+                                <li>Пароль: {access_password}</li>
+                            </ul>
+                            <p>Пожалуйста, введите его в окне чатбота и не сообщайте его никому.</p>
+                            <p>С уважением,<br>Администратор бота</p>
+                        </body>
+                    </html>
+                '''
+                message = f'From: {EMAIL_FROM}\nTo: {dest_email}\nSubject: {subject}\n\n{email_text}'
+                ## Отправляем сообщение
+                server.sendmail(EMAIL_FROM, dest_email, message)
+                ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
+                password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
+                bot.register_next_step_handler(password_message, check_pass_answer)
+                # Ищем полученную почту в системе HappyFox
+                try:
+                    staff = requests.get(api_endpoint + '/staff/', auth=auth, headers=headers).json()
+                    for staff_member in staff:
+                        if staff_member['email'] == email_access.text:
+                            find_id_HF = staff_member['id']
+                            email_access_id = staff_member['email']
+                            find_name = staff_member['name']
+                            find_role_id = staff_member['role']['id']
+                            return find_id_HF, email_access_id, find_name, find_role_id
+                        else:
+                            print("Почты в системе HappyFox - нет")
+                            continue
+                except Exception as e:
+                    logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
+                    print("Произошла ошибка при поиске почты в системе HappyFox:", e)
+        except Exception as e:
+            logger.error("Произошла ошибка отправки пароля на почту: %s", e)
+            print("Произошла ошибка отправки пароля на почту:", e)
     else:
-        bot.send_message(password_message.chat.id, 'Неправильный пароль.')
+        bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
+
+def generate_random_password(length=12):
+    """Функция для генерации случайного пароля указанной длины"""
+    # все возможные символы для пароля
+    chars = string.ascii_letters + string.digits + string.punctuation
+    # генерируем случайную строку из символов заданной длины
+    access_password = ''.join(random.choice(chars) for _ in range(length))
+    # возвращаем пароль, при вызове функции
+    return access_password
+
+## Проверяем введенный пользователем пароль
+def check_pass_answer(password_message, access_password, find_id_HF, email_access_id, find_name, find_role_id):
+    """Функция проверки пароля и записи УЗ в data.xml"""
+    try:
+        ## Если пароль подходит
+        if password_message.text == access_password:
+            ## ВРЕМЕННЫЙ АРГУМЕНТ роли
+            find_role = 'Admin'
+            ## Создаем XML файл и записываем данные
+            create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
+            ## Показываем пользователю главное меню
+            main_menu = types.InlineKeyboardMarkup()
+            button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
+            button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
+            button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
+            main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
+            bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
+        else:
+            bot.send_message(password_message.chat.id, 'Неправильный пароль.')
+    except Exception as e:
+        logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
+        print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", e)
 
 #уведомления о новых тикетах
 @bot.message_handler(commands=['alert'])
