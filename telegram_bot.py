@@ -697,4 +697,4 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
         bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
    
 
-  bot.infinity_polling()
+ bot.infinity_polling()
