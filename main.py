@@ -28,7 +28,7 @@ info_logger.addHandler(info_handler)
 def start_socket_server():
     """Функция запуска ВЭБ-СЕРВЕРА в паралельной сессии"""
     script_path = os.path.abspath(os.path.dirname(__file__))
-    subprocess.Popen(['python', os.path.join(script_path, 'web_server.py')])
+    subprocess.Popen(['python3.10', os.path.join(script_path, 'web_server.py')])
 
 # запуск двух функций (запуск скрипта ВЭБ-СЕРВЕРА и запуск скрипта телебота)
 if __name__ == '__main__':
