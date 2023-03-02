@@ -142,7 +142,6 @@ def send_verification_code(email_access):
                 server.starttls()
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
-                global access_password
                 access_password = generate_random_password()
                 ## Данные (кому отправлять, какая тема и письмо)
                 dest_email = email_access.text
@@ -169,9 +168,6 @@ def send_verification_code(email_access):
                 msg.attach(MIMEText(email_text, 'html', 'utf-8'))
                 # Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, msg.as_string())
-                ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
-                password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
-                bot.register_next_step_handler(password_message, check_pass_answer)
                 # Ищем полученную почту в системе HappyFox
                 try:
                     staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
@@ -179,14 +175,10 @@ def send_verification_code(email_access):
                         res_i = staff[i]
                         find_email = res_i.get('email')
                         if find_email == email_access.text:
-                            global find_id_HF
                             find_id_HF = res_i.get('id')
-                            global email_access_id
                             email_access_id = find_email
-                            global find_name
                             find_name = res_i.get('name')
                             find_role = res_i.get('role') 
-                            global find_role_id
                             find_role_id = find_role.get('id')
                             return find_id_HF, email_access_id, find_name, find_role_id
                     info_logger.info("Почты в системе HappyFox - нет: %s")
@@ -194,6 +186,9 @@ def send_verification_code(email_access):
                 except Exception as e:
                     error_logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
                     print("Произошла ошибка при поиске почты в системе HappyFox:", e)
+                ## Бот выдает сообщение с просьбой ввести пароль
+                password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
+                bot.register_next_step_handler(password_message, check_pass_answer, access_password, find_id_HF, email_access_id, find_name, find_role_id)  
         except Exception as e:
             error_logger.error("Произошла ошибка отправки пароля на почту: %s", e)
             print("Произошла ошибка отправки пароля на почту:", e)
@@ -210,7 +205,7 @@ def generate_random_password(length=12):
     return access_password
 
 ## Проверяем введенный пользователем пароль
-def check_pass_answer(password_message):
+def check_pass_answer(password_message, access_password, find_id_HF, email_access_id, find_name, find_role_id):
     """Функция проверки пароля и записи УЗ в data.xml"""
     try:
         ## Если пароль подходит
