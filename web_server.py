@@ -154,7 +154,7 @@ def get_app():
                     # Если alert_chat_id не был найден, выводим ошибку
                     if alert_chat_id is None:
                         print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
-                        error_logger.error("Не удалось найти chat_id для пользователя {assignee_name} %s")
+                        error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, ticket_message)
@@ -190,7 +190,7 @@ def get_app():
                     # Если alert_chat_id не был найден, выводим ошибку
                     if alert_chat_id is None:
                         print(f"Не удалось найти chat_id для пользователя {new_assignee_name_message}.")
-                        error_logger.error("Не удалось найти chat_id для пользователя {new_assignee_name_message} %s")
+                        error_logger.error("Не удалось найти 'chat id' для пользователя %s", new_assignee_name_message)
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, new_assignee_name_message)
