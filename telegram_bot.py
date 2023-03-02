@@ -171,7 +171,6 @@ def send_verification_code(email_access):
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer, access_password)
-                bot.register_next_step_handler(password_message, check_pass_answer)
                 # Ищем полученную почту в системе HappyFox
                 try:
                     # Делаем переменные глобальные, чтобы передать их в функцию check_pass_answer
