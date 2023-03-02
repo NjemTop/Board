@@ -556,11 +556,14 @@ def inline_button(call):
         setup_script = Path('Automatic_email_BS.ps1')
         setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
         try:
-            result_SB = subprocess.run(["/usr/bin/docker", "run", "--rm", "-v", "$(pwd):/app", "-w", "/app", "mcr.microsoft.com/powershell", "pwsh", "-File", setup_script, str(version_SB)], stdout=subprocess.PIPE).stdout.decode('utf-8')
+            result_SB = subprocess.run(["pwsh.exe", "-File", setup_script, str(version_SB)], stdout=subprocess.PIPE).stdout.decode('utf-8')
         except Exception as e:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
             print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-        
+        with open('/app/logs/script-output.log', 'w') as f:
+            f.write(result_SB)
+        with open('/app/logs/script-output.log', 'rb') as f:
+            bot.send_document(call.message.chat.id, f)
         # Отправить output в телеграмм бота
         bot.send_message(call.message.chat.id, result_SB)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
