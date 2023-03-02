@@ -122,7 +122,7 @@ def start_message(message_start):
         main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
     else:
-        question_email = bot.send_message(message_start.chat.id,"Привет! Твоей учётной записи нет в базе\nПожалуйста, введите адрес рабочей почты.")
+        question_email = bot.send_message(message_start.chat.id,"Привет! Твоей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
         bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
@@ -227,11 +227,15 @@ def check_pass_answer(password_message):
             main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
         else:
-            bot.send_message(password_message.chat.id, 'Неправильный пароль. Нажмите ещё раз /start')
-            error_logger.error("Ведён неправильный пароль сотрудником: {password_message.chat.id} %s")
+            ## Запросить новый пароль
+            bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
+            ## Зарегистрировать следующий шаг обработчика сообщений
+            bot.register_next_step_handler(password_message, check_pass_answer)
+            error_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
     except Exception as e:
         error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", e)
+
 
 #уведомления о новых тикетах
 @bot.message_handler(commands=['alert'])
