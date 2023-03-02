@@ -1,4 +1,4 @@
-param($version_SB)
+param($version_SB, $support_response_id)
 
 ### ТАБЛИЦА ДЛЯ ОТЧЕТА ОТПРАВКИ РАССЫЛКИ КЛИЕНТАМ
 $TABLE_REPORT = New-Object system.Collections.ArrayList
@@ -51,7 +51,7 @@ $TICKET_SUBJECT = "Обновление BoardMaps $NUMBER_VERSION"
 # Gleb = ID - 6
 
 ### ID ПОЛЬЗОВАТЕЛЯ ОТПРАВЛЯЮЩЕГО ОТВЕТ !!!!!!!!!!!
-$USER_ID = "5"
+$USER_ID = $support_response_id
 
 ### ID СТАТУСA ТИКЕТА ПРИ ОТВЕТЕ КЛИЕНТУ (Статус Awaiting reply (Client confirmation))
 $STATUS_ID = "5"
