@@ -168,6 +168,7 @@ def send_verification_code(email_access):
                 msg.attach(MIMEText(email_text, 'html', 'utf-8'))
                 # Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, msg.as_string())
+                info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer, access_password)
@@ -216,6 +217,7 @@ def check_pass_answer(password_message, access_password):
             find_role = 'Admin'
             ## Создаем XML файл и записываем данные
             create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
+            info_logger.info("Сотрудник: %s, прошёл регистрацию в боте", find_name)
             ## Показываем пользователю главное меню
             main_menu = types.InlineKeyboardMarkup()
             button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
@@ -398,12 +400,7 @@ def inline_button(call):
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_Теле2.ps1'
         try:
-            result_tele2 = subprocess.run([
-                "pwsh", 
-                "-File", 
-                setup_script,
-            ],
-            stdout=sys.stdout)
+            result_tele2 = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout)
             # Записываем в лог информацию о пользователе, сформировавшем отчет
             with open('data.xml') as f:
                 xml_data = f.read()
