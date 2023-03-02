@@ -617,12 +617,9 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            log_file_path = '/app/logs/report_send_SB.log'
-            if not os.path.isfile(log_file_path):
-                with open(log_file_path, 'w', encoding='utf-8-sig') as f:
-                    f.write('')  # Создаем пустой файл, если его не существует
-            with open(log_file_path, 'rb') as f:
-                # Отправляем вывод всего результата в телеграмм бота
+            # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
+            with open('/app/logs/report_send_SB.log', 'rb') as f:
+                f.write(result_SB)
                 bot.send_document(call.message.chat.id, f)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
@@ -646,12 +643,9 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки GP:", e)
-            log_file_path = '/app/logs/report_send_GP.log'
-            if not os.path.isfile(log_file_path):
-                with open(log_file_path, 'w', encoding='utf-8-sig') as f:
-                    f.write('')  # Создаем пустой файл, если его не существует
-            with open(log_file_path, 'rb') as f:
-                # Отправляем вывод всего результата в телеграмм бота
+            # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
+            with open('/app/logs/report_send_GP.log', 'rb') as f:
+                f.write(result_GP)
                 bot.send_document(call.message.chat.id, f)
             button_choise_yes_GP = types.InlineKeyboardMarkup()
             back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
