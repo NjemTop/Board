@@ -235,7 +235,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Silver") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Bronze")) {
             <# Action when this condition is true #>
         }
-        elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active ") {
+        elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active") {
             <# Action when this condition is true #>
         }
         ### ЕСЛИ НЕТ СТАТУС ПЛАНА, ТО ЗАПИШЕМ В ТАБЛИЦУ

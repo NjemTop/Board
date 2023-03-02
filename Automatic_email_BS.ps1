@@ -244,7 +244,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
             <# Action when this condition is true #>
         }
-        elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active ") {
+        elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active") {
             <# Action when this condition is true #>
         }
         ### ЕСЛИ ОШИБКА ПРОВЕРКИ СТАТУС, ЗАПИШЕМ В ТАБЛИЦУ
