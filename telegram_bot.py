@@ -120,7 +120,7 @@ def start_message(message_start):
         button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
         button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
         main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
-        bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
+        bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
     else:
         question_email = bot.send_message(message_start.chat.id,"Привет! Твоей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
         bot.register_next_step_handler(question_email, send_verification_code)
@@ -224,7 +224,7 @@ def check_pass_answer(password_message, access_password):
             button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
             button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
             main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
-            bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
+            bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
         else:
             ## Запросить новый пароль
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
