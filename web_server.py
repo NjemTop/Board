@@ -158,13 +158,13 @@ def get_app():
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, ticket_message)
-                    info_logger.info('Отправлена следующая информация в группу: %s', 'Новое сообщение в тикете: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+                    info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
                     # Отправляем ответ о том, что всё принято и всё хорошо
                     return "OK", 200
                 # если было изменение назначенного на тикет
                 elif "assignee_change" in json_data["update"]:
                     # находим значения для ключей
-                    who_change = json_data["update"]["assignee_change"]["old"]
+                    who_change = json_data["update"]["by"]["name"]
                     new_assignee_name = json_data["update"]["assignee_change"]["new"]
                     ticket_id = json_data.get("ticket_id")
                     subject = json_data.get("subject")
@@ -194,7 +194,7 @@ def get_app():
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, new_assignee_name_message)
-                    info_logger.info('Отправлена следующая информация в группу: %s', 'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+                    info_logger.info('Отправлена следующая информация в группу: %s', f'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
                     # Отправляем ответ о том, что всё принято и всё хорошо
                     return "OK", 200
                 else:
