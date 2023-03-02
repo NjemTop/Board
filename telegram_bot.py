@@ -208,7 +208,7 @@ def generate_random_password(length=12):
     return access_password
 
 ## Проверяем введенный пользователем пароль
-def check_pass_answer(password_message, access_password, find_id_HF, email_access_id, find_name, find_role_id):
+def check_pass_answer(password_message, access_password):
     """Функция проверки пароля и записи УЗ в data.xml"""
     try:
         ## Если пароль подходит
