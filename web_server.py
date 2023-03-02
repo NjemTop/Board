@@ -158,7 +158,7 @@ def get_app():
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, ticket_message)
-                    info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id}Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+                    info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {assignee_name} Ссылка: {agent_ticket_url}')
                     # Отправляем ответ о том, что всё принято и всё хорошо
                     return "OK", 200
                 # если было изменение назначенного на тикет
@@ -181,7 +181,7 @@ def get_app():
                     alert_chat_id = None
                     # Проходим циклом по всем найденным элементам header_footer
                     for hf in header_footer_elements:
-                        # Сравниваем значение элемента name с assignee_name
+                        # Сравниваем значение элемента name с new_assignee_name_message
                         if hf.find('name').text == new_assignee_name:
                             # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
                             alert_chat_id = hf.find('chat_id').text
@@ -189,12 +189,12 @@ def get_app():
 
                     # Если alert_chat_id не был найден, выводим ошибку
                     if alert_chat_id is None:
-                        print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
-                        error_logger.error("Не удалось найти chat_id для пользователя {assignee_name} %s")
+                        print(f"Не удалось найти chat_id для пользователя {new_assignee_name_message}.")
+                        error_logger.error("Не удалось найти chat_id для пользователя {new_assignee_name_message} %s")
                     else:
                         # Отправляем сообщение в телеграм-бот
                         send_telegram_message(alert_chat_id, new_assignee_name_message)
-                    info_logger.info('Отправлена следующая информация в группу: %s', f'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject}Приоритет: {priority_name}Имя клиента: {client_name}Назначен: {assigned_name}Ссылка: {agent_ticket_url}')
+                    info_logger.info('Отправлена следующая информация в группу: %s', f'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {new_assignee_name_message} Ссылка: {agent_ticket_url}')
                     # Отправляем ответ о том, что всё принято и всё хорошо
                     return "OK", 200
                 else:
