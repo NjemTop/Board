@@ -554,7 +554,6 @@ def inline_button(call):
     elif call.data == "button_choise_yes_SB":
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email_BS.ps1')
-        setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
         try:
             result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB)], stdout=subprocess.PIPE).stdout.decode('utf-8')
         except Exception as e:
