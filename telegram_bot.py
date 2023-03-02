@@ -190,6 +190,7 @@ def send_verification_code(email_access):
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
                 access_password = generate_random_password()
+                info_logger.debug('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
                 ## Данные (кому отправлять, какая тема и письмо)
                 dest_email = email_access.text
                 subject = 'Добро пожаловать в наш бот!'
@@ -272,6 +273,9 @@ def check_pass_answer(password_message, access_password):
             button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
             main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
+        elif password_message.text == '/start':
+            start_message(password_message.chat.id)
+            return
         else:
             ## Запросить новый пароль
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
