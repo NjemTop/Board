@@ -617,7 +617,7 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('./logs/report_send_SB.log', 'rb') as f:
+            with open('/app/logs/report_send_SB.log', 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
@@ -642,7 +642,7 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки GP:", e)
-            with open('./logs/report_send_GP.log', 'rb') as f:
+            with open('/app/logs/report_send_GP.log', 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
             button_choise_yes_GP = types.InlineKeyboardMarkup()
