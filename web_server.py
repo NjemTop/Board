@@ -200,12 +200,12 @@ def get_app():
                                     alert_chat_id = hf.find('chat_id').text
                                     break  # Выходим из цикла, т.к. нужный элемент уже найден
                         except AttributeError as e:
-                            print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {new_assignee_name}.")
+                            print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя: {new_assignee_name}.")
                             error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, e)
                         # Если alert_chat_id не был найден, выводим ошибку
                         if alert_chat_id is None:
-                            print(f"Не удалось найти chat_id для пользователя {new_assignee_name}.")
-                            error_logger.error("Не удалось найти 'chat id' для пользователя %s", new_assignee_name)
+                            print(f"Не удалось найти chat_id для пользователя: {new_assignee_name}.")
+                            error_logger.error("Не удалось найти 'chat id' для пользователя: %s", new_assignee_name)
                         else:
                             # Отправляем сообщение в телеграм-бот
                             send_telegram_message(alert_chat_id, new_assignee_name_message)
