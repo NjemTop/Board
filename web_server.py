@@ -163,7 +163,7 @@ def get_app():
                         else:
                             # Отправляем сообщение в телеграм-бот
                             send_telegram_message(alert_chat_id, ticket_message)
-                        info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {assignee_name} Ссылка: {agent_ticket_url}')
+                        info_logger.info('Отправлена следующая информация в группу: %s', 'Новое сообщение в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {assignee_name} Ссылка: {agent_ticket_url}')
                         
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 200
@@ -209,7 +209,7 @@ def get_app():
                         else:
                             # Отправляем сообщение в телеграм-бот
                             send_telegram_message(alert_chat_id, new_assignee_name_message)
-                        info_logger.info('Отправлена следующая информация в группу: %s', f'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {new_assignee_name_message} Ссылка: {agent_ticket_url}')
+                        info_logger.info('Отправлена следующая информация в в чат пользователю: %s', '{new_assignee_name} = Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {new_assignee_name_message} Ссылка: {agent_ticket_url}')
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 200
