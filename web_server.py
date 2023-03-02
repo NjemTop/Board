@@ -126,41 +126,51 @@ def get_app():
                 json_message_type = json_data.get("update", {}).get("message_type")
                 # если ответ был дан со стороны клиента
                 if json_message_type == "Client Reply":
-                    # находим значения для ключей
-                    ticket_id = json_data.get("ticket_id")
-                    subject = json_data.get("subject")
-                    priority_name = json_data.get("priority_name")
-                    assignee_name = json_data.get("assignee_name")
-                    client_name = json_data['client_details']['name']
-                    agent_ticket_url = json_data.get("agent_ticket_url")
-                    print('**'*60)
-                    # Формируем сообщение в текст отправки
-                    ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
-                    # Разбор XML-файла и получение корневого элемента
-                    tree = ET.parse('data.xml')
-                    root = tree.getroot()
-                    # Находим все элементы header_footer внутри элемента user
-                    header_footer_elements = root.findall('.//user/header_footer')
-                    # Задаем начальное значение alert_chat_id
-                    alert_chat_id = None
-                    # Проходим циклом по всем найденным элементам header_footer
-                    for hf in header_footer_elements:
-                        # Сравниваем значение элемента name с assignee_name
-                        if hf.find('name').text == assignee_name:
-                            # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
-                            alert_chat_id = hf.find('chat_id').text
-                            break  # Выходим из цикла, т.к. нужный элемент уже найден
+                    try:
+                        # находим значения для ключей
+                        ticket_id = json_data.get("ticket_id")
+                        subject = json_data.get("subject")
+                        priority_name = json_data.get("priority_name")
+                        assignee_name = json_data.get("assignee_name")
+                        client_name = json_data['client_details']['name']
+                        agent_ticket_url = json_data.get("agent_ticket_url")
+                        print('**'*60)
+                        # Формируем сообщение в текст отправки
+                        ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+                        # Разбор XML-файла и получение корневого элемента
+                        tree = ET.parse('data.xml')
+                        root = tree.getroot()
+                        # Находим все элементы header_footer внутри элемента user
+                        header_footer_elements = root.findall('.//user/header_footer')
+                        # Задаем начальное значение alert_chat_id
+                        alert_chat_id = None
+                        try:
+                            # Проходим циклом по всем найденным элементам header_footer
+                            for hf in header_footer_elements:
+                                # Сравниваем значение элемента name с assignee_name
+                                if hf.find('name').text == assignee_name:
+                                    # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
+                                    alert_chat_id = hf.find('chat_id').text
+                                    break  # Выходим из цикла, т.к. нужный элемент уже найден
+                        except AttributeError as e:
+                            print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
+                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, e)
 
-                    # Если alert_chat_id не был найден, выводим ошибку
-                    if alert_chat_id is None:
-                        print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
-                        error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
-                    else:
-                        # Отправляем сообщение в телеграм-бот
-                        send_telegram_message(alert_chat_id, ticket_message)
-                    info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {assignee_name} Ссылка: {agent_ticket_url}')
-                    # Отправляем ответ о том, что всё принято и всё хорошо
-                    return "OK", 200
+                        # Если alert_chat_id не был найден, выводим ошибку
+                        if alert_chat_id is None:
+                            print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
+                            error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
+                        else:
+                            # Отправляем сообщение в телеграм-бот
+                            send_telegram_message(alert_chat_id, ticket_message)
+                        info_logger.info('Отправлена следующая информация в группу: %s', f'Новое сообщение в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {assignee_name} Ссылка: {agent_ticket_url}')
+                        
+                        # Отправляем ответ о том, что всё принято и всё хорошо
+                        return "OK", 200
+                    
+                    except Exception as e:
+                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", e)
+                
                 # если было изменение назначенного на тикет
                 elif json_data.get("update", {}).get("assignee_change") is not None:
                     try:
@@ -190,18 +200,20 @@ def get_app():
                                     alert_chat_id = hf.find('chat_id').text
                                     break  # Выходим из цикла, т.к. нужный элемент уже найден
                         except AttributeError as e:
-                            print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {new_assignee_name_message}.")
-                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name_message, e)
+                            print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {new_assignee_name}.")
+                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, e)
                         # Если alert_chat_id не был найден, выводим ошибку
                         if alert_chat_id is None:
-                            print(f"Не удалось найти chat_id для пользователя {new_assignee_name_message}.")
-                            error_logger.error("Не удалось найти 'chat id' для пользователя %s", new_assignee_name_message)
+                            print(f"Не удалось найти chat_id для пользователя {new_assignee_name}.")
+                            error_logger.error("Не удалось найти 'chat id' для пользователя %s", new_assignee_name)
                         else:
                             # Отправляем сообщение в телеграм-бот
                             send_telegram_message(alert_chat_id, new_assignee_name_message)
                         info_logger.info('Отправлена следующая информация в группу: %s', f'Сотрудник: {who_change} изменил назначенного в тикете: {ticket_id} Тема: {subject} Приоритет: {priority_name} Имя клиента: {client_name} Назначен: {new_assignee_name_message} Ссылка: {agent_ticket_url}')
+
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 200
+                    
                     except Exception as e:
                         error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", e)
                 else:
