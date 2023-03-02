@@ -160,7 +160,7 @@ def get_app():
                             else:
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, ticket_message)
-                                info_logger.info('В группе направлена информация о созданном тикете: %s', ticket_id)
+                                info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
                         except AttributeError as e:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
                             error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, e)
@@ -207,7 +207,7 @@ def get_app():
                             else:
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, new_assignee_name_message)
-                                info_logger.info('Пользователю отправлена информация об изменении отвественного: %s, номер тикета: %s', new_assignee_name, ticket_id)
+                                info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
                         except AttributeError as e:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя: {new_assignee_name}.")
                             error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, e)
