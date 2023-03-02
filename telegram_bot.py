@@ -153,7 +153,7 @@ def send_verification_code(email_access):
                             <h2>Здравствуйте!</h2>
                             <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
                             <ul>
-                                <li>Пароль: <a href="#" title="{access_password}">{access_password}</a></li>
+                                <li style="user-select: all;">Пароль: {access_password}</li
                             </ul>
                             <p>Пожалуйста, введите его в окне бота и не сообщайте его никому.</p>
                             <p>С уважением,<br>Администратор бота</p>
