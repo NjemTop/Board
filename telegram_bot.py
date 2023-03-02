@@ -611,13 +611,17 @@ def inline_button(call):
             bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
             setup_script = Path('Automatic_email_BS.ps1')
             try:
-                result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE).stdout.decode('utf-8')
+                result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-                info_logger.info("Запуск скрипта по отправке рассылки BS: %s, пользователем: %s", result_SB, name_who_run_script)
+                info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s", name_who_run_script)
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('/app/logs/report_send_SB.log', 'rb') as f:
+            log_file_path = '/app/logs/report_send_SB.log'
+            if not os.path.isfile(log_file_path):
+                with open(log_file_path, 'w', encoding='utf-8-sig') as f:
+                    f.write('')  # Создаем пустой файл, если его не существует
+            with open(log_file_path, 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
@@ -634,15 +638,19 @@ def inline_button(call):
             return
         else:
             bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-            setup_script = Path('Automatic_email_GP(OLD_TEXT).ps1')
+            setup_script = Path('Automatic_email_GP.ps1')
             try:
-                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE).stdout.decode('utf-8')
+                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-                info_logger.info("Запуск скрипта по отправке рассылки GP: %s, пользователем: %s", result_GP, name_who_run_script)
+                info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки GP:", e)
-            with open('/app/logs/report_send_GP.log', 'rb') as f:
+            log_file_path = '/app/logs/report_send_GP.log'
+            if not os.path.isfile(log_file_path):
+                with open(log_file_path, 'w', encoding='utf-8-sig') as f:
+                    f.write('')  # Создаем пустой файл, если его не существует
+            with open(log_file_path, 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
             button_choise_yes_GP = types.InlineKeyboardMarkup()
