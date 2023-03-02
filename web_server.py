@@ -77,7 +77,7 @@ def get_app():
                 # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
                 alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
                 send_telegram_message(alert_chat_id, ticket_message)
-                info_logger.info('Отправлена следующая информация в группу: %s', 'Новый тикет: {ticket_id}Тема: {subject}Приоритет: {priority_name}Ссылка: {agent_ticket_url}')
+                info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
             else:
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
