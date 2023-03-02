@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
 # Создание объекта логгера для ошибок и критических событий
-error_logger = logging.getLogger(__name__)
+error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
 error_handler = logging.FileHandler('./logs/web-errors.log')
 error_handler.setLevel(logging.ERROR)
@@ -203,7 +203,7 @@ def get_app():
                             # Если alert_chat_id не был найден, выводим ошибку
                             if alert_chat_id is None:
                                 print(f"Не удалось найти chat_id для пользователя: {new_assignee_name}.")
-                                error_logger.error("Не удалось найти 'chat id' для пользователя: %s", new_assignee_name)
+                                error_logger.error("Не удалось найти 'chat id' для пользователя: %s, номер тикета: %s", new_assignee_name, ticket_id)
                             else:
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, new_assignee_name_message)

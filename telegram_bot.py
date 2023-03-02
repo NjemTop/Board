@@ -22,7 +22,7 @@ from email.header import Header
 from writexml import create_xml
 
 # создаем логгер
-error_logger = logging.getLogger(__name__)
+error_logger = logging.getLogger('error_logger')
 error_logger.setLevel(logging.ERROR)
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
 error_handler = logging.FileHandler('./logs/bot-error.log')
