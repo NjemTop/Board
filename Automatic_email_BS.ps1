@@ -1,4 +1,4 @@
-param($version_SB, $support_response_id)
+﻿param($version_SB, $support_response_id)
 
 ### ТАБЛИЦА ДЛЯ ОТЧЕТА ОТПРАВКИ РАССЫЛКИ КЛИЕНТАМ
 $TABLE_REPORT = New-Object system.Collections.ArrayList
@@ -17,8 +17,8 @@ $CSS_STYLE = @"
         background-color: #BEBEBE;
     },
     .colortext {
-     color: red; 
-   }           
+     color: red;
+   }
     </style>
 "@
 
@@ -43,6 +43,9 @@ $HEADERS.Add("Authorization", "Basic $AuthorizationInfo")
 ### НОМЕР ВЕРСИИ !!!!!!!!!!!
 $NUMBER_VERSION = $version_SB
 
+### ЗАДАДИМ ПУТЬ К HTML ФАЙЛУ РАССЫЛКИ
+$templatePath = "$PSScriptRoot\HTML\testBM31.html"
+
 ### ТЕМА ТИКЕТА
 $TICKET_SUBJECT = "Обновление BoardMaps $NUMBER_VERSION"
 
@@ -64,59 +67,8 @@ $CLIENT_POST_PASS = ConvertTo-SecureString -String "X5k-WFw-7bn-Aq6" -AsPlainTex
 $CLIENT_POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “support@boardmaps.ru”, $CLIENT_POST_PASS
 
 ### ФОРМИРУЕМ HTML ТЕКСТ ДЛЯ СОЗДАНИЯ ТИКЕТА
-$HTML_BODY = @"
-<body style="margin: 0; padding: 0; ">
-    <font style="color: #2f2f2f; font-family: Arial, sans-serif; font-size: 14px; line-height: 16px;" align="justify">
-        <table border="0" align="left" width="100%" height="auto" cellpadding="0" cellspacing ="0" background-size= "contain" background-position="left">
-        <tr>
-        <td>
-            <table style="border-collapse:collapse;" border="0" width="95%" cellpadding="0" cellspacing ="0" align="center">
-                <tr>
-                    <td>
-                        <img src="https://i.ibb.co/d09T7vw/logo.png" width="115px" height="70px" align="left" style="display:block;" alt="Logo">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        Здравствуйте!
-                        <p>Сообщаем Вам о выходе новой версии серверной части приложения - <b>$NUMBER_VERSION</b>, в которую внесены функциональные улучшения.</p>
-                        <p><b>Обращаем Ваше внимание</b>, что перед обновлением серверной части до $NUMBER_VERSION, необходимо обязательное обновление приложения BoardMaps для iPad из AppStore до актуальной версии на всех планшетах.</p>
-                        <p>Для скачивания документации и дистрибутива, Вы можете воспользоваться кнопкой ниже:</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="https://cloud.boardmaps.ru/" target="blank"><img src="https://boardmaps.happyfox.com/get_hdp_inline_attachment/13933/" width="70px" height="35px" align="left" style="display:block;" alt="Скачать дистрибутив" ></a></p>
-                    </td>
-                </tr>
+$HTML_BODY = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
 
-            </table>
-            <table style="border-collapse:collapse;" border="0" width="95%" cellpadding="0" cellspacing ="0" align="center">
-                <tr>
-                    <td colspan="3">
-                        <p>Для получения специалистами технической поддержки BoardMaps обратной связи, нажмите, пожалуйста, на одну из кнопок ниже.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td width="15%" height="30px">
-                        <a href="mailto:support@boardmaps.ru?cc=КОПИИ_ПОЧТЫ&subject=Re:%20Обновление%20BoardMaps%20$NUMBER_VERSION%20#BU0000НОМЕР_ТИКЕТА&body=Добрый%20день!%20Обновление%20установлено"><img src="https://boardmaps.happyfox.com/get_hdp_inline_attachment/13931/" width="140px" height="45px" style="display:block;" alt="" ></a>
-                    </td>
-                    <td width="15%" height="30px">
-                        <a href="mailto:support@boardmaps.ru?cc=КОПИИ_ПОЧТЫ&subject=Re:%20Обновление%20BoardMaps%20$NUMBER_VERSION%20#BU0000НОМЕР_ТИКЕТА&body=Пожалуйста,%20оставьте%20ниже%20Ваш%20комментарий%20или%20задайте%20вопрос%20по%20обновлению:%20"><img src="https://boardmaps.happyfox.com/get_hdp_inline_attachment/13932/"  width="140px" height="45px" style="display:block;" alt=""></a>
-                    <td width="70%"></td>
-                </tr>   
-                <tr>
-                    <td colspan="3">
-                        <p font style="color: #a8a6a6"><br>С уважением,<br>Служба технической поддержки BoardMaps<br></p>
-                    </td>
-                </tr>  
-            </table>
-        </td>
-        </tr>
-        </table>
-    </font>
-</body>
-"@
 ### ЗАПРОСИМ ВЕСЬ СПИСОК ГРУПП ИЗ HAPPYFOX
 $GET_JSON_RESPONSE_FULL_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_groups/" -Headers $HEADERS -ContentType "application/json"
 
@@ -185,19 +137,19 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                 $BODY_CREATE = @{
 
                     name = "$MAIN_CONTACT";
-                    
+
                     email = "$MAIN_EMAIL";
 
                     cc = "$COPY_EMAIL";
-                    
+
                     category = 6;
 
                     priority = "4";
-                    
+
                     subject = "$TICKET_SUBJECT";
-                    
+
                     html = "$HTML_BODY"
-                    
+
                     }
                 ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
                 $CREATE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_CREATE | ConvertTo-Json -Depth 5))
@@ -206,208 +158,24 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                 Write-Host -ForegroundColor Yellow -Object "CREATE TICKET $($GET_JSON_RESPONSE_GROUP.name)"
 
                 ### ФОРМИРУЕМ HTML ТЕКСТ ДЛЯ ОТПРАВКИ ОТВЕТА РАССЫЛКИ КЛИЕНТУ
-                $HTML_BODY_REPLY = @"
-                <style type="text/css">
-html, body {
-margin: 0 !important;
-padding: 0 !important;
-height: 100% !important;
-width: 100% !important;
-}
-* {
--ms-text-size-adjust: 100%;
--webkit-text-size-adjust: 100%;
-}
-.ExternalClass {
-width: 100%;
-}
-div[style*="margin: 16px 0"] {
-margin: 0 !important;
-}
-/* Вот эта штука должна не давать аутлуку делать доп. пробелы в таблицах */
-table, td {
-mso-table-lspace: 0pt !important;
-mso-table-rspace: 0pt !important;
-/* mso-line-height-rule: exactly; ВЕРНУТЬ ЕСЛИ ЧЁ*/
-}
-table {
-border-spacing: 0 !important;
-border-collapse: collapse !important;
-table-layout: fixed !important;
-margin: 0 auto !important;
-}
-table table table {
-table-layout: auto;
-}
-img {
--ms-interpolation-mode: bicubic;
-}
-.yshortcuts a {
-border-bottom: none !important;
-}
-a[x-apple-data-detectors] {
-color: inherit !important;
-}
-</style>
-
-<style type="text/css">
-.button-td, .button-a {
-/* transition: all 100ms ease-in; Это переход был
-mso-ansi-font-size:13px;
-mso-ansi-font-weight:bold;
-mso-ascii-font-family: sans-serif;
-mso-line-height-alt:50px;
-mso-line-height-rule: exactly; */
-}
-/*.button-td:hover, .button-a:hover {
-background: #555555 !important;
-border-color: #555555 !important;
-} */
-/* Попробуем с этой штукой...  */
-.center-on-narrow {
-text-align: center !important;
-display: block !important;
-margin-left: auto !important;
-margin-right: auto !important;
-float: none !important;
-}
-table.center-on-narrow {
-display: inline-block !important;
-}
-</style>
-</head>
-<body width="100%" height="100%" bgcolor="#e0e0e0" style="margin: 0;" yahoo="yahoo">
-<table cellpadding="0" cellspacing="0" border="0" height="100%" width="100%" bgcolor="#e0e0e0" style="border-collapse:collapse;">
-<tr>
-<td><center style="width: 100%;">
-
-<div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family: sans-serif;"> Обновление BoardMaps </div>
-
-
-<div style="max-width: 600px;"> 
-  <!--[if (gte mso 9)|(IE)]>
-    <table cellspacing="0" cellpadding="0" border="0" width="600" align="center">
-    <tr>
-    <td>
-    <![endif]--> 
-  
-  <!-- Header, первая картинка Начало -->
-  <table cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px;">
-    <tr style="padding: 0px;">
-      <!--[if mso]>
-        <td style="padding: 0px;" class="full-width-image" align="center"  ><img src="cid:bm_header_600x200.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-      <![endif]-->
-      <![if !mso]>
-        <td style="padding: 0px;" class="full-width-image" align="center"  ><img src="https://boardmaps.ru/bm_header_600x200.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-      <![endif]>
-    </tr>
-       <tr style="padding: 0px;">
-    <!--[if mso]>
-      <td style="padding: 0px; display: block;" class="full-width-image" align="center" ><img src="cid:bm_updateserver_600x100.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-    <![endif]-->
-    <![if !mso]>
-      <td style="padding: 0px; display: block;" class="full-width-image" align="center" ><img src="https://boardmaps.ru/bm_updateserver_600x100.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-    <![endif]>
-    </tr>
-      
-  </table>
-  <!-- Header конец --> 
-  
-  <!-- Body -->
-  <table cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" width="100%" style="max-width: 600px;">
-    
-    <!-- Вторая картинка (Была)-->
-    
-    <!-- Начало текста -->
-    <tr>
-      <td><table cellspacing="0" cellpadding="0" border="0" width="100%">
-          <tr>
-            <td style="padding: 40px; font-family: sans-serif; font-size: 15px; mso-height-rule: exactly; line-height: 20px; color: #555555;"> 
-              <p><b>Здравствуйте!</b>&nbsp;</p>
-              <p>Сообщаем о выходе новой версии серверной части приложения - <b>$NUMBER_VERSION</b>, в которую внесены функциональные улучшения:&nbsp;</p>
-                <p> ⁃ Добавлена возможность выбора способа трансляции материалов: через сервер PSPDFKit или встроенное решение. <br/>
-                     ⁃ Повышена стабильность сервиса работы с фоновыми задачами. <br/>
-                     <b>⁃ Реализована отправка Push-уведомлений на устройства Apple без необходимости ежегодной загрузки сертификатов.</b> <br/>
-                     ⁃ Выполнена поддержка отправки Push-уведомлений на iPad и iPhone приложение BoardMaps. <br/>
-                     ⁃ Множественные улучшения интерфейса при использовании браузера на мобильных устройствах. <br/>
-                     ⁃ Обновление встроенных библиотек для защиты от уязвимостей. <br/>
-                     ⁃ Прочие исправления. </p>
-              <p><b>Обращаем внимание</b>, что перед обновлением серверной части до $NUMBER_VERSION, необходимо обязательное обновление приложения BoardMaps  из AppStore до актуальной версии на всех планшетах.&nbsp;</p>
-              <p>Ссылка для скачивания дистрибутива и документации об изменениях в новой версии:&nbsp;</p>
-                <!-- "Кнопка" загрузки-->
-                <table cellspacing="0" cellpadding="0" border="0" align="center" style="margin: auto;">
-                <tr>
-                  <td style="border-radius: 3px; background: #d6e7fe; text-align: center;" class="button-td"><a href="https://cloud.boardmaps.ru" style="background: #d6e7fe; border: 10px solid #d6e7fe; padding: 0 10px;color: #000000; font-family: sans-serif; font-size: 13px; text-align: center; text-decoration: none; display: block; border-radius: 3px; font-weight: bold;" class="button-a"> 
-                    <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]-->Загрузить дистрибутив и документацию<!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]--> 
-                    </a></td>
-                </tr>
-              </table>
-                 <!-- Продолжение текста -->
-              
-              <p>Для получения специалистами технической поддержки BoardMaps обратной связи, нажмите, пожалуйста, на одну из кнопок ниже:</p>
-                <!-- "Кнопки" действия -->
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: auto; border-collapse: collapse;">
-                <tr>
-                  <td style="padding-right: 11px; border-radius: 5px; background: #43FF76; text-align: center;" class="button-td"><a href="mailto:support@boardmaps.ru?cc=$($COPY_EMAIL)&subject=Re:%20$($CREATE_TICKET_JSON_RESPONSE.subject)%20$($CREATE_TICKET_JSON_RESPONSE.display_id)&body=Добрый%20день!%20Обновление%20установлено" style="background: #43FF76; border: 10px solid #43FF76; padding: 2px; color: #000000; font-family: sans-serif; font-size: 12px; text-align: center; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold;" class="button-a"> 
-                    <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]-->&nbsp;&nbsp;&nbsp;Обновление прошло успешно<!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]--> 
-                    </a></td>
-                    <td >&nbsp;
-                    </td>
-                    <td style="border-radius: 5px; padding-right: 0px; background: #FF4F4F; text-align: center;" class="button-td"><a href="mailto:support@boardmaps.ru?cc=$($COPY_EMAIL)&subject=Re:%20$($CREATE_TICKET_JSON_RESPONSE.subject)%20$($CREATE_TICKET_JSON_RESPONSE.display_id)&body=Пожалуйста,%20оставьте%20ниже%20Ваш%20комментарий%20или%20задайте%20вопрос%20по%20обновлению:%20" style="background: #FF4F4F; border: 10px solid #FF4F4F; padding: 1px;color: #000000; font-family: sans-serif; font-size: 12px; text-align: center; text-decoration: none; display: inline-block; border-radius: 3px; font-weight: bold;" class="button-a"> 
-                    <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]-->При установке возникла проблема <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]--> 
-                    </a></td>
-                </tr>
-              </table>
-              <p>С уважением,<br/>Служба технической поддержки BoardMaps&nbsp;</p>
-              </td>
-          </tr>
-        </table></td>
-    </tr>
-    
-  </table>
-  <!-- Конец Body --> 
-  
-  <!-- Footer-->
-  <table cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 680px;">
-    <tr>
-      <td style="padding: 10px 10px;width: 100%;font-size: 12px; font-family: sans-serif; mso-height-rule: exactly; text-decoration: none; line-height:18px; text-align: center; color: #888888;"> <!-- <a href="https://cloud.boardmaps.ru"> 
-          <webversion style="color:#cccccc; text-decoration:underline; font-weight: bold;">Посмотреть как веб-страницу</webversion></a> -->
-        <br>
-        <br>BoardMaps<br>
-<span class="mobile-link--footer"><a href="https://boardmaps.ru">www.boardmaps.ru</a></span> <br>
-</td>
-    </tr>
-  </table>
-  <!-- Конец футера --> 
-  
-  <!--[if (gte mso 9)|(IE)]>
-    </td>
-    </tr>
-    </table>
-    <![endif]--> 
-</div>
-</center></td>
-</tr>
-</table>
-</body>
-"@
+                $HTML_BODY_REPLY = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
                 ### ПРОБУЕМ ОТПРАВИТЬ ОТВЕТ В ТИКЕТЕ (ОТПРАВЛЯЕМ ПИСЬМО КЛИЕНТУ О НОВОЙ ВЕРСИИ)
                 try {
                     ### ФОРМИРУЕМ ТЕЛО, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
                     $BODY_REPLY = @{
 
                         html = "$HTML_BODY_REPLY";
-                    
+
                         cc = "$COPY_EMAIL";
-                        
+
                         staff = $USER_ID;
-                    
+
                         status = $STATUS_ID;
 
                         due_date = $DUE_DATE_REPLY;
-                    
+
                         update_customer = "false"
-                        
+
                         }
                     ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
                     $BODY_REPLY = [System.Text.Encoding]::UTF8.GetBytes(($BODY_REPLY | ConvertTo-Json -Depth 5))
@@ -416,206 +184,19 @@ display: inline-block !important;
                     Write-Host -ForegroundColor Yellow -Object "REPLY TICKET $($GET_JSON_RESPONSE_GROUP.name)"
                     try {
                         ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
-                        #$HTML = Get-Content -Path "D:\Script\BoardMaps\automatic_email-1\HTML\testBM29.html"
-
-                        $HTML = @"
-                        <style type="text/css">
-html, body {
-	margin: 0 !important;
-	padding: 0 !important;
-	height: 100% !important;
-	width: 100% !important;
-}
-* {
-	-ms-text-size-adjust: 100%;
-	-webkit-text-size-adjust: 100%;
-}
-.ExternalClass {
-	width: 100%;
-}
-div[style*="margin: 16px 0"] {
-	margin: 0 !important;
-}
-	/* Вот эта штука должна не давать аутлуку делать доп. пробелы в таблицах */
-table, td {
-	mso-table-lspace: 0pt !important;
-	mso-table-rspace: 0pt !important;
-	/* mso-line-height-rule: exactly; ВЕРНУТЬ ЕСЛИ ЧЁ*/
-}
-table {
-	border-spacing: 0 !important;
-	border-collapse: collapse !important;
-	table-layout: fixed !important;
-	margin: 0 auto !important;
-}
-table table table {
-	table-layout: auto;
-}
-img {
-	-ms-interpolation-mode: bicubic;
-}
-.yshortcuts a {
-	border-bottom: none !important;
-}
-a[x-apple-data-detectors] {
-	color: inherit !important;
-}
-</style>
-
-<style type="text/css">
-.button-td, .button-a {
-	/* transition: all 100ms ease-in; Это переход был
-	mso-ansi-font-size:13px;
-	mso-ansi-font-weight:bold;
-	mso-ascii-font-family: sans-serif;
-	mso-line-height-alt:50px;
-	mso-line-height-rule: exactly; */
-}
-/*.button-td:hover, .button-a:hover {
-	background: #555555 !important;
-	border-color: #555555 !important;
-} */
-/* Попробуем с этой штукой...  */
-	.center-on-narrow {
-	text-align: center !important;
-	display: block !important;
-	margin-left: auto !important;
-	margin-right: auto !important;
-	float: none !important;
-}
-table.center-on-narrow {
-	display: inline-block !important;
-}
-</style>
-</head>
-<body width="100%" height="100%" bgcolor="#e0e0e0" style="margin: 0;" yahoo="yahoo">
-<table cellpadding="0" cellspacing="0" border="0" height="100%" width="100%" bgcolor="#e0e0e0" style="border-collapse:collapse;">
-  <tr>
-    <td><center style="width: 100%;">
-        
-        <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family: sans-serif;"> Обновление BoardMaps </div>
-       
-        
-        <div style="max-width: 600px;"> 
-          <!--[if (gte mso 9)|(IE)]>
-            <table cellspacing="0" cellpadding="0" border="0" width="600" align="center">
-            <tr>
-            <td>
-            <![endif]--> 
-          
-          <!-- Header, первая картинка Начало -->
-          <table cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px;">
-            <tr style="padding: 0px;">
-              <!--[if mso]>
-                <td style="padding: 0px;" class="full-width-image" align="center"  ><img src="cid:bm_header_600x200.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-              <![endif]-->
-              <![if !mso]>
-                <td style="padding: 0px;" class="full-width-image" align="center"  ><img src="https://boardmaps.ru/bm_header_600x200.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-              <![endif]>
-            </tr>
-			   <tr style="padding: 0px;">
-            <!--[if mso]>
-              <td style="padding: 0px; display: block;" class="full-width-image" align="center" ><img src="cid:bm_updateserver_600x100.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-            <![endif]-->
-            <![if !mso]>
-              <td style="padding: 0px; display: block;" class="full-width-image" align="center" ><img src="https://boardmaps.ru/bm_updateserver_600x100.png" width="600" alt="boardmaps_logo" border="0" style="width: 100%; max-width: 600px; height: auto; display: block;"></td>
-            <![endif]>
-            </tr>
-			  
-          </table>
-          <!-- Header конец --> 
-          
-          <!-- Body -->
-          <table cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" width="100%" style="max-width: 600px;">
-            
-            <!-- Вторая картинка (Была)-->
-            
-            <!-- Начало текста -->
-            <tr>
-              <td><table cellspacing="0" cellpadding="0" border="0" width="100%">
-                  <tr>
-                    <td style="padding: 40px; font-family: sans-serif; font-size: 15px; mso-height-rule: exactly; line-height: 20px; color: #555555;"> 
-					  <p><b>Здравствуйте!</b>&nbsp;</p>
-                      <p>Сообщаем о выходе новой версии серверной части приложения - <b>$NUMBER_VERSION</b>, в которую внесены функциональные улучшения:&nbsp;</p>
-						<p> ⁃ Добавлена возможность выбора способа трансляции материалов: через сервер PSPDFKit или встроенное решение. <br/>
- 							⁃ Повышена стабильность сервиса работы с фоновыми задачами. <br/>
- 							<b>⁃ Реализована отправка Push-уведомлений на устройства Apple без необходимости ежегодной загрузки сертификатов.</b> <br/>
- 							⁃ Выполнена поддержка отправки Push-уведомлений на iPad и iPhone приложение BoardMaps. <br/>
- 							⁃ Множественные улучшения интерфейса при использовании браузера на мобильных устройствах. <br/>
- 							⁃ Обновление встроенных библиотек для защиты от уязвимостей. <br/>
-							 ⁃ Прочие исправления. </p>
-                      <p><b>Обращаем внимание</b>, что перед обновлением серверной части до $NUMBER_VERSION, необходимо обязательное обновление приложения BoardMaps  из AppStore до актуальной версии на всех планшетах.&nbsp;</p>
-                      <p>Ссылка для скачивания дистрибутива и документации об изменениях в новой версии:&nbsp;</p>
-						<!-- "Кнопка" загрузки-->
-						<table cellspacing="0" cellpadding="0" border="0" align="center" style="margin: auto;">
-                        <tr>
-                          <td style="border-radius: 3px; background: #d6e7fe; text-align: center;" class="button-td"><a href="https://cloud.boardmaps.ru" style="background: #d6e7fe; border: 10px solid #d6e7fe; padding: 0 10px;color: #000000; font-family: sans-serif; font-size: 13px; text-align: center; text-decoration: none; display: block; border-radius: 3px; font-weight: bold;" class="button-a"> 
-                            <!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]-->Загрузить дистрибутив и документацию<!--[if mso]>&nbsp;&nbsp;&nbsp;&nbsp;<![endif]--> 
-                            </a></td>
-                        </tr>
-                      </table>
-						 <!-- Продолжение текста -->
-                      
-                      <p>Для получения специалистами технической поддержки BoardMaps обратной связи, нажмите, пожалуйста, на одну из кнопок ниже:</p>
-						<!-- "Кнопки" действия -->
-						<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 1px; border-collapse: collapse;">
-                        <tr>
-                          <td style="border-radius: 5px; background: #43FF76; text-align: center;" class="button-td"><a href="mailto:support@boardmaps.ru?cc=$($COPY_EMAIL)&subject=Re:%20Обновление%20BoardMaps%20$NUMBER_VERSION%20#BU0000$($CREATE_TICKET_JSON_RESPONSE.id)&body=Добрый%20день!%20Обновление%20установлено" style="background: #43FF76; border: 10px solid #43FF76; padding: 0px 16px; color: #000000; font-family: sans-serif; font-size: 13px; text-align: center; text-decoration: none; display: inline-block; font-weight: bold;" class="button-a" border-radius: 3px; > 
-                            <!--[if mso]>&nbsp;<![endif]-->Обновление прошло успешно<!--[if mso]>&nbsp;<![endif]--> 
-                            </a></td>
-							<td>&nbsp;
-						    </td>
-							<td style="border-radius: 5px; background: #FF4F4F; text-align: center;" class="button-td"><a href="mailto:support@boardmaps.ru?cc=$($COPY_EMAIL)&subject=Re:%20Обновление%20BoardMaps%20$NUMBER_VERSION%20#BU0000$($CREATE_TICKET_JSON_RESPONSE.id)&body=Пожалуйста,%20оставьте%20ниже%20Ваш%20комментарий%20или%20задайте%20вопрос%20по%20обновлению:%20" style="background: #FF4F4F; border: 10px solid #FF4F4F; padding: 0px; color: #000000; font-family: sans-serif; font-size: 13px; text-align: center; text-decoration: none; display: inline-block; font-weight: bold;" class="button-a" border-radius: 3px; > 
-                            <!--[if mso]>&nbsp;<![endif]-->При установке возникла проблема <!--[if mso]>&nbsp;<![endif]--> 
-                            </a></td>
-                        </tr>
-                      </table>
-                      <p>С уважением,<br/>Служба технической поддержки BoardMaps&nbsp;</p>
-					  </td>
-                  </tr>
-                </table></td>
-            </tr>
-            
-          </table>
-          <!-- Конец Body --> 
-          
-          <!-- Footer-->
-          <table cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 680px;">
-            <tr>
-              <td style="padding: 10px 10px;width: 100%;font-size: 12px; font-family: sans-serif; mso-height-rule: exactly; text-decoration: none; line-height:18px; text-align: center; color: #888888;"> <!-- <a href="https://cloud.boardmaps.ru"> 
-				  <webversion style="color:#cccccc; text-decoration:underline; font-weight: bold;">Посмотреть как веб-страницу</webversion></a> -->
-                <br>
-                <br>BoardMaps<br>
-<span class="mobile-link--footer"><a href="https://boardmaps.ru">www.boardmaps.ru</a></span> <br>
-</td>
-            </tr>
-          </table>
-          <!-- Конец футера --> 
-          
-          <!--[if (gte mso 9)|(IE)]>
-            </td>
-            </tr>
-            </table>
-            <![endif]--> 
-        </div>
-      </center></td>
-  </tr>
-</table>
-</body>
-"@
-                        
+                        $HTML = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
                         ### ПРОВЕРИМ, ЕСТЬ ЛИ КОПИЯ КОМУ ОТПРАВЛЯТЬ
                         if ($COPY_EMAIL) {
                             ### ПРЕОБРАЗУЕМ СТРОКУ В МАССИВ СТРОК
                             [string[]]$TO_COPY = $COPY_EMAIL.Split(',')
                             ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
-                            Get-ChildItem -Path 'D:\Script\BoardMaps\automatic_email-1\HTML\Images' | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Cc $TO_COPY -Subject $TICKET_SUBJECT -Body ($HTML | Out-String) -BodyAsHtml -Credential $CLIENT_POST_CREDS `
+                            Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Cc $TO_COPY -Subject $TICKET_SUBJECT -Body $HTML_BODY_REPLY -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                             -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure'
                         }
                         ### ЕСЛИ КОПИИ НЕТ, ПРОСТО ОТПРАВИМ РАССЫЛКУ НА ОСНОВНОЙ КОНТАКТ
                         else {
                             ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
-                            Get-ChildItem -Path '.\' | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Subject $TICKET_SUBJECT -Body ($HTML | Out-String) -BodyAsHtml -Credential $CLIENT_POST_CREDS `
+                            Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Subject $TICKET_SUBJECT -Body ($HTML | Out-String) -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                             -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure'
                         }
                         Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена"
@@ -636,7 +217,6 @@ table.center-on-narrow {
                 }
                 ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
                 catch {
-                    
                     $PS = New-Object PSObject
                     $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
                     $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
@@ -646,7 +226,6 @@ table.center-on-narrow {
             }
             ### ЕСЛИ ОШИБКА СОЗДАНИИ ТИКЕТА, ЗАПИШЕМ В ТАБЛИЦУ
             catch {
-                
                 $PS = New-Object PSObject
                 $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка создания тикета"
                 $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
@@ -726,3 +305,4 @@ if ($BODY_REPORT){
 else {
     Write-Host -ForegroundColor Red -Object "Ошибка. Не правильно сформированно тело отправки запроса"
 }
+

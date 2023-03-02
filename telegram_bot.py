@@ -252,7 +252,7 @@ def check_pass_answer(password_message, access_password):
             ## Запросить новый пароль
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
             ## Зарегистрировать следующий шаг обработчика сообщений
-            bot.register_next_step_handler(password_message, check_pass_answer)
+            bot.register_next_step_handler(password_message, check_pass_answer, access_password)
             error_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
     except Exception as e:
         error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
@@ -587,7 +587,7 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('/app/logs/script-output.log', 'rb') as f:
+            with open('/app/logs/report.log', 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
         
