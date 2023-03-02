@@ -640,7 +640,7 @@ def inline_button(call):
             bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
             setup_script = Path('Automatic_email_GP.ps1')
             try:
-                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
+                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
                 info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
             except Exception as e:

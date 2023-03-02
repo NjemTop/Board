@@ -41,7 +41,7 @@ $HEADERS = @{}
 $HEADERS.Add("Authorization", "Basic $AuthorizationInfo")
 
 ### НОМЕР ВЕРСИИ !!!!!!!!!!!
-$NUMBER_VERSION = $version
+$NUMBER_VERSION = $version_GP
 
 ### ТЕМА ТИКЕТА
 $TICKET_SUBJECT = "Обновление BoardMaps $NUMBER_VERSION"
