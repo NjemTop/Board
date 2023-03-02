@@ -618,7 +618,7 @@ def inline_button(call):
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
             # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-            with open('/app/logs/report_send_SB.log', 'rb') as f:
+            with open('/app/logs/report_send_SB.log', 'w') as f:
                 f.write(result_SB)
                 bot.send_document(call.message.chat.id, f)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
@@ -644,7 +644,7 @@ def inline_button(call):
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки GP:", e)
             # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-            with open('/app/logs/report_send_GP.log', 'rb') as f:
+            with open('/app/logs/report_send_GP.log', 'w') as f:
                 f.write(result_GP)
                 bot.send_document(call.message.chat.id, f)
             button_choise_yes_GP = types.InlineKeyboardMarkup()
