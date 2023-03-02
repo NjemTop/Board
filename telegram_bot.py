@@ -25,7 +25,7 @@ from writexml import create_xml
 error_logger = logging.getLogger(__name__)
 error_logger.setLevel(logging.ERROR)
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-error_handler = logging.FileHandler('bot-error.log')
+error_handler = logging.FileHandler('./logs/bot-error.log')
 error_handler.setLevel(logging.ERROR)
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -36,7 +36,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('bot-info.log')
+info_handler = logging.FileHandler('./logs/bot-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
@@ -98,6 +98,9 @@ def check_user_in_file(chat_id):
                 chat_id_elem = header_footer.find('chat_id')
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     return True
+                else:
+                    info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                    return False
     except FileNotFoundError as e:
         error_logger.error("Файл data.xml не найден: %s", e)
         print("Файл data.xml не найден")
@@ -119,7 +122,7 @@ def start_message(message_start):
         main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие', reply_markup=main_menu)
     else:
-        question_email = bot.send_message(message_start.chat.id,"Привет! Пожалуйста, введите адрес рабочей почты.")
+        question_email = bot.send_message(message_start.chat.id,"Привет! Твоей учётной записи нет в базе\nПожалуйста, введите адрес рабочей почты.")
         bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
