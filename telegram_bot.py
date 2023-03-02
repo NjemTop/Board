@@ -109,8 +109,32 @@ def check_user_in_file(chat_id):
         print("Ошибка чтения файла data.xml")
     return False
 
+def get_name_by_chat_id(chat_id):
+    """Функция для получения значения атрибута name из файла data.xml"""
+    try:
+        # Открываем файл и ищем chat_id
+        with open(Path('data.xml'), encoding="utf-8") as user_access:
+            root = ET.parse(user_access).getroot()
+            for user in root.findall('user'):
+                header_footer = user.find('header_footer')
+                chat_id_elem = header_footer.find('chat_id')
+                if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
+                    name_elem = header_footer.find('name')
+                    if name_elem is not None:
+                        return name_elem.text
+                else:
+                    info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                    return None
+    except FileNotFoundError as e:
+        error_logger.error("Файл data.xml не найден: %s", e)
+        print("Файл data.xml не найден")
+    except Exception as e:
+        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+        print("Ошибка чтения файла data.xml")
+    return None
+
 def get_header_footer_id(chat_id):
-    """Функция для получения значения атрибута id узла header_footer из файла data.xml"""
+    """Функция для получения значения атрибута role_id из файла data.xml"""
     try:
         # Открываем файл и ищем chat_id
         with open(Path('data.xml'), encoding="utf-8") as user_access:
@@ -577,20 +601,21 @@ def inline_button(call):
     elif call.data == "button_choise_yes_SB":
         support_response_id = get_header_footer_id(call.message.chat.id)
         if support_response_id is None:
-            bot.edit_message_text('Вы не зарегистрированы в системе. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
+            bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
         else:
             bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
             setup_script = Path('Automatic_email_BS.ps1')
             try:
                 result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE).stdout.decode('utf-8')
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                info_logger.info("Запуск скрипта по отправке рассылки BS: %s, пользователем: %s", result_SB, name_who_run_script)
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('/app/logs/report.log', 'rb') as f:
+            with open('./logs/report_send_SB.log', 'rb') as f:
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
-        
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
@@ -599,18 +624,28 @@ def inline_button(call):
         
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email_GP(OLD_TEXT).ps1')
-        try:
-            subprocess.run(["pwsh", "-File", setup_script,str(version_GP) ],stdout=sys.stdout)
-        except Exception as e:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
-            print("Ошибка запуска скрипта по отправке рассылки GP:", e)
-        button_choise_yes_GP = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
-        bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
+        support_response_id = get_header_footer_id(call.message.chat.id)
+        if support_response_id is None:
+            bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
+            return
+        else:
+            bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+            setup_script = Path('Automatic_email_GP(OLD_TEXT).ps1')
+            try:
+                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE).stdout.decode('utf-8')
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                info_logger.info("Запуск скрипта по отправке рассылки GP: %s, пользователем: %s", result_GP, name_who_run_script)
+            except Exception as e:
+                error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+                print("Ошибка запуска скрипта по отправке рассылки GP:", e)
+            with open('./logs/report_send_GP.log', 'rb') as f:
+                # Отправляем вывод всего результата в телеграмм бота
+                bot.send_document(call.message.chat.id, f)
+            button_choise_yes_GP = types.InlineKeyboardMarkup()
+            back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
+            bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
 
 #### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update
     elif call.data == "button_update_statistics_yes_SB":
