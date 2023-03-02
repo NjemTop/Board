@@ -25,7 +25,7 @@ from writexml import create_xml
 error_logger = logging.getLogger(__name__)
 error_logger.setLevel(logging.ERROR)
 # создаем обработчик, который будет записывать ошибки в файл bot-error.log
-error_handler = logging.FileHandler('./logs/bot-error.log')
+error_handler = logging.FileHandler('bot-error.log')
 error_handler.setLevel(logging.ERROR)
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -36,7 +36,7 @@ error_logger.addHandler(error_handler)
 # Создание объекта логгера для информационных сообщений
 info_logger = logging.getLogger('info_logger')
 info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('./logs/bot-info.log')
+info_handler = logging.FileHandler('bot-info.log')
 info_handler.setLevel(logging.INFO)
 info_handler.setFormatter(formatter)
 info_logger.addHandler(info_handler)
@@ -719,9 +719,11 @@ def send_text_for_stat_update_SB(result_SB_update_statistic):
    
 def start_telegram_bot():
     """"Функция запуска телебота"""
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
+        print("Starting Telegram bot...")  # noqa: T001
         # запуск бота
-        info_logger.info("Телеграмм бот запустился.")
-        bot.polling(none_stop=True, interval=0)
+        bot.infinity_polling()
     except Exception as e:
-        error_logger.error("Ошибка запуска телеграмм бота: %s", e)
+        print("Error in Telegram bot: %s", e)  # noqa: T001
+        error_logger.error("Error in Telegram bot: %s", e)
