@@ -148,17 +148,17 @@ def send_verification_code(email_access):
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
                 email_text = f'''\
-                    <html>
-                        <body style="background-color: lightblue">
-                            <h2>Здравствуйте!</h2>
-                            <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
-                            <ul>
-                                <li>Пароль: {access_password}</li>
-                            </ul>
-                            <p>Пожалуйста, введите его в окне бота и не сообщайте его никому.</p>
-                            <p>С уважением,<br>Администратор бота</p>
-                        </body>
-                    </html>
+                <html>
+                    <body style="background-color: lightblue">
+                        <h2>Здравствуйте!</h2>
+                        <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
+                        <ul>
+                            <li onclick="navigator.clipboard.writeText('{access_password}')">Пароль: {access_password}</li>
+                        </ul>
+                        <p>Пожалуйста, введите его в окне бота и не сообщайте его никому.</p>
+                        <p>С уважением,<br>Администратор бота</p>
+                    </body>
+                </html>
                 '''
                 # Указываем заголовки
                 msg['From'] = EMAIL_FROM
@@ -171,7 +171,6 @@ def send_verification_code(email_access):
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer, access_password)
-                
                 # Ищем полученную почту в системе HappyFox
                 try:
                     # Делаем переменные глобальные, чтобы передать их в функцию check_pass_answer
