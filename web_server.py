@@ -169,6 +169,7 @@ def get_app():
                         new_assignee_name = json_data["update"]["assignee_change"]["new"]
                         ticket_id = json_data.get("ticket_id")
                         subject = json_data.get("subject")
+                        client_name = json_data['client_details']['name']
                         priority_name = json_data.get("priority_name")
                         agent_ticket_url = json_data.get("agent_ticket_url")
                         # Формируем сообщение в текст отправки
