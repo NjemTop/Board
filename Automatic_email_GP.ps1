@@ -233,7 +233,10 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         }
         ### ПРОВЕРИМ КЛИЕНТА НА СИЛЬВЕР ИЛИ БРОНЗУ
         elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Silver") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Bronze")) {
-            Write-Host -ForegroundColor DarkBlue "Клиент статуса Bronze или Silver $($GET_JSON_RESPONSE_GROUP.name)"
+            <# Action when this condition is true #>
+        }
+        elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active ") {
+            <# Action when this condition is true #>
         }
         ### ЕСЛИ НЕТ СТАТУС ПЛАНА, ТО ЗАПИШЕМ В ТАБЛИЦУ
         else {

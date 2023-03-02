@@ -83,7 +83,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
             $COPY_EMAIL = $null
             $MAIN_EMAIL = $null
             $MAIN_CONTACT = $null
-            Write-Host -ForegroundColor DarkMagenta "Bronze OR Silver $($GET_JSON_RESPONSE_GROUP.name)"
             ### ПРОЙДЁМСЯ ПО СПИСКУ КОНТАКТОВ(КЛИЕНТОВ) В ГРУППЕ
             foreach ($ID_CONTACT in $GET_JSON_RESPONSE_GROUP.contacts.id){
                 ### ВЫТЯНИМ ИНФОРМАЦИЮ О КЛИЕНТЕ
@@ -94,7 +93,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     if ($GET_JSON_RESPONSE_CLIENT.custom_fields.value -cmatch "Основной контакт") {
                         $MAIN_CONTACT = $GET_JSON_RESPONSE_CLIENT.name
                         $MAIN_EMAIL = $GET_JSON_RESPONSE_CLIENT.email
-                        Write-Host -ForegroundColor Green -Object "Добавлен в основной контакт: $MAIN_CONTACT"
                     }
                     ### СОСТАВИМ СПИСОК ПО КОПИИ
                     elseif ($GET_JSON_RESPONSE_CLIENT.custom_fields.value -cnotmatch "Основной контакт") {
@@ -102,11 +100,9 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         if ($COPY_EMAIL) {
                             $COPY_EMAIL += ', '
                             $COPY_EMAIL += $COPY_EMAIL_ADD
-                            Write-Host -ForegroundColor Green -Object "+ COPY: $COPY_EMAIL"
                         }
                         else {
                             $COPY_EMAIL += $COPY_EMAIL_ADD
-                            Write-Host -ForegroundColor Green -Object "1st COPY: $COPY_EMAIL"
                         }
                     }
                     ### ЕСЛИ ИНФОРМАЦИЮ О КЛИЕНТЕ НЕ ПОЛУЧИЛОСЬ СОСТАВИТЬ, ЗАПИШЕМ В ТАБЛИЦУ
@@ -155,7 +151,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                 $CREATE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_CREATE | ConvertTo-Json -Depth 5))
                 ### ОТПРАВЛЯЕМ ЗАПРОС НА СОЗДАНИЕ ТИКЕТА
                 $CREATE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/tickets/" -Headers $HEADERS -Body $CREATE_TICKET -ContentType "application/json"
-                Write-Host -ForegroundColor Yellow -Object "CREATE TICKET $($GET_JSON_RESPONSE_GROUP.name)"
 
                 ### ФОРМИРУЕМ HTML ТЕКСТ ДЛЯ ОТПРАВКИ ОТВЕТА РАССЫЛКИ КЛИЕНТУ
                 $HTML_BODY_REPLY = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
@@ -181,7 +176,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     $BODY_REPLY = [System.Text.Encoding]::UTF8.GetBytes(($BODY_REPLY | ConvertTo-Json -Depth 5))
                     ### ОТПРАВЛЯЕМ ОТВЕТ В РАНЕЕ СОЗДАННОМ ТИКЕТЕ (ЧТОБЫ УШЛО СООБЩЕНИЕ КЛИЕНТУ)
                     $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $BODY_REPLY -ContentType "application/json"
-                    Write-Host -ForegroundColor Yellow -Object "REPLY TICKET $($GET_JSON_RESPONSE_GROUP.name)"
                     try {
                         ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
                         $HTML = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
@@ -244,12 +238,11 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                 $GET_JSON_RESPONSE_UNSUBSCRIBE.name
                 ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
                 $PS = $TABLE_REPORT.Add($PS)
-                Write-Host -ForegroundColor Green -Object "DONE CLIENT $($GET_JSON_RESPONSE_GROUP.name)"
             }
         }
         ### ПРОВЕРИМ КЛИЕНТА НА ГОЛД ИЛИ ПЛАТИНУМ
         elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
-            Write-Host -ForegroundColor DarkMagenta "Gold OR Platinum $($GET_JSON_RESPONSE_GROUP.name)"
+            <# Action when this condition is true #>
         }
         elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active ") {
             <# Action when this condition is true #>
@@ -259,6 +252,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
             $PS = New-Object PSObject
             $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка проверки статуса клиента"
             $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
+            $PS = $TABLE_REPORT.Add($PS)
             Write-Host -ForegroundColor Red -Object "Ошибка проверки статуса клиента $($GET_JSON_RESPONSE_GROUP.name)"
         }
     }
