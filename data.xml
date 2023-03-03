@@ -1,0 +1,35 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<data>
+  <user>
+    <access email="oleg.eliseev@boardmaps.ru" />
+    <header_footer id="5">
+      <name>Oleg Eliseev</name>
+      <role id="1">Admin</role>
+      <chat_id>320851571</chat_id>
+    </header_footer>
+  </user>
+  <user>
+    <access email="dmitriy.chaban@boardmaps.ru" />
+    <header_footer id="4">
+      <name>Dmitriy Chaban</name>
+      <role id="1">Admin</role>
+      <chat_id>596907325</chat_id>
+    </header_footer>
+  </user>
+  <user>
+    <access email="gleb.chechelnitskiy@boardmaps.ru" />
+    <header_footer id="6">
+      <name>Gleb Chechelnitskiy</name>
+      <role id="3">Admin</role>
+      <chat_id>73633627</chat_id>
+    </header_footer>
+  </user>
+  <user>
+    <access email="maxim.sorokin@boardmaps.ru" />
+    <header_footer id="8">
+      <name>Maxim Sorokin</name>
+      <role id="1">Admin</role>
+      <chat_id>183044231</chat_id>
+    </header_footer>
+  </user>
+</data>
