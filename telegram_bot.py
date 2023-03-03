@@ -617,7 +617,7 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('/app/logs/script-output.log', 'rb') as f:
+            with open('/app/logs/script-output.log', 'w') as f:
                 f.write(result_SB)
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
