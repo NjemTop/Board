@@ -47,7 +47,7 @@ def get_app():
         user_who = f'User-Agent: {user_agent}'
         info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
         info_logger.info('Его данные подключения: %s', (user_who,))
-        return Response('Этот URL для получение вэбхуков(создание)', mimetype='text/plain')
+        return Response('Этот URL для получения вэбхуков(создание)', mimetype='text/plain')
     
     @app.route('/create_ticket', methods=['POST'])
     def create_ticket():
@@ -59,7 +59,6 @@ def get_app():
             json_start = message.find('{')
             if json_start != -1:
                 json_str = message[json_start:]
-                print('--'*60)
                 # парсим JSON
                 json_data = json.loads(json_str)
                 # находим значения для ключей
@@ -67,7 +66,6 @@ def get_app():
                 subject = json_data.get("subject")
                 priority_name = json_data.get("priority_name")
                 agent_ticket_url = json_data.get("agent_ticket_url")
-                print('**'*60)
                 # отправляем сообщение в телеграм-бот
                 ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
@@ -114,7 +112,6 @@ def get_app():
             json_start = message.find('{')
             if json_start != -1:
                 json_str = message[json_start:]
-                print('--'*60)
                 # парсим JSON
                 try:
                     json_data = json.loads(json_str)
@@ -134,7 +131,6 @@ def get_app():
                         assignee_name = json_data.get("assignee_name")
                         client_name = json_data['client_details']['name']
                         agent_ticket_url = json_data.get("agent_ticket_url")
-                        print('**'*60)
                         # Формируем сообщение в текст отправки
                         ticket_message = (f"Новое сообщение в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
                         # Разбор XML-файла и получение корневого элемента

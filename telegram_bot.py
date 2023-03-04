@@ -73,8 +73,8 @@ headers = {'Content-Type': 'application/json'}
 # Создаем бота
 bot=telebot.TeleBot(TOKEN)
 
-# Создаем объект сообщения
-msg = MIMEMultipart()
+# Создаем объект сообщения отправки пароля на почту при регистрации
+msg_pass = MIMEMultipart()
 
 # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
 def send_telegram_message(alert_chat_id, alert_text):
@@ -82,9 +82,8 @@ def send_telegram_message(alert_chat_id, alert_text):
     url = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
     headers_server = {'Content-type': 'application/json'}
     data = {'chat_id': alert_chat_id, 'text': f'{alert_text}'}
-    response = requests.post(url, headers=headers_server, data=json.dumps(data))
+    response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)
     print(response)
-    print('*--*--*'*60)
 
 # УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
@@ -98,14 +97,13 @@ def check_user_in_file(chat_id):
                 chat_id_elem = header_footer.find('chat_id')
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     return True
-                else:
-                    info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
-                    return False
-    except FileNotFoundError as e:
-        error_logger.error("Файл data.xml не найден: %s", e)
+                info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                return False
+    except FileNotFoundError as error_message:
+        error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
-    except Exception as e:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+    except ET.ParseError as error_message:
+        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return False
 
@@ -125,11 +123,11 @@ def get_name_by_chat_id(chat_id):
                 else:
                     info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
                     return None
-    except FileNotFoundError as e:
-        error_logger.error("Файл data.xml не найден: %s", e)
+    except FileNotFoundError as error_message:
+        error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
-    except Exception as e:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+    except ET.ParseError as error_message:
+        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return None
 
@@ -145,14 +143,13 @@ def get_header_footer_id(chat_id):
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     support_response_id = header_footer.get('id')
                     return support_response_id
-                else:
-                    info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
-                    return None
-    except FileNotFoundError as e:
-        error_logger.error("Файл data.xml не найден: %s", e)
+                info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                return None
+    except FileNotFoundError as error_message:
+        error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
-    except Exception as e:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", e)
+    except ET.ParseError as error_message:
+        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return None
 
@@ -164,19 +161,19 @@ def start_message(message_start):
         # Главное меню
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text='Клиенты', callback_data='button_clients')
-        button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
+        button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDesk (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
         button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
         main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
     else:
-        question_email = bot.send_message(message_start.chat.id,"Привет! Твоей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
+        question_email = bot.send_message(message_start.chat.id,"Привет! Вашей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
         bot.register_next_step_handler(question_email, send_verification_code)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def send_verification_code(email_access):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
-    if '@boardmaps.ru' in email_access.text:
+    if '@boardmaps.ru' in email_access.message.chat.id:
         # Открытие файла и чтение его содержимого
         # Получение информации о почте, пароле и SMTP настройках
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
@@ -190,9 +187,9 @@ def send_verification_code(email_access):
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
                 access_password = generate_random_password()
-                info_logger.debug('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
+                info_logger.debug('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.message.chat.id)
                 ## Данные (кому отправлять, какая тема и письмо)
-                dest_email = email_access.text
+                dest_email = email_access.message.chat.id
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
                 email_text = f'''\
@@ -209,13 +206,13 @@ def send_verification_code(email_access):
                 </html>
                 '''
                 # Указываем заголовки
-                msg['From'] = EMAIL_FROM
-                msg['To'] = dest_email
-                msg['Subject'] = subject
+                msg_pass['From'] = EMAIL_FROM
+                msg_pass['To'] = dest_email
+                msg_pass['Subject'] = subject
                 # Добавляем текст сообщения в формате HTML
-                msg.attach(MIMEText(email_text, 'html', 'utf-8'))
+                msg_pass.attach(MIMEText(email_text, 'html', 'utf-8'))
                 # Отправляем сообщение
-                server.sendmail(EMAIL_FROM, dest_email, msg.as_string())
+                server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
                 info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
@@ -228,7 +225,7 @@ def send_verification_code(email_access):
                     for i in range(len(staff)):
                         res_i = staff[i]
                         find_email = res_i.get('email')
-                        if find_email == email_access.text:
+                        if find_email == email_access.message.chat.id:
                             find_id_HF = res_i.get('id')
                             email_access_id = find_email
                             find_name = res_i.get('name')
@@ -269,7 +266,7 @@ def check_pass_answer(password_message, access_password):
             ## Показываем пользователю главное меню
             main_menu = types.InlineKeyboardMarkup()
             button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
-            button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDes (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
+            button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDesk (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
             button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
             main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
@@ -286,60 +283,6 @@ def check_pass_answer(password_message, access_password):
         error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", e)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", e)
 
-
-#уведомления о новых тикетах
-@bot.message_handler(commands=['alert'])
-def alert_message(message_alert):
-    """Функция отправки алерта"""
-    if check_user_in_file(message_alert.chat.id):
-        if message_alert.chat.id == 1:
-            ######## АЛЕРТЫ ПО НОВЫМ ТИКЕТАМ БЕЗ ОТВЕТА
-            ### ЗАДАЁМ ПАРАМЕТРЫ ЗАПРОСА, ЧТОБЫ СРАЗУ ВЫДАТЬ ИНФУ О НОВОМ СОЗДАННОМ ТИКЕТЕ СО СТАТУСОМ NEW В КАТЕГОРИИ СТАНДАРТНОЙ И БЕЗ НАЗНАЧЕННОГО НА ДАННЫЙ ТИКЕТ
-            query_params = { "status": '1', "category": '1', "unresponded": 'true', "q": 'assignee:"none"'}
-            ### ЗАДАЁМ ENDPOINTS, ПАРОЛИ И ВЫТЯГИВАЕМ ВСЮ ИНФУ ИЗ ЗАПРОСА
-            url_0 = API_ENDPOINT + '/tickets/?size=50&page=1'
-            res_0 = requests.get(url_0,auth=auth, headers=headers, params=query_params).json()
-            ### ВЫТАСКИВАЕМ ИНФУ о количестве отфильтрованных тикетов ИЗ МАССИВА page_info
-            page_info = res_0.get('page_info')
-            last_index = page_info.get('last_index')
-            # делаем проверку по количеству найденных тикетов
-            if last_index == 0:
-                print('No tickets')
-                # если тикеты есть. если 1, то проверяем один. Если больше, то запускается цикл перебора тикетов с выводом инфы для каждого тикета построчно
-            elif last_index >= 1:
-                for page in range(len(str(last_index))):
-                    if page == 0:
-                        url = url_0
-                        res = res_0
-                    # каждый тикет будет на отдельной странице, т.е. № тикета = номеру страницы. перебираем стр по тикетам
-                    else:
-                        url = API_ENDPOINT + ('/tickets/?size=50&page=' + (page + 1))
-                        res = requests.get(url,auth=auth, headers=headers, params=query_params).json()
-                ### ВЫТАСКИВАЕМ всю ИНФУ по тикету ИЗ МАССИВА DATA и из вложенного в него списка
-                data = res.get('data')
-                for i in range (len(data)):
-                    ticket_data = data[i]
-                    # находим тему
-                    ticket_subject = ticket_data.get('subject')
-                    # находим тикет айди
-                    ticket_id=ticket_data.get('id')
-                    ticket_url = str('https://boardmaps.happyfox.com/staff/ticket/' + str(ticket_id))
-                    ticket_link = '[' + str(ticket_id) + '](' + ticket_url + ')'
-                    # находим приоритет из дата - приорити инфо - приорити нейм
-                    priority_info = ticket_data.get('priority')
-                    priority_name = priority_info.get('name')
-                    # ищем название клиента внутри юзер инфо - контакт инфо - нейм
-                    user_info = ticket_data.get('user')
-                    contact_info = user_info.get('contact_groups')
-                    ## ищем имя внутри списка контакт инфо []
-                    for k in range(len(contact_info)):
-                        name_info = contact_info[k].get('name')
-                    # выводим на печать искомые данные
-                    bot.send_message(message_alert.chat.id, 'Новый тикет: ' + ticket_link + '\nКлиент: ' + str(name_info) + '\nПриоритет: ' + str(priority_name) + '\nТема: ' + str(ticket_subject), parse_mode='Markdown')
-        else:
-            bot.send_message(message_alert.chat.id,"Кнопка на ремонте.")
-    else:
-        bot.send_message(message_alert.chat.id,"К сожалению, у Вас отсутствует доступ.")
 # Обработчик вызова /clients
 @bot.message_handler(commands=['clients'])
 def clients_message(message_clients):
@@ -617,13 +560,13 @@ def inline_button(call):
             except Exception as e:
                 error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
                 print("Ошибка запуска скрипта по отправке рассылки BS:", e)
-            with open('/app/logs/script-output.log', 'w') as f:
+            with open('/app/logs/script-output.log', 'w', encoding='utf-8-sig') as f:
                 f.write(result_SB)
                 # Отправляем вывод всего результата в телеграмм бота
                 bot.send_document(call.message.chat.id, f)
 
             # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-            # with open('/logs/report_send_SB.log', 'w') as f:
+            # with open('/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
             #     f.write(result_SB)
 
             # with open('/logs/report_send_SB.log', 'rb') as f:
