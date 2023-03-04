@@ -185,10 +185,10 @@ def send_email(dest_email, email_text):
             server.login(EMAIL_FROM, PASSWORD)
 
             subject = 'Добро пожаловать в наш бот!'
-            
+            msg_pass = None
+            msg_pass = MIMEMultipart()
             # Указываем заголовки
             msg_pass['From'] = EMAIL_FROM
-            msg_pass['To'] = None
             msg_pass['To'] = dest_email
             msg_pass['Subject'] = subject
             # Добавляем текст сообщения в формате HTML
@@ -211,6 +211,7 @@ def send_verification_code(email_access, user_id):
         access_password = generate_random_password()
         info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
         # Формируем текст письма, включая сгенерированный пароль
+        email_text = None
         email_text = f'''\
         <html>
             <body style="background-color: lightblue"; padding: 10px">
