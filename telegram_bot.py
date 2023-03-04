@@ -167,13 +167,15 @@ def start_message(message_start):
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
     else:
         question_email = bot.send_message(message_start.chat.id,"Привет! Вашей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
-        bot.register_next_step_handler(question_email, send_verification_code, message_start)
+        user_id = message_start.chat.id
+        bot.register_next_step_handler(question_email, send_verification_code, user_id)
         
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
-def send_verification_code(email_access, message_start):
+def send_verification_code(email_access, user_id):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
-    if ('@boardmaps.ru' in email_access.text and email_access.chat.id == message_start.chat.id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == message_start.chat.id):
+    if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == user_id):
+
         # Открытие файла и чтение его содержимого
         # Получение информации о почте, пароле и SMTP настройках
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
