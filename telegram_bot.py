@@ -73,9 +73,6 @@ headers = {'Content-Type': 'application/json'}
 # Создаем бота
 bot=telebot.TeleBot(TOKEN)
 
-# Создаем объект сообщения отправки пароля на почту при регистрации
-msg_pass = MIMEMultipart()
-
 # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
 def send_telegram_message(alert_chat_id, alert_text):
     """Отправляет сообщение в телеграм-бот"""
@@ -186,6 +183,7 @@ def send_email(dest_email, email_text):
 
             subject = 'Добро пожаловать в наш бот!'
             msg_pass = None
+            # Создаем объект сообщения отправки пароля на почту при регистрации
             msg_pass = MIMEMultipart()
             # Указываем заголовки
             msg_pass['From'] = EMAIL_FROM
@@ -195,8 +193,7 @@ def send_email(dest_email, email_text):
             msg_pass.attach(MIMEText(email_text, 'html', 'utf-8'))
             # Отправляем сообщение
             server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
-
-    except Exception as error_message:
+    except smtplib.SMTPConnectError as error_message:
         error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
         print("Произошла ошибка отправки пароля на почту:", error_message)
 
@@ -227,7 +224,7 @@ def send_verification_code(email_access, user_id):
         '''
         # Отправляем сообщение пользователю
         send_email(email_access.text, email_text)
-        info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
+        info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", (email_access.chat.id), (email_access.text))
 
         ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
         password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
@@ -236,7 +233,7 @@ def send_verification_code(email_access, user_id):
         try:
             # Делаем переменные глобальные, чтобы передать их в функцию check_pass_answer
             global find_id_HF, email_access_id, find_name, find_role_id
-            staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers).json()
+            staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers, timeout=30).json()
             for i in range(len(staff)):
                 res_i = staff[i]
                 find_email = res_i.get('email')
@@ -249,10 +246,12 @@ def send_verification_code(email_access, user_id):
                     return find_id_HF, email_access_id, find_name, find_role_id
             info_logger.info("Почты в системе HappyFox - нет: %s", email_access.text)
             print("Почты в системе HappyFox - нет")
-        except Exception as error_message:
-            error_logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", error_message)
-            print("Произошла ошибка при поиске почты в системе HappyFox:", error_message)
-        
+        except requests.exceptions.Timeout as error_message:
+            error_logger.error("Timeout error: %s", error_message)
+            print("Timeout error:", error_message)
+        except requests.exceptions.RequestException as error_message:
+            error_logger.error("Request error: %s", error_message)
+            print("Request error:", error_message)
     else:
         bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
         error_logger.error("Несовпадение chat id: %s сообщением от %s", email_access.chat.id, email_access.message.chat.id)
