@@ -187,7 +187,7 @@ def send_verification_code(email_access):
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
                 access_password = generate_random_password()
-                info_logger.debug('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.message.chat.id)
+                info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.message.chat.id)
                 ## Данные (кому отправлять, какая тема и письмо)
                 dest_email = email_access.message.chat.id
                 subject = 'Добро пожаловать в наш бот!'
