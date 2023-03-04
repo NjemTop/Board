@@ -184,12 +184,14 @@ def get_user_info_happyfox(database_email_access_info):
                 return find_id_HF, email_access_id, find_name, find_role_id
         info_logger.info("Почты в системе HappyFox - нет: %s", database_email_access_info)
         print("Почты в системе HappyFox - нет")
+        return None
     except requests.exceptions.Timeout as error_message:
         error_logger.error("Timeout error: %s", error_message)
         print("Timeout error:", error_message)
     except requests.exceptions.RequestException as error_message:
         error_logger.error("Request error: %s", error_message)
         print("Request error:", error_message)
+        return None
 
 def send_email(dest_email, email_text):
     """Функция отправки сообщения пользователю с паролем"""
@@ -279,7 +281,9 @@ def check_pass_answer(password_message, access_password, email_access):
             find_role_id = None
             find_role = None
             # Запускаем функцию и передаём туда email пользователя
-            get_user_info_happyfox(email_access)
+            user_info = get_user_info_happyfox(email_access)
+            if user_info is not None:
+                find_id_HF, email_access_id, find_name, find_role_id = user_info
             # Создаем XML файл и записываем данные
             create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
 
