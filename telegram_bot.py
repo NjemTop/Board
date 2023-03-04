@@ -215,7 +215,7 @@ def send_verification_code(email_access, user_id):
                 # Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
                 info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
-                dest_email.clear()
+                dest_email = None
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer, access_password)
