@@ -188,13 +188,13 @@ def send_email(dest_email, email_text):
             
             # Указываем заголовки
             msg_pass['From'] = EMAIL_FROM
+            msg_pass['To'] = None
             msg_pass['To'] = dest_email
             msg_pass['Subject'] = subject
             # Добавляем текст сообщения в формате HTML
             msg_pass.attach(MIMEText(email_text, 'html', 'utf-8'))
             # Отправляем сообщение
             server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
-            info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
 
     except Exception as error_message:
         error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
@@ -226,6 +226,7 @@ def send_verification_code(email_access, user_id):
         '''
         # Отправляем сообщение пользователю
         send_email(email_access.text, email_text)
+        info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
 
         ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
         password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
