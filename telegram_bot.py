@@ -187,9 +187,9 @@ def send_verification_code(email_access, message_start):
                 server.login(EMAIL_FROM, PASSWORD)
                 ## Генерируем рандомный пароль для доступа к боту
                 access_password = generate_random_password()
-                info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.message.chat.id)
+                info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
                 ## Данные (кому отправлять, какая тема и письмо)
-                dest_email = email_access.message.chat.id
+                dest_email = email_access.text
                 subject = 'Добро пожаловать в наш бот!'
                 # Формируем текст письма, включая сгенерированный пароль
                 email_text = f'''\
@@ -225,7 +225,7 @@ def send_verification_code(email_access, message_start):
                     for i in range(len(staff)):
                         res_i = staff[i]
                         find_email = res_i.get('email')
-                        if find_email == email_access.message.chat.id:
+                        if find_email == email_access.text:
                             find_id_HF = res_i.get('id')
                             email_access_id = find_email
                             find_name = res_i.get('name')
