@@ -203,32 +203,29 @@ def send_email(dest_email, email_text):
 
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def send_verification_code(email_access, user_id):
-    """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
+    """Функция проверки почты на соотвествие и отправления случайного пароля на почту"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == user_id):
         
-        users_emails = [email_access.text]
-
-        for send_email_user_id in users_emails:
-            ## Генерируем рандомный пароль для доступа к боту
-            access_password = generate_random_password()
-            info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
-            # Формируем текст письма, включая сгенерированный пароль
-            email_text = f'''\
-            <html>
-                <body style="background-color: lightblue"; padding: 10px">
-                    <h2>Здравствуйте!</h2>
-                    <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
-                    <ul>
-                        <li><a href="">{access_password}</a></li>
-                    </ul>
-                    <p>Пожалуйста, введите его в окне бота и не сообщайте его никому.</p>
-                    <p>С уважением,<br>Администратор бота</p>
-                </body>
-            </html>
-            '''
-            # Отправляем сообщение пользователю
-            send_email(send_email_user_id, email_text)
+        ## Генерируем рандомный пароль для доступа к боту
+        access_password = generate_random_password()
+        info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
+        # Формируем текст письма, включая сгенерированный пароль
+        email_text = f'''\
+        <html>
+            <body style="background-color: lightblue"; padding: 10px">
+                <h2>Здравствуйте!</h2>
+                <p>Вы успешно зарегистрировались в нашем боте. Ниже приведен временный пароль для входа в систему:</p>
+                <ul>
+                    <li><a href="">{access_password}</a></li>
+                </ul>
+                <p>Пожалуйста, введите его в окне бота и не сообщайте его никому.</p>
+                <p>С уважением,<br>Администратор бота</p>
+            </body>
+        </html>
+        '''
+        # Отправляем сообщение пользователю
+        send_email(email_access.text, email_text)
 
         ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
         password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
