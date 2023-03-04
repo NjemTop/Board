@@ -175,7 +175,6 @@ def send_verification_code(email_access, user_id):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
     if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == user_id):
-
         # Открытие файла и чтение его содержимого
         # Получение информации о почте, пароле и SMTP настройках
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
@@ -216,6 +215,7 @@ def send_verification_code(email_access, user_id):
                 # Отправляем сообщение
                 server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
                 info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", email_access.chat.id, dest_email)
+                dest_email.clear()
                 ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
                 password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
                 bot.register_next_step_handler(password_message, check_pass_answer, access_password)
@@ -234,7 +234,7 @@ def send_verification_code(email_access, user_id):
                             find_role = res_i.get('role') 
                             find_role_id = find_role.get('id')
                             return find_id_HF, email_access_id, find_name, find_role_id
-                    info_logger.info("Почты в системе HappyFox - нет: %s")
+                    info_logger.info("Почты в системе HappyFox - нет: %s", email_access.text)
                     print("Почты в системе HappyFox - нет")
                 except Exception as e:
                     error_logger.error("Произошла ошибка при поиске почты в системе HappyFox: %s", e)
