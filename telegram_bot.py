@@ -166,7 +166,31 @@ def start_message(message_start):
         question_email = bot.send_message(message_start.chat.id,"Привет! Вашей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
         user_id = message_start.chat.id
         bot.register_next_step_handler(question_email, send_verification_code, user_id)
-        
+
+def get_user_info_happyfox(database_email_access_info):
+    """Функция обработки УЗ в HappyFox"""
+    # Ищем полученную почту в системе HappyFox
+    try:
+        staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers, timeout=30).json()
+        for i in range(len(staff)):
+            res_i = staff[i]
+            find_email = res_i.get('email')
+            if find_email == database_email_access_info:
+                find_id_HF = res_i.get('id')
+                email_access_id = find_email
+                find_name = res_i.get('name')
+                find_role = res_i.get('role') 
+                find_role_id = find_role.get('id')
+                return find_id_HF, email_access_id, find_name, find_role_id
+        info_logger.info("Почты в системе HappyFox - нет: %s", database_email_access_info)
+        print("Почты в системе HappyFox - нет")
+    except requests.exceptions.Timeout as error_message:
+        error_logger.error("Timeout error: %s", error_message)
+        print("Timeout error:", error_message)
+    except requests.exceptions.RequestException as error_message:
+        error_logger.error("Request error: %s", error_message)
+        print("Request error:", error_message)
+
 def send_email(dest_email, email_text):
     """Функция отправки сообщения пользователю с паролем"""
     # Открытие файла и чтение его содержимого
@@ -197,13 +221,11 @@ def send_email(dest_email, email_text):
         error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
         print("Произошла ошибка отправки пароля на почту:", error_message)
 
-
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
 def send_verification_code(email_access, user_id):
     """Функция проверки почты на соотвествие и отправления случайного пароля на почту"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
-    if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == user_id):
-        
+    if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id):
         ## Генерируем рандомный пароль для доступа к боту
         access_password = generate_random_password()
         info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
@@ -228,30 +250,8 @@ def send_verification_code(email_access, user_id):
 
         ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
         password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
-        bot.register_next_step_handler(password_message, check_pass_answer, access_password)
-        # Ищем полученную почту в системе HappyFox
-        try:
-            # Делаем переменные глобальные, чтобы передать их в функцию check_pass_answer
-            global find_id_HF, email_access_id, find_name, find_role_id
-            staff = requests.get(API_ENDPOINT + '/staff/', auth=auth, headers=headers, timeout=30).json()
-            for i in range(len(staff)):
-                res_i = staff[i]
-                find_email = res_i.get('email')
-                if find_email == email_access.text:
-                    find_id_HF = res_i.get('id')
-                    email_access_id = find_email
-                    find_name = res_i.get('name')
-                    find_role = res_i.get('role') 
-                    find_role_id = find_role.get('id')
-                    return find_id_HF, email_access_id, find_name, find_role_id
-            info_logger.info("Почты в системе HappyFox - нет: %s", email_access.text)
-            print("Почты в системе HappyFox - нет")
-        except requests.exceptions.Timeout as error_message:
-            error_logger.error("Timeout error: %s", error_message)
-            print("Timeout error:", error_message)
-        except requests.exceptions.RequestException as error_message:
-            error_logger.error("Request error: %s", error_message)
-            print("Request error:", error_message)
+        bot.register_next_step_handler(password_message, check_pass_answer, access_password, email_access.text)
+        
     else:
         bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
         error_logger.error("Несовпадение chat id: %s сообщением от %s", email_access.chat.id, email_access.message.chat.id)
@@ -266,15 +266,23 @@ def generate_random_password(length=12):
     return access_password
 
 ## Проверяем введенный пользователем пароль
-def check_pass_answer(password_message, access_password):
+def check_pass_answer(password_message, access_password, email_access):
     """Функция проверки пароля и записи УЗ в data.xml"""
     try:
         ## Если пароль подходит
         if password_message.text == access_password:
             ## ВРЕМЕННЫЙ АРГУМЕНТ роли
             find_role = 'Admin'
-            ## Создаем XML файл и записываем данные
+            find_id_HF = None
+            email_access_id = None
+            find_name = None
+            find_role_id = None
+            find_role = None
+            # Запускаем функцию и передаём туда email пользователя
+            get_user_info_happyfox(email_access)
+            # Создаем XML файл и записываем данные
             create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
+
             info_logger.info("Сотрудник: %s, прошёл регистрацию в боте", find_name)
             ## Показываем пользователю главное меню
             main_menu = types.InlineKeyboardMarkup()
