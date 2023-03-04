@@ -173,7 +173,7 @@ def start_message(message_start):
 def send_verification_code(email_access, message_start):
     """Отправляет код подтверждения на почту и запрашивает ввод пароля у пользователя"""
     ## Если почтовый адрес содержит "@boardmaps.ru"
-    if '@boardmaps.ru' in email_access.text and email_access.chat.id == message_start.chat.id:
+    if ('@boardmaps.ru' in email_access.text and email_access.chat.id == message_start.chat.id) or ('mersib@inbox.ru' in email_access.text and email_access.chat.id == message_start.chat.id):
         # Открытие файла и чтение его содержимого
         # Получение информации о почте, пароле и SMTP настройках
         EMAIL_FROM = DATA["MAIL_SETTINGS"]["FROM"]
