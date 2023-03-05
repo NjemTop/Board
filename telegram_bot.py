@@ -192,7 +192,6 @@ def get_user_info_happyfox(database_email_access_info):
         error_logger.error("Request error: %s", error_message)
         print("Request error:", error_message)
         return None
-    return None
 
 def send_email(dest_email, email_text):
     """Функция отправки сообщения пользователю с паролем"""
@@ -423,18 +422,17 @@ def inline_button(call):
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_Теле2.ps1'
         try:
-            result_tele2 = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout, check=True)
+            result_tele2 = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout)
             # Записываем в лог информацию о пользователе, сформировавшем отчет
-            xml_data = None
-            with open('data.xml', encoding='utf-8-sig') as file_data:
-                xml_data = file_data.read()
+            with open('data.xml') as f:
+                xml_data = f.read()
                 root = ET.fromstring(xml_data)
                 chat_id = root.find('chat_id').text
                 if str(call.message.chat.id) == chat_id:
                     name = root.find('header_footer/name').text
-                    info_logger.info("Пользователь: %s сформировал отчет.", name)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
+                    info_logger.info(f"Пользователь {name} сформировал отчет.")
+        except subprocess.CalledProcessError as e:
+            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, e)
             bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
         else:
             if platform.system() == 'Windows':
@@ -442,20 +440,28 @@ def inline_button(call):
                 report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx').replace('\\', '/')
             elif platform.system() == 'Linux':
                 report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx')
-            with open(report_path, 'rb') as report_file:
-                bot.send_document(call.message.chat.id, report_file)
+            bot.send_document(call.message.chat.id, open(report_path, 'rb'))
     
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_ПСБ.ps1'
-        result_rez = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout)
+        result_rez = subprocess.run([
+            "pwsh", 
+            "-File", 
+            setup_script,
+          ],
+          stdout=sys.stdout)
         bot.send_document(call.message.chat.id, open('C:/Users/Adena/AppData/Local/Отчёт_клиента_ПСБ.docx', 'rb'))       
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_РЭЦ.ps1'
-        result_rez = subprocess.run(["pwsh", "-File", setup_script,],
+        result_rez = subprocess.run([
+            "pwsh", 
+            "-File", 
+            setup_script,
+          ],
           stdout=sys.stdout)
         bot.send_document(call.message.chat.id, open('C:/Users/Adena/AppData/Local/Отчёт_клиента_РЭЦ.docx', 'rb'))      
     ### УРОВЕНЬ 4 "ПОЧТА РОССИИ" ///////////////////////////////////////// в работе
@@ -572,20 +578,20 @@ def inline_button(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email_BS.ps1')
-        try:
-            result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
-            name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s", name_who_run_script)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
-        # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open('/app/logs/script-output.log', 'w', encoding='utf-8-sig') as file_send:
-            file_send.write(result_SB)
-            # Отправляем вывод всего результата в телеграмм бота
-            bot.send_document(call.message.chat.id, file_send)
+        else:
+            bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+            setup_script = Path('Automatic_email_BS.ps1')
+            try:
+                result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s", name_who_run_script)
+            except Exception as e:
+                error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", e)
+                print("Ошибка запуска скрипта по отправке рассылки BS:", e)
+            with open('/app/logs/script-output.log', 'w', encoding='utf-8-sig') as f:
+                f.write(result_SB)
+                # Отправляем вывод всего результата в телеграмм бота
+                bot.send_document(call.message.chat.id, f)
 
             # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
             # with open('/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
@@ -605,38 +611,37 @@ def inline_button(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email_GP.ps1')
-        try:
-            result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
-            name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
-        # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        # with open('/app/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
-        #     f.write(result_GP)
+        else:
+            bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+            setup_script = Path('Automatic_email_GP.ps1')
+            try:
+                result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=False).stdout.decode('utf-8')
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
+            except Exception as e:
+                error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+                print("Ошибка запуска скрипта по отправке рассылки GP:", e)
+            # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
+            # with open('/app/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
+            #     f.write(result_GP)
 
-        # with open('/app/logs/report_send_SB.log', 'rb') as f:
-        #     bot.send_document(call.message.chat.id, f)
-        button_choise_yes_GP = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
-        bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
+            # with open('/app/logs/report_send_SB.log', 'rb') as f:
+            #     bot.send_document(call.message.chat.id, f)
+            button_choise_yes_GP = types.InlineKeyboardMarkup()
+            back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
+            bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
 
 #### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update
     elif call.data == "button_update_statistics_yes_SB":
         bot.edit_message_text('Отлично! Произвожу расчеты. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
         try:
-            result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout, check=True)
-            name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
+            result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout)
+        except Exception as e:
+            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", e)
+            print("Ошибка запуска скрипта по отправке рассылки GP:", e)
         button_update_statistics_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_update_statistics_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_update_statistics_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
