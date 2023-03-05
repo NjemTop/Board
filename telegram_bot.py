@@ -575,15 +575,16 @@ def inline_button(call):
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email_BS.ps1')
         try:
-            result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
             info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s", name_who_run_script)
+            result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open('/app/logs/script-output.log', 'w', encoding='utf-8-sig') as file_send:
+        with open('/app/logs/script-output.log', 'a+', encoding='utf-8-sig') as file_send:
             file_send.write(result_SB)
+            file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
             bot.send_document(call.message.chat.id, file_send)
 
@@ -608,9 +609,9 @@ def inline_button(call):
         bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email_GP.ps1')
         try:
-            result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
             info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
+            result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
