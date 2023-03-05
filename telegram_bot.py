@@ -308,7 +308,7 @@ def check_pass_answer(password_message, access_password, email_access):
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
             ## Зарегистрировать следующий шаг обработчика сообщений
             bot.register_next_step_handler(password_message, check_pass_answer, access_password)
-            error_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
+            info_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
     except Exception as error_message:
         error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", error_message)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", error_message)
