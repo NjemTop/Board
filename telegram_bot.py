@@ -581,18 +581,19 @@ def inline_button(call):
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
-        # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
+        button_choise_yes_SB = types.InlineKeyboardMarkup()
+        back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
+        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+        button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
+        info_logger.info("Рассылка клиентам BS отправлена")
+        bot.send_message(button_create_update_tickets_SB.from_user.id, text='Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
+       # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
         with open('/app/logs/report_send_SB.log', 'a+', encoding='utf-8-sig') as file_send:
             file_send.write(result_SB)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
-           # bot.send_document(call.message.chat.id, file_send)
-        button_choise_yes_SB_new = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes_SB_new = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes_SB_new.add(back_from_button_choise_yes_SB_new, main_menu, row_width=2)
-        info_logger.info("Рассылка клиентам BS отправлена")
-        bot.edit_message_text(file_send, 'Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB_new)
+            bot.send_document(call.message.chat.id, file_send)
+        # bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB)
         
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
