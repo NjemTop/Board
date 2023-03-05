@@ -577,7 +577,7 @@ def inline_button(call):
         setup_script = Path('Automatic_email_BS.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s", name_who_run_script)
+            info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
             result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
@@ -592,13 +592,13 @@ def inline_button(call):
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
-        info_logger.info("Рассылка клиентам BS отправлена")
+        info_logger.info("Рассылка клиентам BS успешно отправлена.")
         bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
         try:
-            os.remove('/app/logs/report_send_SB.log')
+            os.remove(f'/app/logs/report_send_SB({version_SB}).log')
         except FileNotFoundError as error_message:
-            error_logger.error('Файл "report_send_SB.log" не найден: %s', error_message)
-            print('Файл "report_send_SB.log" не найден: %s', error_message)
+            error_logger.error('Файл не найден: %s', version_SB, error_message)
+            print('Файл не найден: %s', version_SB, error_message)
         except PermissionError as error_message:
             error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
             print('Недостаточно прав для удаления файла: %s', error_message)
