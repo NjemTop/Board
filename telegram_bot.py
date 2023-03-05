@@ -572,8 +572,7 @@ def inline_button(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.send_message(call.message.chat.id, text='Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.')
-        #bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email_BS.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
@@ -587,13 +586,13 @@ def inline_button(call):
             file_send.write(result_SB)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
-            bot.send_document(call.message.chat.id, file_send)
+           # bot.send_document(call.message.chat.id, file_send)
         button_choise_yes_SB_new = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB_new = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes_SB_new.add(back_from_button_choise_yes_SB_new, main_menu, row_width=2)
         info_logger.info("Рассылка клиентам BS отправлена")
-        bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB_new)
+        bot.edit_message_text(file_send, 'Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB_new)
         
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
