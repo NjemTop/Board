@@ -593,7 +593,18 @@ def inline_button(call):
         button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
         info_logger.info("Рассылка клиентам BS отправлена")
         bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
-       # bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB)
+        try:
+            os.remove('/app/logs/report_send_SB.log')
+        except FileNotFoundError as error_message:
+            error_logger.error('Файл "report_send_SB.log" не найден: %s', error_message)
+            print('Файл "report_send_SB.log" не найден: %s', error_message)
+        except PermissionError as error_message:
+            error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
+            print('Недостаточно прав для удаления файла: %s', error_message)
+        except OSError as error_message:
+            error_logger.error('Ошибка при удалении файла: %s', error_message)
+            print('Ошибка при удалении файла: %s', error_message)
+
         
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
@@ -622,6 +633,17 @@ def inline_button(call):
         button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
         info_logger.info("Запрос сервисного окна клиентам GP отправлен")
         bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
+        try:
+            os.remove('/app/logs/report_send_GP.log')
+        except FileNotFoundError as error_message:
+            error_logger.error('Файл "report_send_GP.log" не найден: %s', error_message)
+            print('Файл "report_send_GP.log" не найден: %s', error_message)
+        except PermissionError as error_message:
+            error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
+            print('Недостаточно прав для удаления файла: %s', error_message)
+        except OSError as error_message:
+            error_logger.error('Ошибка при удалении файла: %s', error_message)
+            print('Ошибка при удалении файла: %s', error_message)
 
 #### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update
     elif call.data == "button_update_statistics_yes_SB":
