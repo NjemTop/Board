@@ -582,7 +582,7 @@ def inline_button(call):
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open('/app/logs/report_send_SB.log', 'a+', encoding='utf-8-sig') as file_send:
+        with open(f'/app/logs/report_send_SB({version_SB}).log', 'a+', encoding='utf-8-sig') as file_send:
             file_send.write(result_SB)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота

@@ -176,14 +176,14 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                 ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
                                 Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Cc $TO_COPY -Subject $TICKET_SUBJECT -Body $HTML_BODY_REPLY -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                                 -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
-                                Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия: $TO_COPY`n `n"
+                                Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия: $TO_COPY`n"
                             }
                             ### ЕСЛИ КОПИИ НЕТ, ПРОСТО ОТПРАВИМ РАССЫЛКУ НА ОСНОВНОЙ КОНТАКТ
                             else {
                                 ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
                                 Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Subject $TICKET_SUBJECT -Body ($HTML | Out-String) -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                                 -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
-                                Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия - отсутствует`n `n"
+                                Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия - отсутствует`n"
                             }
                             
                             ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
@@ -290,7 +290,7 @@ $POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “sup
 if ($BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
-        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
         Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
