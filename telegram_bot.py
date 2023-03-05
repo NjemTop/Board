@@ -591,6 +591,7 @@ def inline_button(call):
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
+        info_logger.info("Рассылка клиентам BS отправлена")
         bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_SB)
         
     ## ДЛЯ GP
@@ -603,7 +604,7 @@ def inline_button(call):
         setup_script = Path('Automatic_email_GP.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
+            info_logger.info("Запуск скрипта по запросу сервисного окна клиентам GP, пользователем: %s", name_who_run_script)
             result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
@@ -618,6 +619,7 @@ def inline_button(call):
         back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
+        info_logger.info("Запрос сервисного окна клиентам GP отправлен")
         bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
 
 #### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update

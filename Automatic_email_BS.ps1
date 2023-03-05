@@ -191,7 +191,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         else {
                             ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
                             Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Subject $TICKET_SUBJECT -Body ($HTML | Out-String) -BodyAsHtml -Credential $CLIENT_POST_CREDS `
-                            -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure'
+                            -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
                         }
                         Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена"
                         ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
@@ -289,8 +289,8 @@ $POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “sup
 if ($BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
-        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8);
-        Write-Host -ForegroundColor Green -Object "Рассылка Bronze и Silver клиентам отправлена"
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
         {Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"}
@@ -299,4 +299,3 @@ if ($BODY_REPORT){
 else {
     Write-Host -ForegroundColor Red -Object "Ошибка. Не правильно сформированно тело отправки запроса"
 }
-
