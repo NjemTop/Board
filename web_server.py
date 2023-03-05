@@ -70,8 +70,8 @@ def get_app():
                 ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
                 print(ticket_message)
                 # открываем файл и загружаем данные
-                with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
-                    data = json.load(f)
+                with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+                    data = json.load(file)
                 # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
                 alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
                 send_telegram_message(alert_chat_id, ticket_message)
@@ -80,9 +80,9 @@ def get_app():
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
                 return 'JSON не найден в сообщении.', 400
-        except ValueError as e:
+        except ValueError as error_message:
             print('Не удалось распарсить JSON в запросе.')
-            error_logger.error("Не удалось распарсить JSON в запросе. %s")
+            error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
             return 'Не удалось распарсить JSON в запросе.', 400
         
         return "OK", 200
@@ -115,9 +115,9 @@ def get_app():
                 # парсим JSON
                 try:
                     json_data = json.loads(json_str)
-                except json.decoder.JSONDecodeError:
+                except json.decoder.JSONDecodeError as error_message:
                     print('Не удаётся распарсить JSON в запросе.')
-                    error_logger.error("Не удаётся распарсить JSON в запросе. %s")
+                    error_logger.error("Не удаётся распарсить JSON в запросе. %s", error_message)
                     return 'Не удаётся распарсить JSON в запросе.', 400
                 # находим значения кто ответил
                 json_message_type = json_data.get("update", {}).get("message_type")
@@ -157,15 +157,19 @@ def get_app():
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, ticket_message)
                                 info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
-                        except AttributeError as e:
+                        except AttributeError as error_message:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
-                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, e)
+                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 200
                     
-                    except Exception as e:
-                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", e)
+                    except ValueError as error_message:
+                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                    except FileNotFoundError as error_message:
+                        error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                    except AttributeError as error_message:
+                        error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
                 
                 # если было изменение назначенного на тикет
                 elif json_data.get("update", {}).get("assignee_change") is not None:
@@ -204,15 +208,19 @@ def get_app():
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, new_assignee_name_message)
                                 info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
-                        except AttributeError as e:
+                        except AttributeError as error_message:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя: {new_assignee_name}.")
-                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, e)
+                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 200
                     
-                    except Exception as e:
-                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", e)
+                    except ValueError as error_message:
+                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                    except FileNotFoundError as error_message:
+                        error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                    except AttributeError as error_message:
+                        error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
                 else:
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
                     return "OK", 200
@@ -220,9 +228,9 @@ def get_app():
                 print('JSON не найден в сообщении.')
                 error_logger.error("JSON не найден в сообщении. %s")
                 return 'JSON не найден в сообщении.', 400
-        except ValueError as e:
+        except ValueError as error_message:
             print('Не удалось распарсить JSON в запросе.')
-            error_logger.error("Не удалось распарсить JSON в запросе. %s", e)
+            error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
             return 'Не удалось распарсить JSON в запросе.', 400
 
     return app
@@ -234,8 +242,8 @@ def run_server():
         app = get_app()
         info_logger.info('Сервер запущен на порту %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)
-    except Exception as e:
-        error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", e)
-        raise e
+    except Exception as error_message:
+        error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", error_message)
+        raise error_message
 
 run_server()

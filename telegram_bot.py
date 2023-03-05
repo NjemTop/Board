@@ -1,5 +1,6 @@
 import encodings
 import telebot
+import telegram
 from telebot import types
 import requests
 import pandas as pd
@@ -785,8 +786,13 @@ def start_telegram_bot():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
         print("Starting Telegram bot...")  # noqa: T001
+        info_logger.info("Starting Telegram bot...")
         # запуск бота
         bot.infinity_polling()
-    except Exception as e:
-        print("Error in Telegram bot: %s", e)  # noqa: T001
-        error_logger.error("Error in Telegram bot: %s", e)
+    except requests.exceptions.ConnectionError as error_message:
+        print(f"Error in Telegram bot: {error_message}")  # noqa: T001
+        error_logger.error("Error in Telegram bot: %s", error_message)
+    except telegram.error.TelegramError as error_message:
+        print(f"Error in Telegram bot: {error_message}")  # noqa: T001
+        error_logger.error("Error in Telegram bot: %s", error_message)
+
