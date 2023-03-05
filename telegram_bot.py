@@ -422,7 +422,7 @@ def inline_button(call):
     ### УРОВЕНЬ 4 "ТЕЛЕ2" 
     elif call.data == "button_tele2":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        setup_script = 'Скрипт_формирования_отчёта_клиента_Теле2.ps1'
+        setup_script = 'Report_tele2.ps1'
         try:
             result_tele2 = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
             # Записываем в лог информацию о пользователе, сформировавшем отчет
@@ -440,9 +440,9 @@ def inline_button(call):
         else:
             if platform.system() == 'Windows':
                 # формируем путь к файлу отчета в директории AppData\Local
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx').replace('\\', '/')
+                report_path = os.path.join(local_appdata_path, 'Report_tele2.docx').replace('\\', '/')
             elif platform.system() == 'Linux':
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_Теле2.docx')
+                report_path = os.path.join(local_appdata_path, 'Report_tele2.docx')
             with open(report_path, 'rb') as report_file:
                 bot.send_document(call.message.chat.id, report_file)
     
@@ -614,7 +614,7 @@ def inline_button(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+        bot.edit_message_text('Отлично! Начат процесс создания тикетов с запросом сервисного окна. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email_BS.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
@@ -634,7 +634,7 @@ def inline_button(call):
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
         info_logger.info("Рассылка клиентам BS успешно отправлена.")
-        bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
+        bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты с запросом сервисного окна созданы. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
         try:
             os.remove(f'/app/logs/report_send_SB({version_SB}).log')
         except FileNotFoundError as error_message:
@@ -657,7 +657,7 @@ def inline_button(call):
         setup_script = Path('Automatic_email_GP.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по запросу сервисного окна клиентам GP, пользователем: %s", name_who_run_script)
+            info_logger.info("Запуск скрипта по запросу сервисного окна клиентам GP, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_GP)
             result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)

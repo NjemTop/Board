@@ -294,7 +294,7 @@ if ($BODY_REPORT){
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
-        {Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"}
+        Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"
     }
 }
 else {
