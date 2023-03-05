@@ -424,7 +424,7 @@ def inline_button(call):
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_Теле2.ps1'
         try:
-            result_tele2 = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout, check=True)
+            result_tele2 = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
             # Записываем в лог информацию о пользователе, сформировавшем отчет
             xml_data = None
             with open('data.xml', encoding='utf-8-sig') as file_data:
@@ -450,15 +450,56 @@ def inline_button(call):
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_ПСБ.ps1'
-        result_rez = subprocess.run(["pwsh", "-File", setup_script,],stdout=sys.stdout)
-        bot.send_document(call.message.chat.id, open('C:/Users/Adena/AppData/Local/Отчёт_клиента_ПСБ.docx', 'rb'))       
+        try:
+            result_rez = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
+            # Записываем в лог информацию о пользователе, сформировавшем отчет
+            xml_data = None
+            with open('data.xml', encoding='utf-8-sig') as file_data:
+                xml_data = file_data.read()
+                root = ET.fromstring(xml_data)
+                chat_id = root.find('chat_id').text
+                if str(call.message.chat.id) == chat_id:
+                    name = root.find('header_footer/name').text
+                    info_logger.info("Пользователь: %s сформировал отчет.", name)
+        except subprocess.CalledProcessError as error_message:
+            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
+            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
+        else:
+            if platform.system() == 'Windows':
+                # формируем путь к файлу отчета в директории AppData\Local
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_ПСБ.docx').replace('\\', '/')
+            elif platform.system() == 'Linux':
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_ПСБ.docx')
+            with open(report_path, 'rb') as report_file:
+                bot.send_document(call.message.chat.id, report_file)
+
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_РЭЦ.ps1'
-        result_rez = subprocess.run(["pwsh", "-File", setup_script,],
-          stdout=sys.stdout)
-        bot.send_document(call.message.chat.id, open('C:/Users/Adena/AppData/Local/Отчёт_клиента_РЭЦ.docx', 'rb'))      
+        try:
+            result_rez = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
+            # Записываем в лог информацию о пользователе, сформировавшем отчет
+            xml_data = None
+            with open('data.xml', encoding='utf-8-sig') as file_data:
+                xml_data = file_data.read()
+                root = ET.fromstring(xml_data)
+                chat_id = root.find('chat_id').text
+                if str(call.message.chat.id) == chat_id:
+                    name = root.find('header_footer/name').text
+                    info_logger.info("Пользователь: %s сформировал отчет.", name)
+        except subprocess.CalledProcessError as error_message:
+            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
+            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
+        else:
+            if platform.system() == 'Windows':
+                # формируем путь к файлу отчета в директории AppData\Local
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx').replace('\\', '/')
+            elif platform.system() == 'Linux':
+                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx')
+            with open(report_path, 'rb') as report_file:
+                bot.send_document(call.message.chat.id, report_file)
+
     ### УРОВЕНЬ 4 "ПОЧТА РОССИИ" ///////////////////////////////////////// в работе
     #elif call.data == "button_pochtaR": 
 
@@ -597,8 +638,8 @@ def inline_button(call):
         try:
             os.remove(f'/app/logs/report_send_SB({version_SB}).log')
         except FileNotFoundError as error_message:
-            error_logger.error('Файл не найден: %s', version_SB, error_message)
-            print('Файл не найден: %s', version_SB, error_message)
+            error_logger.error('Файл не найден: %s', error_message)
+            print('Файл не найден: %s', error_message)
         except PermissionError as error_message:
             error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
             print('Недостаточно прав для удаления файла: %s', error_message)
@@ -622,7 +663,7 @@ def inline_button(call):
             error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open('/app/logs/report_send_GP.log', 'a+', encoding='utf-8-sig') as file_send:
+        with open(f'/app/logs/report_send_GP({version_GP}).log', 'a+', encoding='utf-8-sig') as file_send:
             file_send.write(result_GP)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
@@ -634,10 +675,10 @@ def inline_button(call):
         info_logger.info("Запрос сервисного окна клиентам GP отправлен")
         bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
         try:
-            os.remove('/app/logs/report_send_GP.log')
+            os.remove(f'/app/logs/report_send_GP({version_GP}).log')
         except FileNotFoundError as error_message:
-            error_logger.error('Файл "report_send_GP.log" не найден: %s', error_message)
-            print('Файл "report_send_GP.log" не найден: %s', error_message)
+            error_logger.error('Файл не найден: %s', error_message)
+            print('Файл не найден: %s', error_message)
         except PermissionError as error_message:
             error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
             print('Недостаточно прав для удаления файла: %s', error_message)
