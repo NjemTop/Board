@@ -582,18 +582,11 @@ def inline_button(call):
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open('/app/logs/script-output.log', 'a+', encoding='utf-8-sig') as file_send:
+        with open('/app/logs/report_send_SB.log', 'a+', encoding='utf-8-sig') as file_send:
             file_send.write(result_SB)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
             bot.send_document(call.message.chat.id, file_send)
-
-            # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-            # with open('/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
-            #     f.write(result_SB)
-
-            # with open('/logs/report_send_SB.log', 'rb') as f:
-            #     bot.send_document(call.message.chat.id, f)
         button_choise_yes_SB = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
@@ -616,11 +609,11 @@ def inline_button(call):
             error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        # with open('/app/logs/report_send_SB.log', 'w', encoding='utf-8-sig') as f:
-        #     f.write(result_GP)
-
-        # with open('/app/logs/report_send_SB.log', 'rb') as f:
-        #     bot.send_document(call.message.chat.id, f)
+        with open('/app/logs/report_send_GP.log', 'a+', encoding='utf-8-sig') as file_send:
+            file_send.write(result_GP)
+            file_send.seek(0)  # перематываем указатель в начало файла
+            # Отправляем вывод всего результата в телеграмм бота
+            bot.send_document(call.message.chat.id, file_send)
         button_choise_yes_GP = types.InlineKeyboardMarkup()
         back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
