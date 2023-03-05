@@ -604,7 +604,6 @@ def inline_button(call):
         except OSError as error_message:
             error_logger.error('Ошибка при удалении файла: %s', error_message)
             print('Ошибка при удалении файла: %s', error_message)
-
         
     ## ДЛЯ GP
     elif call.data == "button_choise_yes_GP":
