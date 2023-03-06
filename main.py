@@ -54,5 +54,5 @@ if __name__ == '__main__':
         app_error_logger.error(str(error_message))
     else:
         app_info_logger.info("The program has finished running without errors.")
-        app_error_logger.logging.warning('This is a warning message')
-        app_error_logger.logging.critical('This is a critical message')
+        app_error_logger.warning('This is a warning message')
+        app_error_logger.critical('This is a critical message')
