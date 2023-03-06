@@ -163,10 +163,11 @@ def get_app():
                     if alert_chat_id is None:
                         print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
                         web_error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
-                    else:
-                        # Отправляем сообщение в телеграм-бот
-                        send_telegram_message(alert_chat_id, ticket_message)
-                        web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
+                        # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
+                        return "OK", 200
+                    # Отправляем сообщение в телеграм-бот
+                    send_telegram_message(alert_chat_id, ticket_message)
+                    web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
                 except AttributeError as error_message:
                     print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
                     web_error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
@@ -192,6 +193,11 @@ def get_app():
                 client_name = json_data['client_details']['name']
                 priority_name = json_data.get("priority_name")
                 agent_ticket_url = json_data.get("agent_ticket_url")
+                if who_change == new_assignee_name:
+                    print(f"Сотрудник {assignee_name} сам себе назначил тикет{ticket_id}, поэтому алерт не нужен")
+                    web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', assignee_name, ticket_id)
+                    # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
+                    return "OK", 200
                 # Формируем сообщение в текст отправки
                 new_assignee_name_message = (f"Сотрудником: {who_change}\nИзменил назначенного в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
                 # Разбор XML-файла и получение корневого элемента
@@ -204,7 +210,7 @@ def get_app():
                 try:
                     # Проходим циклом по всем найденным элементам header_footer
                     for header_footer in header_footer_elements:
-                        # Сравниваем значение элемента name с new_assignee_name_message
+                        # Сравниваем значение элемента name с new_assignee_name
                         if header_footer.find('name').text == new_assignee_name:
                             # Если значения совпадают, сохраняем значение элемента chat_id в alert_chat_id
                             alert_chat_id = header_footer.find('chat_id').text
@@ -214,10 +220,11 @@ def get_app():
                     if alert_chat_id is None:
                         print(f"Не удалось найти chat_id для пользователя: {new_assignee_name}.")
                         web_error_logger.error("Не удалось найти 'chat id' для пользователя: %s, номер тикета: %s", new_assignee_name, ticket_id)
-                    else:
-                        # Отправляем сообщение в телеграм-бот
-                        send_telegram_message(alert_chat_id, new_assignee_name_message)
-                        web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
+                        # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
+                        return "OK", 200
+                    # Отправляем сообщение в телеграм-бот
+                    send_telegram_message(alert_chat_id, new_assignee_name_message)
+                    web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
                 except AttributeError as error_message:
                     print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя: {new_assignee_name}.")
                     web_error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, error_message)
