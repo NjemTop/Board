@@ -83,7 +83,7 @@ def get_app():
         except ValueError as error_message:
             print('Не удалось распарсить JSON в запросе.')
             web_error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
-            return 'Не удалось распарсить JSON в запросе.', 400
+            return 'Не удалось распарсить JSON в запросе.', 500
         
         # Отправляем ответ о том, что всё принято и всё хорошо
         return "OK", 201
@@ -128,7 +128,7 @@ def get_app():
         except json.decoder.JSONDecodeError as error_message:
             print('Не удаётся распарсить JSON в запросе.')
             web_error_logger.error("Не удаётся распарсить JSON в запросе. %s", error_message)
-            return 'Не удаётся распарсить JSON в запросе.', 400
+            return 'Не удаётся распарсить JSON в запросе.', 500
         # находим значения кто ответил
         json_message_type = json_data.get("update", {}).get("message_type")
         # если ответ был дан со стороны клиента
@@ -177,10 +177,13 @@ def get_app():
             
             except ValueError as error_message:
                 web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.', 400
             except FileNotFoundError as error_message:
-                web_error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
+                return 'Не удалось найти файл data.xml.', 500
             except AttributeError as error_message:
-                web_error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
+                web_error_logger.error("Не удалось найти chat_id для пользователя: %s. Ошибка: %s", assignee_name, error_message)
+                return 'Не удалось найти chat_id для пользователя.', 500
         
         # если было изменение назначенного на тикет
         elif json_data.get("update", {}).get("assignee_change") is not None:
@@ -194,8 +197,8 @@ def get_app():
                 priority_name = json_data.get("priority_name")
                 agent_ticket_url = json_data.get("agent_ticket_url")
                 if who_change == new_assignee_name:
-                    print(f"Сотрудник {assignee_name} сам себе назначил тикет{ticket_id}, поэтому алерт не нужен")
-                    web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', assignee_name, ticket_id)
+                    print(f"Сотрудник {who_change} сам себе назначил тикет{ticket_id}, поэтому алерт не нужен")
+                    web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', who_change, ticket_id)
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
                     return "OK", 200
                 # Формируем сообщение в текст отправки
@@ -234,10 +237,13 @@ def get_app():
             
             except ValueError as error_message:
                 web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.', 400
             except FileNotFoundError as error_message:
-                web_error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
+                return 'Не удалось найти файл data.xml.', 500
             except AttributeError as error_message:
-                web_error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
+                web_error_logger.error("Не удалось найти chat_id для пользователя: %s. Ошибка: %s", assignee_name, error_message)
+                return 'Не удалось найти chat_id для пользователя.', 500
         else:
             # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
             return "OK", 200
