@@ -12,19 +12,20 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 
 # Создание объекта логгера для ошибок и критических событий
-error_logger = logging.getLogger('AppError')
-error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('./logs/app-error.log')
-error_handler.setLevel(logging.ERROR)
-error_handler.setFormatter(formatter)
-error_logger.addHandler(error_handler)
+app_error_logger = logging.getLogger('AppError')
+app_error_logger.setLevel(logging.ERROR)
+app_error_handler = logging.FileHandler('./logs/app-error.log')
+app_error_handler.setLevel(logging.ERROR)
+app_error_handler.setFormatter(formatter)
+app_error_logger.addHandler(app_error_handler)
 
 # Создание объекта логгера для информационных сообщений
-info_logger = logging.getLogger('AppInfo')
-info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('app-info.log')
-info_handler.setLevel(logging.INFO)
-info_logger.addHandler(formatter)
+app_info_logger = logging.getLogger('AppInfo')
+app_info_logger.setLevel(logging.INFO)
+app_info_handler = logging.FileHandler('app-info.log')
+app_info_handler.setLevel(logging.INFO)
+app_info_handler.setFormatter(formatter)
+app_info_logger.addHandler(app_info_handler)
 
 # Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты.
 def start_socket_server():
@@ -39,7 +40,9 @@ if __name__ == '__main__':
         # Здесь мы используем threading.Thread для запуска функции start_telegram_bot в отдельном потоке, который не блокирует выполнение остального кода.
         p2 = threading.Thread(target=start_telegram_bot)
         p1.start()
+        info_logger.info("Вэб-сервер запущен")
         p2.start()
+        info_logger.info("Телебот запущен")
         p1.join()
         p2.join()
         p2.join()

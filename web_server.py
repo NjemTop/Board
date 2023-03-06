@@ -5,22 +5,22 @@ from flask import Response
 import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
-# Создание объекта логгера для ошибок и критических событий
-error_logger = logging.getLogger('WebError')
-error_logger.setLevel(logging.ERROR)
-error_handler = logging.FileHandler('./logs/web-errors.log')
-error_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-error_handler.setFormatter(formatter)
-error_logger.addHandler(error_handler)
+# Создание объекта логгера для ошибок и критических событий
+web_error_logger = logging.getLogger('WebError')
+web_error_logger.setLevel(logging.ERROR)
+web_error_handler = logging.FileHandler('./logs/web-errors.log')
+web_error_handler.setLevel(logging.ERROR)
+web_error_handler.setFormatter(formatter)
+web_error_logger.addHandler(web_error_handler)
 
 # Создание объекта логгера для информационных сообщений
-info_logger = logging.getLogger('WebInfo')
-info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('./logs/web-info.log')
-info_handler.setLevel(logging.INFO)
-info_handler.setFormatter(formatter)
-info_logger.addHandler(info_handler)
+web_info_logger = logging.getLogger('WebInfo')
+web_info_logger.setLevel(logging.INFO)
+web_info_handler = logging.FileHandler('./logs/web-info.log')
+web_info_handler.setLevel(logging.INFO)
+web_info_handler.setFormatter(formatter)
+web_info_logger.addHandler(web_info_handler)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
@@ -35,8 +35,8 @@ def get_app():
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
         user_who = f'User-Agent: {user_agent}'
-        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
-        info_logger.info('Его данные подключения: %s', (user_who,))
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Чё пришёл сюда?', mimetype='text/plain')
     
     @app.route('/create_ticket', methods=['GET'])
@@ -45,8 +45,8 @@ def get_app():
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
         user_who = f'User-Agent: {user_agent}'
-        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
-        info_logger.info('Его данные подключения: %s', (user_who,))
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Этот URL для получения вэбхуков(создание)', mimetype='text/plain')
     
     @app.route('/create_ticket', methods=['POST'])
@@ -75,14 +75,14 @@ def get_app():
                 # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
                 alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
                 send_telegram_message(alert_chat_id, ticket_message)
-                info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
+                web_info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
             else:
                 print('JSON не найден в сообщении.')
-                error_logger.error("JSON не найден в сообщении. %s")
+                web_error_logger.error("JSON не найден в сообщении. %s")
                 return 'JSON не найден в сообщении.', 400
         except ValueError as error_message:
             print('Не удалось распарсить JSON в запросе.')
-            error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
+            web_error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
             return 'Не удалось распарсить JSON в запросе.', 400
         
         # Отправляем ответ о том, что всё принято и всё хорошо
@@ -94,8 +94,8 @@ def get_app():
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
         user_who = f'User-Agent: {user_agent}'
-        info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
-        info_logger.info('Его данные подключения: %s', (user_who,))
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Этот URL для получение вэбхуков (обнова)', mimetype='text/plain')
     
     @app.route('/update_ticket', methods=['POST'])
@@ -107,7 +107,7 @@ def get_app():
             # проверяем наличие JSON в сообщении
             if '{' not in message:
                 print('JSON не найден в сообщении.')
-                error_logger.error("JSON не найден в сообщении. %s")
+                web_error_logger.error("JSON не найден в сообщении. %s")
                 return 'JSON не найден в сообщении.', 400
             # находим JSON в сообщении
             json_start = message.find('{')
@@ -118,7 +118,7 @@ def get_app():
                     json_data = json.loads(json_str)
                 except json.decoder.JSONDecodeError as error_message:
                     print('Не удаётся распарсить JSON в запросе.')
-                    error_logger.error("Не удаётся распарсить JSON в запросе. %s", error_message)
+                    web_error_logger.error("Не удаётся распарсить JSON в запросе. %s", error_message)
                     return 'Не удаётся распарсить JSON в запросе.', 400
                 # находим значения кто ответил
                 json_message_type = json_data.get("update", {}).get("message_type")
@@ -153,24 +153,24 @@ def get_app():
                             # Если alert_chat_id не был найден, выводим ошибку
                             if alert_chat_id is None:
                                 print(f"Не удалось найти chat_id для пользователя {assignee_name}.")
-                                error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
+                                web_error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
                             else:
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, ticket_message)
-                                info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
+                                web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
                         except AttributeError as error_message:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
-                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
+                            web_error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 201
                     
                     except ValueError as error_message:
-                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                        web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
                     except FileNotFoundError as error_message:
-                        error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                        web_error_logger.error("Не удалось найти файл data.xml %s", error_message)
                     except AttributeError as error_message:
-                        error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
+                        web_error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
                 
                 # если было изменение назначенного на тикет
                 elif json_data.get("update", {}).get("assignee_change") is not None:
@@ -204,34 +204,34 @@ def get_app():
                             # Если alert_chat_id не был найден, выводим ошибку
                             if alert_chat_id is None:
                                 print(f"Не удалось найти chat_id для пользователя: {new_assignee_name}.")
-                                error_logger.error("Не удалось найти 'chat id' для пользователя: %s, номер тикета: %s", new_assignee_name, ticket_id)
+                                web_error_logger.error("Не удалось найти 'chat id' для пользователя: %s, номер тикета: %s", new_assignee_name, ticket_id)
                             else:
                                 # Отправляем сообщение в телеграм-бот
                                 send_telegram_message(alert_chat_id, new_assignee_name_message)
-                                info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
+                                web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
                         except AttributeError as error_message:
                             print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя: {new_assignee_name}.")
-                            error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, error_message)
+                            web_error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
                         return "OK", 201
                     
                     except ValueError as error_message:
-                        error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
+                        web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
                     except FileNotFoundError as error_message:
-                        error_logger.error("Не удалось найти файл data.xml %s", error_message)
+                        web_error_logger.error("Не удалось найти файл data.xml %s", error_message)
                     except AttributeError as error_message:
-                        error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
+                        web_error_logger.error("Не удалось найти chat_id для пользователя %s", error_message)
                 else:
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
                     return "OK", 200
             else:
                 print('JSON не найден в сообщении.')
-                error_logger.error("JSON не найден в сообщении. %s")
+                web_error_logger.error("JSON не найден в сообщении. %s")
                 return 'JSON не найден в сообщении.', 400
         except ValueError as error_message:
             print('Не удалось распарсить JSON в запросе.')
-            error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
+            web_error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
             return 'Не удалось распарсить JSON в запросе.', 400
 
     return app
@@ -241,10 +241,10 @@ def run_server():
     try:
         server_address = ('0.0.0.0', 3030)
         app = get_app()
-        info_logger.info('Сервер запущен на порту %s', server_address[1])
+        web_info_logger.info('Сервер запущен на порту %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)
     except Exception as error_message:
-        error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", error_message)
+        web_error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", error_message)
         raise error_message
 
 run_server()
