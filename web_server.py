@@ -85,7 +85,8 @@ def get_app():
             error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
             return 'Не удалось распарсить JSON в запросе.', 400
         
-        return "OK", 200
+        # Отправляем ответ о том, что всё принято и всё хорошо
+        return "OK", 201
 
     @app.route('/update_ticket', methods=['GET'])
     def handle_get_update_ticket():
@@ -162,7 +163,7 @@ def get_app():
                             error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
-                        return "OK", 200
+                        return "OK", 201
                     
                     except ValueError as error_message:
                         error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
@@ -213,7 +214,7 @@ def get_app():
                             error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", new_assignee_name, error_message)
 
                         # Отправляем ответ о том, что всё принято и всё хорошо
-                        return "OK", 200
+                        return "OK", 201
                     
                     except ValueError as error_message:
                         error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
