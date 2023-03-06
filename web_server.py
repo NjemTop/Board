@@ -168,6 +168,7 @@ def get_app():
                     # Отправляем сообщение в телеграм-бот
                     send_telegram_message(alert_chat_id, ticket_message)
                     web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
+                    
                 except AttributeError as error_message:
                     print(f"Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя {assignee_name}.")
                     web_error_logger.error("Ошибка при обработке xml-файла: 'chat_id' не найден для пользователя %s. Ошибка: %s", assignee_name, error_message)
@@ -248,6 +249,32 @@ def get_app():
             # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
             return "OK", 200
 
+    @app.route('/undersponed_ticket', methods=['POST'])
+    def undersponed_ticket():
+        """Функция обработки вебхука от HappyFox, если тикет был отложен"""
+        message = ""
+        message = request.data.decode('utf-8')
+        try:
+            # находим JSON в сообщении
+            json_start = message.find('{')
+            if json_start != -1:
+                json_str = message[json_start:]
+                # парсим JSON
+                json_data = json.loads(json_str)
+                print(json_data)
+                web_info_logger.info('Направлена информация в группу о созданном тикете: %s', json_data)
+            else:
+                print('JSON не найден в сообщении.')
+                web_error_logger.error("JSON не найден в сообщении. %s")
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as error_message:
+            print('Не удалось распарсить JSON в запросе.')
+            web_error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
+            return 'Не удалось распарсить JSON в запросе.', 500
+        
+        # Отправляем ответ о том, что всё принято и всё хорошо
+        return "OK", 201
+    
     return app
 
 def run_server():
