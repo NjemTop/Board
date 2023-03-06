@@ -77,19 +77,19 @@ def handle_client_reply(json_data):
             # Если alert_chat_id не был найден, выводим ошибку
             if alert_chat_id is None:
                 web_error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
-                # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
-                return "OK", 200
+                # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
+                return "OK"
         except FileNotFoundError as error_message:
             web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
-            return 'Не удалось найти файл data.xml.', 500
+            return 'Не удалось найти файл data.xml.'
         # Отправляем сообщение в телеграм-бот
         send_telegram_message(alert_chat_id, ticket_message)
         web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
-        # Отправляем ответ о том, что всё принято и всё хорошо
-        return "OK", 201
+        # Отправляем ответ о том, что всё принято и всё хорошо (201)
+        return "OK"
     except ValueError as error_message:
         web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
-        return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.', 400
+        return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.'
 
 def handle_assignee_change(json_data):
     """Обработка изменения назначенного в тикете"""
@@ -104,8 +104,8 @@ def handle_assignee_change(json_data):
         agent_ticket_url = json_data.get("agent_ticket_url")
         if who_change == new_assignee_name:
             web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', who_change, ticket_id)
-            # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
-            return "OK", 200
+            # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
+            return "OK"
         # Формируем сообщение в текст отправки
         new_assignee_name_message = (f"Сотрудником: {who_change}\nИзменил назначенного в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
         # Находим все элементы header_footer внутри элемента user
@@ -115,16 +115,16 @@ def handle_assignee_change(json_data):
         # Если alert_chat_id не был найден, выводим ошибку
         if alert_chat_id is None:
             web_error_logger.error("Не удалось найти 'chat_id' для пользователя %s", new_assignee_name)
-            # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же
-            return "OK", 200
+            # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
+            return "OK"
         # Отправляем сообщение в телеграм-бот
         send_telegram_message(alert_chat_id, new_assignee_name_message)
         web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
-        # Отправляем ответ о том, что всё принято и всё хорошо
-        return "OK", 201
+        # Отправляем ответ о том, что всё принято и всё хорошо (201)
+        return "OK"
     except ValueError as error_message:
         web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
-        return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.', 400
+        return 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.'
 
 def get_app():
     """Функция приложения ВЭБ-сервера"""
@@ -191,25 +191,22 @@ def get_app():
         message = request.data.decode('utf-8')
         json_data, error = parse_json_message(message)
         if error:
-            return error, 400
+            return Response(error, status=400)
         
         if json_data.get("update") is None:
-            return "OK", 200
+            return Response(status=200)
         
         json_message_type = json_data["update"].get("message_type")
         if json_message_type == "Client Reply":
             result, error = handle_client_reply(json_data)
-            if error:
-                return error, 400
-            if result:
-                return "OK", 201
         elif json_data["update"].get("assignee_change") is not None:
             result, error = handle_assignee_change(json_data)
-            if error:
-                return error, 400
-            if result:
-                return "OK", 201
-        return "OK", 200
+        else:
+            return Response(status=200)
+        
+        if error:
+            return Response(error, status=400)
+        return Response(result, status=201)
 
     @app.route('/undersponed_ticket', methods=['POST'])
     def undersponed_ticket():
