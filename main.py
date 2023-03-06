@@ -40,19 +40,19 @@ if __name__ == '__main__':
         # Здесь мы используем threading.Thread для запуска функции start_telegram_bot в отдельном потоке, который не блокирует выполнение остального кода.
         p2 = threading.Thread(target=start_telegram_bot)
         p1.start()
-        info_logger.info("Вэб-сервер запущен")
+        app_info_logger.info("Вэб-сервер запущен")
         p2.start()
-        info_logger.info("Телебот запущен")
+        app_info_logger.info("Телебот запущен")
         p1.join()
         p2.join()
         p2.join()
     except requests.exceptions.ConnectionError as error_message:
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        app_error_logger.error("Error in Telegram bot: %s", error_message)
     except telegram.error.TelegramError as error_message:
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        app_error_logger.error("Error in Telegram bot: %s", error_message)
     except Exception as error_message:
-        error_logger.error(str(error_message))
+        app_error_logger.error(str(error_message))
     else:
-        info_logger.info("The program has finished running without errors.")
-        logging.warning('This is a warning message')
-        logging.critical('This is a critical message')
+        app_info_logger.info("The program has finished running without errors.")
+        app_error_logger.logging.warning('This is a warning message')
+        app_error_logger.logging.critical('This is a critical message')
