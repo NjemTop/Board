@@ -185,18 +185,20 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                 -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
                                 Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия - отсутствует`n"
                             }
-                            
                             ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
                             $PS = New-Object PSObject
                             $PS | Add-Member -Type NoteProperty "Операция" -Value "Рассылка клиенту отправлена"
                             $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                            ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
+                            $PS = $TABLE_REPORT.Add($PS)
                             }
                         catch {
                             $PS = New-Object PSObject
                             $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
                             $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                            $PS = $TABLE_REPORT.Add($PS)
                             Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
                             Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту"
                         }
@@ -207,6 +209,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
                         $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                         $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $PS = $TABLE_REPORT.Add($PS)
                         Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                 }
@@ -215,21 +218,55 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     $PS = New-Object PSObject
                     $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка создания тикета"
                     $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
+                    $PS = $TABLE_REPORT.Add($PS)
                     Write-Host -ForegroundColor Red -Object "ERROR CREATE $($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
                 }
-                ### ОТПИШИМСЯ ОТ СОЗДАННОГО ТИКЕТА
+                ### ВЫПОЛНИМ ПОСЛЕДНЕЕ ДЕЙСТВИЕ ПОСЛЕ ОТПРАВКИ РАССЫЛКИ (ОТПИШЕМСЯ ОТ ТИКЕТА, А ТАКЖЕ ЗАКРОЕМ ЕГО)
                 finally {
-                    $BODY_UNSUBSCRIBE = @{
+                    ### ОТПИШИМСЯ ОТ СОЗДАННОГО ТИКЕТА
+                    try {
+                        $BODY_UNSUBSCRIBE = @{
 
-                        staff_id = "$USER_ID";
-
+                            staff_id = "$USER_ID";
+    
+                        }
+                        ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
+                        $UNSUBSCRIBE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_UNSUBSCRIBE | ConvertTo-Json -Depth 5))
+                        $GET_JSON_RESPONSE_UNSUBSCRIBE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/unsubscribe/" -Headers $HEADERS -Body $UNSUBSCRIBE_TICKET -ContentType "application/json"
+                        $GET_JSON_RESPONSE_UNSUBSCRIBE.name
                     }
-                    ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
-                    $UNSUBSCRIBE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_UNSUBSCRIBE | ConvertTo-Json -Depth 5))
-                    $GET_JSON_RESPONSE_UNSUBSCRIBE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/unsubscribe/" -Headers $HEADERS -Body $UNSUBSCRIBE_TICKET -ContentType "application/json"
-                    $GET_JSON_RESPONSE_UNSUBSCRIBE.name
-                    ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
-                    $PS = $TABLE_REPORT.Add($PS)
+                    catch {
+                        $PS = New-Object PSObject
+                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отписки от тикета"
+                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $PS = $TABLE_REPORT.Add($PS)
+                        Write-Host -ForegroundColor Red -Object "ERROR отписки от тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
+                    }
+                    ### ЗАКРОЕМ ТИКЕТ
+                    try {
+                        ### ФОРМИРУЕМ ТЕЛО, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
+                        $BODY_CLOSE = @{
+                                    
+                            staff = $USER_ID;
+                        
+                            status = "4";
+            
+                            "t-cf-26" = "98";
+                                        
+                        }
+                        ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
+                        $CLOSE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_CLOSE | ConvertTo-Json -Depth 5))
+                        ### ОТПРАВЛЯЕМ POST ЗАПРОС НА ЗАКРЫТИЕ ТИКЕТА
+                        $CLOSE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $CLOSE_TICKET -ContentType "application/json"
+                        $CLOSE_TICKET_JSON_RESPONSE.name
+                    }
+                    catch {
+                        $PS = New-Object PSObject
+                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка закрытия тикета"
+                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $PS = $TABLE_REPORT.Add($PS)
+                        Write-Host -ForegroundColor Red -Object "ERROR закрытия тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
+                    }
                 }
             }
             ### ЕСЛИ НЕ НАШЁЛСЯ КОНТАКТ, КОМУ ОТПРАВЛЯТЬ РАССЫЛКУ, ТО ЗАПИШЕМ ЭТО В ТАБЛИЦУ
@@ -243,10 +280,12 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         }
         ### ПРОВЕРИМ КЛИЕНТА НА ГОЛД ИЛИ ПЛАТИНУМ
         elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
-            <# Action when this condition is true #>
+            ### ПРОПУСТИМ И ПОЙДЁМ ДАЛЬШЕ
+            continue
         }
         elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active") {
-            <# Action when this condition is true #>
+            ### ПРОПУСТИМ И ПОЙДЁМ ДАЛЬШЕ
+            continue
         }
         ### ЕСЛИ ОШИБКА ПРОВЕРКИ СТАТУС, ЗАПИШЕМ В ТАБЛИЦУ
         else {
