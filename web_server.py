@@ -191,7 +191,7 @@ def handle_unresponded_info_120(json_data):
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
                 send_telegram_message(alert_chat_id, ping_ticket_message)
-                web_info_logger.info('В группу %s, отправлена информация о новом сообщении без ответа два часа в тикете: %s', assignee_name, ticket_id)
+                web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s два часа в тикете: %s', assignee_name, ticket_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
             except FileNotFoundError as error_message:
