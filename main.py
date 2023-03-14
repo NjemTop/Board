@@ -22,7 +22,7 @@ app_error_logger.addHandler(app_error_handler)
 # Создание объекта логгера для информационных сообщений
 app_info_logger = logging.getLogger('AppInfo')
 app_info_logger.setLevel(logging.INFO)
-app_info_handler = logging.FileHandler('app-info.log')
+app_info_handler = logging.FileHandler('./logs/app-info.log')
 app_info_handler.setLevel(logging.INFO)
 app_info_handler.setFormatter(formatter)
 app_info_logger.addHandler(app_info_handler)
