@@ -156,6 +156,7 @@ def get_tickets():
         #'status': '1,2,3',  # выбираем все статусы, кроме "Закрыт"
         #'status_neq': '4',       # Исключить закрытые статусы
         'category': '1',
+        'status': '_pending',
         #'q': 'behavior:pending'
         #'q': 'unresponded:"true"'
         #'q': 'duedate:"today"'
