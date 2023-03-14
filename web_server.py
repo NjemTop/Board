@@ -88,8 +88,8 @@ def handle_client_reply(json_data):
         # Отправляем ответ о том, что всё принято и всё хорошо (201)
         return "OK", None
     except ValueError as error_message:
-        web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
-        return None, 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.'
+        web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
+        return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
 
 def handle_assignee_change(json_data):
     """Обработка изменения назначенного в тикете"""
@@ -127,10 +127,10 @@ def handle_assignee_change(json_data):
             web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
             return None, 'Не удалось найти файл data.xml.'
     except ValueError as error_message:
-        web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
-        return None, 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.'
+        web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
+        return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
 
-def handle_unresponded_info(json_data):
+def handle_unresponded_info_60(json_data):
     """Находит информацию о "Unresponded for 60 min" в блоке массива update"""
     try:
         assignee_name = json_data.get("assignee_name")
@@ -140,7 +140,7 @@ def handle_unresponded_info(json_data):
         priority_name = json_data.get("priority_name")
         agent_ticket_url = json_data.get("agent_ticket_url")
         unresponded_info = json_data.get("update", {}).get("by", {})
-        if unresponded_info.get("type") == "smartrule" and unresponded_info.get("name") == "Unresponded for 60 min":
+        if unresponded_info.get("name") == "Unresponded for 60 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (f"Тикет без ответа час: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
             try:
@@ -155,16 +155,52 @@ def handle_unresponded_info(json_data):
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
                 send_telegram_message(alert_chat_id, ping_ticket_message)
-                web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', assignee_name, ticket_id)
+                web_info_logger.info('В чат %s, повторно отправлена информация о новом сообщении без ответа час в тикете: %s', assignee_name, ticket_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
             except FileNotFoundError as error_message:
                 web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
                 return None, 'Не удалось найти файл data.xml.'
     except ValueError as error_message:
-        web_error_logger.error("Не удалось собрать инфорамацию из запроса, который прислал HappyFox %s", error_message)
-        return None, 'Не удалось собрать инфорамацию из запроса, который прислал HappyFox.'
+        web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
+        return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
 
+def handle_unresponded_info_120(json_data):
+    """Находит информацию о "Unresponded for 120 min" в блоке массива update"""
+    try:
+        assignee_name = json_data.get("assignee_name")
+        ticket_id = json_data.get("ticket_id")
+        subject = json_data.get("subject")
+        client_name = json_data['client_details']['name']
+        priority_name = json_data.get("priority_name")
+        agent_ticket_url = json_data.get("agent_ticket_url")
+        unresponded_info = json_data.get("update", {}).get("by", {})
+        if unresponded_info.get("name") == "Unresponded for 120 min":
+            # Формируем сообщение в текст отправки
+            ping_ticket_message = (f"Тикет без ответа час: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+            try:
+                # открываем файл и загружаем данные
+                with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+                    data = json.load(file)
+                # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+                alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
+                # Если alert_chat_id не был найден, выводим ошибку
+                if alert_chat_id is None:
+                    web_error_logger.error("Не удалось найти 'chat_id' для пользователя %s", assignee_name)
+                    # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
+                    return "OK", None
+                # Отправляем сообщение в телеграм-бот
+                send_telegram_message(alert_chat_id, ping_ticket_message)
+                web_info_logger.info('В группу %s, отправлена информация о новом сообщении без ответа два часа в тикете: %s', assignee_name, ticket_id)
+                # Отправляем ответ о том, что всё принято и всё хорошо (201)
+                return "OK", None
+            except FileNotFoundError as error_message:
+                web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
+                return None, 'Не удалось найти файл data.xml.'
+    except ValueError as error_message:
+        web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
+        return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
+    
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -241,7 +277,12 @@ def get_app():
         elif json_data["update"].get("assignee_change") is not None:
             result, error = handle_assignee_change(json_data)
         elif json_data["update"].get("by").get("type") == "smartrule":
-            result, error = handle_unresponded_info(json_data)
+            if json_data["update"].get("by").get("name") == "Unresponded for 60 min":
+                result, error = handle_unresponded_info_60(json_data)
+            elif json_data["update"].get("by").get("name") == "Unresponded for 120 min":
+                result, error = handle_unresponded_info_120(json_data)
+            else:
+                return Response(status=200)
         else:
             return Response(status=200)
         
