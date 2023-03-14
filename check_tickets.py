@@ -187,8 +187,7 @@ def get_tickets():
                 check_error_logger.error("Error occurred: %s", error_message)
             data = response.json()
             for ticket_data in data.get('data'):
-                process_ticket(ticket_data)
-                
+                process_ticket(ticket_data)  
 
 # Создадим задачу на отправку алертов в чат
 schedule.every().day.at("10:25").do(get_tickets)
