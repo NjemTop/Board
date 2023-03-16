@@ -54,8 +54,8 @@ else:
 CONFIG_FILE = "Main.config"
 
 # Читаем данные из файла
-with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
-    DATA = json.load(file)
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    DATA = json.load(f)
 
 # Получаем значение ключа BOT_TOKEN в TELEGRAM_SETTINGS
 BOT_TOKEN = DATA['TELEGRAM_SETTINGS']['BOT_TOKEN']
