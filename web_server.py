@@ -164,6 +164,7 @@ def handle_unresponded_info_60(json_data):
     except ValueError as error_message:
         web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
         return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
+    return None, None
 
 def handle_unresponded_info_120(json_data):
     """Находит информацию о "Unresponded for 120 min" в блоке массива update"""
@@ -200,6 +201,7 @@ def handle_unresponded_info_120(json_data):
     except ValueError as error_message:
         web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
         return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
+    return None, None
     
 def get_app():
     """Функция приложения ВЭБ-сервера"""
