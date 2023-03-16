@@ -284,6 +284,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         ### ОТПРАВЛЯЕМ POST ЗАПРОС НА ЗАКРЫТИЕ ТИКЕТА
                         $CLOSE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $CLOSE_TICKET -ContentType "application/json"
                         $CLOSE_TICKET_JSON_RESPONSE.name
+                        Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_CLIENT.contact_groups.name) отправлена"
                     }
                     catch {
                         $ERROR_PS = New-Object PSObject
