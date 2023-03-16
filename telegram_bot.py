@@ -21,6 +21,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
+from YandexDocsMove import download_and_upload_pdf_files
 
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -53,8 +54,8 @@ else:
 CONFIG_FILE = "Main.config"
 
 # Читаем данные из файла
-with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
-    DATA = json.load(f)
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    DATA = json.load(file)
 
 # Получаем значение ключа BOT_TOKEN в TELEGRAM_SETTINGS
 BOT_TOKEN = DATA['TELEGRAM_SETTINGS']['BOT_TOKEN']
@@ -70,6 +71,15 @@ API_SECRET = DATA['HAPPYFOX_SETTINGS']['API_SECRET']
 auth = (API_KEY, API_SECRET)
 API_ENDPOINT = DATA['HAPPYFOX_SETTINGS']['API_ENDPOINT']
 headers = {'Content-Type': 'application/json'}
+
+# Получение списка папок Яндекс.Диска
+YANDEX_DISK_FOLDERS = DATA["YANDEX_DISK_FOLDERS"]
+
+# Получаем значения из конфига для отправки рассылки
+YANDEX_OAUTH_TOKEN = DATA["YANDEX_DISK"]["OAUTH-TOKEN"]
+NEXTCLOUD_URL = DATA["NEXT_CLOUD"]["URL"]
+NEXTCLOUD_USER = DATA["NEXT_CLOUD"]["USER"]
+NEXTCLOUD_PASSWORD = DATA["NEXT_CLOUD"]["PASSWORD"]
 
 # Создаем бота
 bot=telebot.TeleBot(TOKEN)
@@ -618,6 +628,10 @@ def inline_button(call):
         setup_script = Path('Automatic_email_BS.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+            # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
+            updated_folder_paths = [folder_path.format(version_SB=version_SB) for folder_path in YANDEX_DISK_FOLDERS]
+            # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
+            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_SB, updated_folder_paths)
             info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
             result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:

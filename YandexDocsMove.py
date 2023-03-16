@@ -154,17 +154,17 @@ def upload_to_nextcloud(local_file_path, remote_file_path, nextcloud_url, userna
     else:
         print(f"Ошибка при загрузке файла {local_file_path} на Nextcloud: {response.status_code}, {response.text}")
 
-access_token = "y0_AgAEA7qkB2AWAAlIKgAAAADel0HQaYRTiTBYSu6efA-81KEa9Yxw9eM"
-nextcloud_url = "https://cloud.boardmaps.ru"
-username = "ncloud"
-password = "G6s6kWaZWyOC0oLt"
+# access_token = "y0_AgAEA7qkB2AWAAlIKgAAAADel0HQaYRTiTBYSu6efA-81KEa9Yxw9eM"
+# nextcloud_url = "https://cloud.boardmaps.ru"
+# username = "ncloud"
+# password = "G6s6kWaZWyOC0oLt"
 
-version = "2.61"
-folder_paths = [
-    f"/Документация BoardMaps/iPad/{version}/RU",
-    f"/Документация BoardMaps/Server/{version}/RU",
-    f"/Документация BoardMaps/Server/{version}/RU/USERS",
-    f"/Документация BoardMaps/Server/{version}/RU/ADMINISTRATORS",
-]
+# version = "2.61"
+# folder_paths = [
+#     f"/Документация BoardMaps/iPad/{version}/RU",
+#     f"/Документация BoardMaps/Server/{version}/RU",
+#     f"/Документация BoardMaps/Server/{version}/RU/USERS",
+#     f"/Документация BoardMaps/Server/{version}/RU/ADMINISTRATORS",
+# ]
 
-download_and_upload_pdf_files(access_token, nextcloud_url, username, password, version, folder_paths)
+# download_and_upload_pdf_files(access_token, nextcloud_url, username, password, version, folder_paths)
