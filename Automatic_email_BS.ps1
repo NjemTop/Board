@@ -22,9 +22,34 @@ $CSS_STYLE = @"
     </style>
 "@
 
+### ТАБЛИЦА ДЛЯ ОТЧЕТА С ОШИБКАМИ ОТПРАВКИ РАССЫЛКИ КЛИЕНТАМ
+$ERROR_TABLE_REPORT = New-Object system.Collections.ArrayList
+
+### СТИЛЬ ДЛЯ ТАБЛИЦЫ ОТЧЕТА С ОШИБКАМИ
+$ERROR_CSS_STYLE = @"
+    <style>
+    th
+    {
+        background-color: #3366CC;
+        color: white;
+    },
+    table, td
+    {
+        border: 1px solid black;
+        background-color: #BEBEBE;
+    },
+    .colortext {
+     color: red;
+   }
+    </style>
+"@
+
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
 $TO = "oleg.eliseev@boardmaps.ru"
 #, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru"
+
+### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА С ОШИБКАМИ
+$ERROR_TO = "oleg.eliseev@boardmaps.ru"
 
 ### ТОКЕН ДОСТУПА ДЛЯ API К HAPPYFOX
 $ACCESS_TOKEN = "45357d176a5f4e25b740aebae58f189c:3b9e5c6cc6f34802ad5ae82bafdab3bd"
@@ -44,7 +69,7 @@ $HEADERS.Add("Authorization", "Basic $AuthorizationInfo")
 $NUMBER_VERSION = $version_SB
 
 ### ЗАДАДИМ ПУТЬ К HTML ФАЙЛУ РАССЫЛКИ
-$templatePath = "$PSScriptRoot\HTML\testBM31.html"
+$TEMPLATEPATH = "$PSScriptRoot\HTML\testBM31.html"
 
 ### ТЕМА ТИКЕТА
 $TICKET_SUBJECT = "Обновление BoardMaps $NUMBER_VERSION"
@@ -62,12 +87,12 @@ $STATUS_ID = "5"
 ### СОЗДАДИМ DUE DATE ДЛЯ ТИКЕТА
 $DUE_DATE_REPLY = ((Get-Date).AddDays(7)).ToString('yyyy-MM-dd', [cultureinfo]::GetCultureInfo('en-US'))
 
-### ФОРМИРУЕМ ДАННЫЕ ДЛЯ ОТПРАВКИ ПИСЬМА КЛИЕНТУ
+### ФОРМИРУЕМ ДАННЫЕ ПОЧТЫ ДЛЯ ОТПРАВКИ ПИСЬМА КЛИЕНТУ
 $CLIENT_POST_PASS = ConvertTo-SecureString -String "X5k-WFw-7bn-Aq6" -AsPlainText -Force
 $CLIENT_POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “support@boardmaps.ru”, $CLIENT_POST_PASS
 
 ### ФОРМИРУЕМ HTML ТЕКСТ ДЛЯ СОЗДАНИЯ ТИКЕТА
-$HTML_BODY = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
+$HTML_BODY = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
 
 ### ЗАПРОСИМ ВЕСЬ СПИСОК ГРУПП ИЗ HAPPYFOX
 $GET_JSON_RESPONSE_FULL_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_groups/" -Headers $HEADERS -ContentType "application/json"
@@ -77,8 +102,8 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
     foreach ($ID_GROUP in $GET_JSON_RESPONSE_FULL_GROUP.id){
         ### ИНФОРМАЦИЯ О КОНТАКТЕ
         $GET_JSON_RESPONSE_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_group/$($ID_GROUP)/" -Headers $HEADERS -ContentType "application/json"
-        ### ПРОВЕРИМ СТАТУС КЛИЕНТА, ЕСЛИ SILVER ИЛИ BRONZE, ТО ОТПРАВИМ СТАНДАРТНУЮ РАССЫЛКУ
-        if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Silver1") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Bronze1")) {
+        ### ПРОВЕРИМ СТАТУС КЛИЕНТА И ОТПРАВИМ СТАНДАРТНУЮ РАССЫЛКУ
+        if ($GET_JSON_RESPONSE_GROUP.tagged_domains -in @("Silver1", "Bronze1", "Platinum1", "Gold1")) {
             ### ОБНУЛИМ СПИСОК РАССЫЛКИ КЛИЕНТОВ
             $COPY_EMAIL = $null
             $MAIN_EMAIL = $null
@@ -107,10 +132,10 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     }
                     ### ЕСЛИ ИНФОРМАЦИЮ О КЛИЕНТЕ НЕ ПОЛУЧИЛОСЬ СОСТАВИТЬ, ЗАПИШЕМ В ТАБЛИЦУ
                     else {
-                        $PS = New-Object PSObject
-                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка формирования клиента на рассылку"
-                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
-                        $PS = $TABLE_REPORT.Add($PS)
+                        $ERROR_PS = New-Object PSObject
+                        $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Формирование клиента на рассылку"
+                        $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
+                        $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                         Write-Host -ForegroundColor Red -Object "ERROR $($GET_JSON_RESPONSE_CLIENT.name)"
                     }
                 }
@@ -143,7 +168,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     $CREATE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/tickets/" -Headers $HEADERS -Body $CREATE_TICKET -ContentType "application/json"
 
                     ### ФОРМИРУЕМ HTML ТЕКСТ ДЛЯ ОТПРАВКИ ОТВЕТА РАССЫЛКИ КЛИЕНТУ
-                    $HTML_BODY_REPLY = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
+                    $HTML_BODY_REPLY = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
                     ### ПРОБУЕМ ОТПРАВИТЬ ОТВЕТ В ТИКЕТЕ (ОТПРАВЛЯЕМ ПИСЬМО КЛИЕНТУ О НОВОЙ ВЕРСИИ)
                     try {
                         ### ФОРМИРУЕМ ТЕЛО, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
@@ -168,7 +193,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $BODY_REPLY -ContentType "application/json"
                         try {
                             ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
-                            $HTML = (Get-Content -Path $templatePath -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
+                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
                             ### ПРОВЕРИМ, ЕСТЬ ЛИ КОПИЯ КОМУ ОТПРАВЛЯТЬ
                             if ($COPY_EMAIL) {
                                 ### ПРЕОБРАЗУЕМ СТРОКУ В МАССИВ СТРОК
@@ -194,31 +219,31 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             $PS = $TABLE_REPORT.Add($PS)
                             }
                         catch {
-                            $PS = New-Object PSObject
-                            $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
-                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
-                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
-                            $PS = $TABLE_REPORT.Add($PS)
+                            $ERROR_PS = New-Object PSObject
+                            $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Отправка письма на почту"
+                            $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                            $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                            $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                             Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
-                            Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту"
+                            Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
                         }
                     }
                     ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
                     catch {
-                        $PS = New-Object PSObject
-                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
-                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
-                        $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
-                        $PS = $TABLE_REPORT.Add($PS)
+                        $ERROR_PS = New-Object PSObject
+                        $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Отправка ответа в тикете"
+                        $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                        $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                         Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                 }
                 ### ЕСЛИ ОШИБКА СОЗДАНИИ ТИКЕТА, ЗАПИШЕМ В ТАБЛИЦУ
                 catch {
-                    $PS = New-Object PSObject
-                    $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка создания тикета"
-                    $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
-                    $PS = $TABLE_REPORT.Add($PS)
+                    $ERROR_PS = New-Object PSObject
+                    $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Создание тикета"
+                    $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
+                    $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                     Write-Host -ForegroundColor Red -Object "ERROR CREATE $($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
                 }
                 ### ВЫПОЛНИМ ПОСЛЕДНЕЕ ДЕЙСТВИЕ ПОСЛЕ ОТПРАВКИ РАССЫЛКИ (ОТПИШЕМСЯ ОТ ТИКЕТА, А ТАКЖЕ ЗАКРОЕМ ЕГО)
@@ -236,10 +261,10 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $GET_JSON_RESPONSE_UNSUBSCRIBE.name
                     }
                     catch {
-                        $PS = New-Object PSObject
-                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отписки от тикета"
-                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
-                        $PS = $TABLE_REPORT.Add($PS)
+                        $ERROR_PS = New-Object PSObject
+                        $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Отписка от тикета"
+                        $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                         Write-Host -ForegroundColor Red -Object "ERROR отписки от тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                     ### ЗАКРОЕМ ТИКЕТ
@@ -261,27 +286,22 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $CLOSE_TICKET_JSON_RESPONSE.name
                     }
                     catch {
-                        $PS = New-Object PSObject
-                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка закрытия тикета"
-                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
-                        $PS = $TABLE_REPORT.Add($PS)
+                        $ERROR_PS = New-Object PSObject
+                        $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Закрытие тикета"
+                        $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                        $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                         Write-Host -ForegroundColor Red -Object "ERROR закрытия тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                 }
             }
             ### ЕСЛИ НЕ НАШЁЛСЯ КОНТАКТ, КОМУ ОТПРАВЛЯТЬ РАССЫЛКУ, ТО ЗАПИШЕМ ЭТО В ТАБЛИЦУ
             else {
-                $PS = New-Object PSObject
-                $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка поиска контакта на рассылку"
-                $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.name)"
-                $PS = $TABLE_REPORT.Add($PS)
+                $ERROR_PS = New-Object PSObject
+                $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Поиск контакта на рассылку"
+                $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.name)"
+                $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
                 Write-Host -ForegroundColor Red -Object "ERROR нет контакта на рассылку $($GET_JSON_RESPONSE_CLIENT.name)"
             }
-        }
-        ### ПРОВЕРИМ КЛИЕНТА НА ГОЛД ИЛИ ПЛАТИНУМ
-        elseif (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
-            ### ПРОПУСТИМ И ПОЙДЁМ ДАЛЬШЕ
-            continue
         }
         elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active") {
             ### ПРОПУСТИМ И ПОЙДЁМ ДАЛЬШЕ
@@ -289,19 +309,20 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         }
         ### ЕСЛИ ОШИБКА ПРОВЕРКИ СТАТУС, ЗАПИШЕМ В ТАБЛИЦУ
         else {
-            $PS = New-Object PSObject
-            $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка проверки статуса клиента"
-            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
-            $PS = $TABLE_REPORT.Add($PS)
+            $ERROR_PS = New-Object PSObject
+            $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Проверка статуса клиента"
+            $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
+            $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
             Write-Host -ForegroundColor Red -Object "Ошибка проверки статуса клиента $($GET_JSON_RESPONSE_GROUP.name)"
         }
     }
 }
 ### ЕСЛИ ОШИБКА ПОЛУЧЕНИИ ИНФОРМАЦИИ О КЛИЕНТЕ, ЗАПИШЕМ В ТАБЛИЦУ
 else {
-    $PS = New-Object PSObject
-    $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка составления списка клиента"
-    $PS | Add-Member -Type NoteProperty "Компания" -Value "ID клиента: $ID_GROUP"
+    $ERROR_PS = New-Object PSObject
+    $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Составление списка клиента"
+    $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "ID клиента: $ID_GROUP"
+    $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
     Write-Host -ForegroundColor Red -Object "ERROR, ID клиента: $ID_GROUP"
 }
 
@@ -330,6 +351,30 @@ if ($BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
         Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
+    }
+    catch {
+        Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"
+    }
+}
+else {
+    Write-Host -ForegroundColor Red -Object "Ошибка. Не правильно сформированно тело отправки запроса"
+}
+
+### СФОРМИРУЕМ ТЕЛО ПИСЬМА С ОШИБКАМИ ЕСЛИ ОНИ БЫЛИ ЗАПОЛНЕНЫ В ТАБЛИЦЕ
+if($ERROR_TABLE_REPORT) {
+    $ERROR_HTML_REPORT = ($ERROR_TABLE_REPORT | ConvertTo-Html -Fragment) | Out-String
+    $ERROR_BODY_REPORT = @"
+    $ERROR_CSS_STYLE
+    <h1 style="color: #5e9ca0;">Список с ошибками отправки рассылки клиентам</h1>
+    $ERROR_HTML_REPORT
+"@
+}
+### ЕСЛИ ТЕЛО ПИСЬМА СФОРМИРОВАНО, ТО ОТПРАВИМ ПИСЬМО
+if ($ERROR_BODY_REPORT){
+    ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
+    try {
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $ERROR_TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $ERROR_BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
