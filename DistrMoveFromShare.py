@@ -68,3 +68,9 @@ else:
 
 # Уберём монтирование диска
 unmount_cmd = f"sudo umount {mount_point}"
+unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
+
+if unmount_result.returncode != 0:
+    print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
+else:
+    print("Файловая шара успешно размонтирована.")
