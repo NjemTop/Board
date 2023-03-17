@@ -1,7 +1,7 @@
-import json
 from io import BytesIO
+import json
 import logging
-from smbprotocol import SMBConnection, SMBFile, SMBTime
+from smbprotocol.connection import Connection as SMBConnection
 from smbprotocol.exceptions import SMBAuthenticationError, SMBResponseException
 from urllib.parse import quote
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
@@ -63,7 +63,13 @@ def move_distr_file(version):
         return
 
     # Создаем папку с названием версии на NextCloud
-    create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+    try:
+        create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+    except Exception as error:
+        print(f"Не удалось создать папку на NextCloud: {error}")
+        distr_move_error_logger.error("Не удалось создать папку на NextCloud: %s", error)
+        conn.disconnect()
+        return
 
     # Путь к папке с дистрибутивом на файловой шаре
     distributive_folder = f"\\\\{SHARE_IP_ADDRESS}\\{SHARE_NAME}\\{version}\\Release\\Mainstream" 
@@ -87,9 +93,13 @@ def move_distr_file(version):
         remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
 
         # Загружаем файл на NextCloud
-        with SMBFile(conn, local_file_path) as local_file:
-            file_content = BytesIO(local_file.read())
-            upload_to_nextcloud(file_content, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+        try:
+            with conn.open_file(conn, local_file_path) as local_file:
+                file_content = BytesIO(local_file.read())
+                upload_to_nextcloud(file_content, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+        except Exception as error:
+            print(f"Не удалось прочитать файл на файловой шаре: {error}")
+            distr_move_error_logger.error("Не удалось прочитать файл на файловой шаре: %s", error)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
 
