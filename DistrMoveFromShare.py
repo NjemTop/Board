@@ -56,11 +56,11 @@ def move_distr_file(version):
         conn.connect((SHARE_IP_ADDRESS, 445))
     except SMBAuthenticationError as error:
         print(f"Ошибка аутентификации: {error}")
-        distr_move_error_logger.error("Ошибка аутентификации: %s", error)
+        distr_move_error_logger.error(f"Ошибка аутентификации: {error}")
         return
     except Exception as error:
         print(f"Не удалось установить соединение с файловой шарой: {error}")
-        distr_move_error_logger.error("Не удалось установить соединение с файловой шарой:: %s", error)
+        distr_move_error_logger.error(f"Не удалось установить соединение с файловой шарой: {error}")
         return
 
     # Создаем папку с названием версии на NextCloud
