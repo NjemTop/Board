@@ -21,9 +21,12 @@ nextcloud_username = data["NEXT_CLOUD"]["USER"]
 nextcloud_password = data["NEXT_CLOUD"]["PASSWORD"]
 
 # Задаем параметры файловой шары
-share_path = "\\\\corp.boardmaps.com\\data\\Releases\\[Server]"
+share_path = r"\\corp.boardmaps.com\data\Releases\[Server]"
 mount_point = "/mnt/windows_share"
 
+print(username)
+print(password)
+print(domain)
 # Монтируем файловую шару
 mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={username},password={password},domain={domain}"
 mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
