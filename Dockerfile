@@ -20,7 +20,8 @@ RUN apt-get clean && \
 
 # Устанавливаем дополнительные пакеты, необходимые для подключения к Windows-шаре
 RUN apt-get update && \
-    apt-get install -y cifs-utils
+    apt-get install -y cifs-utils && \
+    apt-get clean
 
 # Создаём каталог внутри контейнера для монтирования Windows-шары
 RUN mkdir /mnt/windows_share
