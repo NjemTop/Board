@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 from pathlib import Path
+from urllib.parse import quote
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
 # Указываем путь к файлу с данными
@@ -59,10 +60,12 @@ except Exception as error:
 if executable_file is not None:
     # Формируем пути к файлу на файловой шаре и на NextCloud
     local_file_path = os.path.join(distributive_folder, executable_file)
-    remote_file_path = f"1. Актуальный релиз/Дистрибутивы/{version}/{executable_file}"
+    remote_file_path = f"/1. Актуальный релиз/Дистрибутив/{version}/{executable_file}"
+    remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
 
     # Загружаем файл на NextCloud
     upload_to_nextcloud(local_file_path, remote_file_path, nextcloud_url, nextcloud_username, nextcloud_password)
+
 else:
     print("Не удалось найти файл дистрибутива с расширением .exe")
 
