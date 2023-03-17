@@ -25,7 +25,6 @@ share_path = r"//corp.boardmaps.com/data/Releases/[Server]"
 mount_point = "/mnt/windows_share"
 
 # Монтируем файловую шару
-# mount_cmd = f"sudo mount -t cifs {share_path} {mount_point} -o username={username},password={password}"
 mount_cmd = f"sudo mount -t cifs {share_path} {mount_point} -o username={username},password={password},domain={domain}"
 mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
 
@@ -66,3 +65,6 @@ if executable_file is not None:
     upload_to_nextcloud(local_file_path, remote_file_path, nextcloud_url, nextcloud_username, nextcloud_password)
 else:
     print("Не удалось найти файл дистрибутива с расширением .exe")
+
+# Уберём монтирование диска
+unmount_cmd = f"sudo umount {mount_point}"
