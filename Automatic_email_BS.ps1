@@ -69,7 +69,7 @@ $HEADERS.Add("Authorization", "Basic $AuthorizationInfo")
 $NUMBER_VERSION = $version_SB
 
 ### ЗАДАДИМ ПУТЬ К HTML ФАЙЛУ РАССЫЛКИ
-$TEMPLATEPATH = "$PSScriptRoot\HTML\testBM31.html"
+$TEMPLATEPATH = "$PSScriptRoot\HTML\index.html"
 
 ### ТЕМА ТИКЕТА
 $TICKET_SUBJECT = "Обновление BoardMaps $NUMBER_VERSION"
