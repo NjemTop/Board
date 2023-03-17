@@ -1,9 +1,9 @@
-import os
-import subprocess
 import json
-from pathlib import Path
+from io import BytesIO
 import logging
 from urllib.parse import quote
+from smbprotocol import SMBConnection, SMBFile
+from smbprotocol.exceptions import SMBAuthenticationError, SMBResponseException
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
 # Настройка логирования
@@ -43,70 +43,55 @@ NEXTCLOUD_USERNAME = data["NEXT_CLOUD"]["USER"]
 NEXTCLOUD_PASSWORD = data["NEXT_CLOUD"]["PASSWORD"]
 
 # Задаем параметры файловой шары
-share_path = r"//corp.boardmaps.com/data/Releases/[Server]"
-mount_point = "/mnt/windows_share"
-
-def mount_share(share_path, mount_point):
-    # Монтируем файловую шару
-    mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN},vers=3.0,sec=ntlmssp"
-    mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
-    # Проверяем, получилось или нет
-    if mount_result.returncode != 0:
-        print(f"Не удалось смонтировать файловую шару. Код возврата: {mount_result.returncode}. Ошибка: {mount_result.stderr}")
-        distr_move_error_logger.error("Не удалось смонтировать файловую шару. Код возврата: %s. Ошибка: %s", mount_result.returncode, mount_result.stderr)
-        return False
-    else:
-        print("Файловая шара успешно смонтирована.")
-        distr_move_info_logger.info('Файловая шара успешно смонтирована.')
-        return True
-
-def unmount_share(mount_point):
-    # Уберём монтирование диска
-    unmount_cmd = f"umount {mount_point}"
-    unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
-    # Проверяем, получилось или нет
-    if unmount_result.returncode != 0:
-        print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
-        distr_move_error_logger.error("Не удалось размонтировать файловую шару. Код возврата: %s. Ошибка: %s", unmount_result.returncode, unmount_result.stderr)
-    else:
-        print("Файловая шара успешно размонтирована.")
-        distr_move_info_logger.info('Файловая шара успешно размонтирована.')
+SHARE_IP_ADDRESS = "10.6.75.22"
+SHARE_NAME = "data/Releases/[Server]"
 
 def move_distr_file(version):
     """Функция мув дистр на NextCloud"""
+
+    # Создаем соединение с файловой шарой
+    try:
+        conn = SMBConnection(username=USERNAME, password=PASSWORD, domain=DOMAIN, client_name="SMBClient")
+        conn.connect(SHARE_IP_ADDRESS)
+    except SMBAuthenticationError as error:
+        print(f"Ошибка аутентификации: {error}")
+        distr_move_error_logger.error("Ошибка аутентификации: %s", error)
+        return
+    except Exception as error:
+        print(f"Не удалось установить соединение с файловой шарой: {error}")
+        distr_move_error_logger.error("Не удалось установить соединение с файловой шарой:: %s", error)
+        return
+
     # Создаем папку с названием версии на NextCloud
     create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+
     # Путь к папке с дистрибутивом на файловой шаре
-    distributive_folder = f"/mnt/windows_share/{version}/Release/Mainstream"
+    distributive_folder = f"\\\\{SHARE_IP_ADDRESS}\\{SHARE_NAME}\\{version}\\Release\\Mainstream" 
+
     # Ищем файл с расширением .exe в папке с дистрибутивами
     executable_file = None
     try:
-        for file in os.listdir(distributive_folder):
-            if file.endswith(".exe"):
-                executable_file = file
+        for file_info in conn.list_directory(distributive_folder):
+            if file_info.filename.endswith(".exe"):
+                executable_file = file_info.filename
                 break
-    except FileNotFoundError:
-        print(f"Не удалось найти папку {distributive_folder}. Проверьте доступность файловой шары.")
-    except OSError as error:
-        print(f"Произошла ошибка при чтении папки {distributive_folder}: {error}")
+    except SMBResponseException as error:
+        print(f"Ошибка доступа к файловой шаре: {error}")
     except Exception as error:
         print(f"Произошла ошибка при поиске файла дистрибутива с расширением .exe: {error}")
+
     if executable_file is not None:
         # Формируем пути к файлу на файловой шаре и на NextCloud
-        local_file_path = os.path.join(distributive_folder, executable_file)
+        local_file_path = f"{distributive_folder}\\{executable_file}"
         remote_file_path = f"/1. Актуальный релиз/Дистрибутив/{version}/{executable_file}"
         remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
+
         # Загружаем файл на NextCloud
-        upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+        with SMBFile(conn, local_file_path) as local_file:
+            file_content = BytesIO(local_file.read())
+            upload_to_nextcloud(file_content, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
 
-def move_distr_and_manage_share(version):
-    # Монтируем шару
-    if mount_share(share_path, mount_point):
-        try:
-            # Перемещаем дистрибутив на NextCloud
-            move_distr_file(version)
-        finally:
-            # Размонтируем шару
-            unmount_share(mount_point)
+    # Закрываем соединение с файловой шарой
+    conn.disconnect()
