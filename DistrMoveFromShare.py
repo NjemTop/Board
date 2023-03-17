@@ -48,7 +48,7 @@ mount_point = "/mnt/windows_share"
 
 def mount_share(share_path, mount_point):
     # Монтируем файловую шару
-    mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN}"
+    mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN},vers=3.0,sec=ntlmssp"
     mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
     # Проверяем, получилось или нет
     if mount_result.returncode != 0:
