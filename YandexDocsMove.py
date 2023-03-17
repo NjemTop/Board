@@ -70,7 +70,7 @@ def download_and_upload_pdf_files(access_token, nextcloud_url, username, passwor
                     download_url = item['file']
                     local_file_path = os.path.join(tempfile.gettempdir(), item_name)
                     with open(local_file_path, "wb") as file:
-                        response = requests.get(download_url)
+                        response = requests.get(download_url, timeout=30)
                         file.write(response.content)
 
                     remote_file_path = f"{nextcloud_folder_path}/{item_name}"
@@ -96,7 +96,7 @@ def create_nextcloud_folder(folder_path, nextcloud_url, username, password):
     """
     try:
         url = f"{nextcloud_url}/remote.php/dav/files/{username}/{folder_path}"
-        response = requests.request("MKCOL", url, auth=(username, password))
+        response = requests.request("MKCOL", url, auth=(username, password), timeout=30)
         if response.status_code == 201:
             print(f"Папка {folder_path} успешно создана на Nextcloud.")
             YandexDocsMove_info_logger.info('Папка %s успешно создана на Nextcloud.', folder_path)
@@ -130,7 +130,7 @@ def get_yandex_disk_files_list(access_token, folder_path):
     encoded_folder_path = quote(folder_path)
     url = f"https://cloud-api.yandex.net/v1/disk/resources?path={encoded_folder_path}&limit=100"
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
     except requests.exceptions.RequestException as error:
         print(f"Ошибка при выполнении запроса: {error}")
         YandexDocsMove_error_logger.error("Ошибка при выполнении запроса: %s", error)
@@ -140,7 +140,7 @@ def get_yandex_disk_files_list(access_token, folder_path):
         response_data = response.json()
         items = response_data['_embedded']['items']
         # Возвращаем список items
-        return items  
+        return items
     else:
         print(f"Ошибка при получении списка файлов: {response.status_code}, {response.text}")
         YandexDocsMove_error_logger.error("Ошибка при получении списка файлов. Код статуса: %s, Текст ошибки: %s", response.status_code, response.text)
@@ -181,7 +181,7 @@ def propfind_request(url, username, password, depth=0):
 
     try:
         # Выполнение PROPFIND-запроса с использованием предоставленных аргументов и данных
-        response = requests.request("PROPFIND", url, headers=headers, data=body, auth=(username, password))
+        response = requests.request("PROPFIND", url, headers=headers, data=body, auth=(username, password), timeout=30)
     except requests.exceptions.RequestException as error:
         print(f"Ошибка при выполнении запроса: {error}")
         YandexDocsMove_error_logger.error("Ошибка при выполнении запроса: %s", error)
@@ -230,7 +230,7 @@ def move_internal_folders(src_dir, dest_dir, nextcloud_url, username, password):
             "Overwrite": "F",
         }
         try:
-            response = requests.request("MOVE", item_src_url, headers=headers, auth=(username, password))
+            response = requests.request("MOVE", item_src_url, headers=headers, auth=(username, password), timeout=30)
         except requests.exceptions.RequestException as error:
             print(f"Ошибка при выполнении запроса: {error}")
             YandexDocsMove_error_logger.error("Ошибка при выполнении запроса: %s", error)
@@ -264,7 +264,7 @@ def upload_to_nextcloud(local_file_path, remote_file_path, nextcloud_url, userna
     """
     url = f"{nextcloud_url}/remote.php/dav/files/{username}/{remote_file_path}"
     with open(local_file_path, "rb") as file:
-        response = requests.put(url, data=file, auth=(username, password))
+        response = requests.put(url, data=file, auth=(username, password), timeout=30)
     if response.status_code == 201:
         print(f"Файл {local_file_path} успешно загружен на Nextcloud.")
         YandexDocsMove_info_logger.info("Файл %s успешно загружен на Nextcloud.", local_file_path)

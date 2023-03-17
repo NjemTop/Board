@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(mes
 # Создание объекта логгера для ошибок и критических событий
 distr_move_error_logger = logging.getLogger('DistrMoveError')
 distr_move_error_logger.setLevel(logging.ERROR)
-distr_move_error_handler = logging.FileHandler('distr_move-error.log')
+distr_move_error_handler = logging.FileHandler('./logs/distr_move-error.log')
 distr_move_error_handler.setLevel(logging.ERROR)
 distr_move_error_handler.setFormatter(formatter)
 distr_move_error_logger.addHandler(distr_move_error_handler)
@@ -21,7 +21,7 @@ distr_move_error_logger.addHandler(distr_move_error_handler)
 # Создание объекта логгера для информационных сообщений
 distr_move_info_logger = logging.getLogger('DistrMoveInfo')
 distr_move_info_logger.setLevel(logging.INFO)
-distr_move_info_handler = logging.FileHandler('distr_move-info.log')
+distr_move_info_handler = logging.FileHandler('./logs/distr_move-info.log')
 distr_move_info_handler.setLevel(logging.INFO)
 distr_move_info_handler.setFormatter(formatter)
 distr_move_info_logger.addHandler(distr_move_info_handler)
