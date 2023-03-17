@@ -2,8 +2,29 @@ import os
 import subprocess
 import json
 from pathlib import Path
+import logging
 from urllib.parse import quote
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
+
+# Настройка логирования
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
+
+# Создание объекта логгера для ошибок и критических событий
+distr_move_error_logger = logging.getLogger('DistrMoveError')
+distr_move_error_logger.setLevel(logging.ERROR)
+distr_move_error_handler = logging.FileHandler('distr_move-error.log')
+distr_move_error_handler.setLevel(logging.ERROR)
+distr_move_error_handler.setFormatter(formatter)
+distr_move_error_logger.addHandler(distr_move_error_handler)
+
+# Создание объекта логгера для информационных сообщений
+distr_move_info_logger = logging.getLogger('DistrMoveInfo')
+distr_move_info_logger.setLevel(logging.INFO)
+distr_move_info_handler = logging.FileHandler('distr_move-info.log')
+distr_move_info_handler.setLevel(logging.INFO)
+distr_move_info_handler.setFormatter(formatter)
+distr_move_info_logger.addHandler(distr_move_info_handler)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
@@ -32,9 +53,11 @@ def mount_share(share_path, mount_point):
     # Проверяем, получилось или нет
     if mount_result.returncode != 0:
         print(f"Не удалось смонтировать файловую шару. Код возврата: {mount_result.returncode}. Ошибка: {mount_result.stderr}")
+        distr_move_error_logger.error("Не удалось смонтировать файловую шару. Код возврата: %s. Ошибка: %s", mount_result.returncode, mount_result.stderr)
         return False
     else:
         print("Файловая шара успешно смонтирована.")
+        distr_move_info_logger.info('Файловая шара успешно смонтирована.')
         return True
 
 def unmount_share(mount_point):
@@ -44,8 +67,10 @@ def unmount_share(mount_point):
     # Проверяем, получилось или нет
     if unmount_result.returncode != 0:
         print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
+        distr_move_error_logger.error("Не удалось размонтировать файловую шару. Код возврата: %s. Ошибка: %s", unmount_result.returncode, unmount_result.stderr)
     else:
         print("Файловая шара успешно размонтирована.")
+        distr_move_info_logger.info('Файловая шара успешно размонтирована.')
 
 def move_distr_file(version):
     """Функция мув дистр на NextCloud"""
@@ -79,7 +104,9 @@ def move_distr_file(version):
 def move_distr_and_manage_share(version):
     # Монтируем шару
     if mount_share(share_path, mount_point):
-        # Перемещаем дистрибутив на NextCloud
-        move_distr_file(version)
-        # Размонтируем шару
-        unmount_share(mount_point)
+        try:
+            # Перемещаем дистрибутив на NextCloud
+            move_distr_file(version)
+        finally:
+            # Размонтируем шару
+            unmount_share(mount_point)
