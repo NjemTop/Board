@@ -18,23 +18,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 RUN apt-get clean && \
     apt-get update --fix-missing
 
-# Устанавливаем дополнительные пакеты, необходимые для подключения к Windows-шаре и установки sudo
-RUN apt-get update && \
-    apt-get install -y cifs-utils sudo && \
-    apt-get clean
-
-# Создаем нового пользователя и добавляем его в группу sudo
-RUN useradd -m system_smb && \
-    usermod -aG sudo system_smb
-
-# Создаём каталог внутри контейнера для монтирования Windows-шары
-RUN mkdir /mnt/windows_share
-
 # Задаем рабочую директорию
 WORKDIR /app
-
-# Переключаемся на нового пользователя
-USER system_smb
 
 # Запускаем команду для запуска приложения
 CMD ["python", "main.py"]
