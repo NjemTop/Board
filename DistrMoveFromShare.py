@@ -25,14 +25,27 @@ NEXTCLOUD_PASSWORD = data["NEXT_CLOUD"]["PASSWORD"]
 share_path = r"//corp.boardmaps.com/data/Releases/[Server]"
 mount_point = "/mnt/windows_share"
 
-# Монтируем файловую шару
-mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN}"
-mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
+def mount_share(share_path, mount_point):
+    # Монтируем файловую шару
+    mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN}"
+    mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
+    # Проверяем, получилось или нет
+    if mount_result.returncode != 0:
+        print(f"Не удалось смонтировать файловую шару. Код возврата: {mount_result.returncode}. Ошибка: {mount_result.stderr}")
+        return False
+    else:
+        print("Файловая шара успешно смонтирована.")
+        return True
 
-if mount_result.returncode != 0:
-    print(f"Не удалось смонтировать файловую шару. Код возврата: {mount_result.returncode}. Ошибка: {mount_result.stderr}")
-else:
-    print("Файловая шара успешно смонтирована.")
+def unmount_share(mount_point):
+    # Уберём монтирование диска
+    unmount_cmd = f"umount {mount_point}"
+    unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
+    # Проверяем, получилось или нет
+    if unmount_result.returncode != 0:
+        print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
+    else:
+        print("Файловая шара успешно размонтирована.")
 
 def move_distr_file(version):
     """Функция мув дистр на NextCloud"""
@@ -62,10 +75,11 @@ def move_distr_file(version):
         upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
-# Уберём монтирование диска
-unmount_cmd = f"umount {mount_point}"
-unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
-if unmount_result.returncode != 0:
-    print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
-else:
-    print("Файловая шара успешно размонтирована.")
+
+def move_distr_and_manage_share(version):
+    # Монтируем шару
+    if mount_share(share_path, mount_point):
+        # Перемещаем дистрибутив на NextCloud
+        move_distr_file(version)
+        # Размонтируем шару
+        unmount_share(mount_point)
