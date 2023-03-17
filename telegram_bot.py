@@ -22,7 +22,7 @@ from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
 from YandexDocsMove import download_and_upload_pdf_files
-from DistrMoveFromShare import move_distr_and_manage_share
+from DistrMoveFromShare import move_distr_file
 
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -636,7 +636,7 @@ def inline_button(call):
             download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_SB, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
             info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
-            move_distr_and_manage_share(version_SB)
+            move_distr_file(version_SB)
             info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
             result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
         except subprocess.CalledProcessError as error_message:
