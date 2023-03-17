@@ -26,7 +26,7 @@ share_path = r"//corp.boardmaps.com/data/Releases/[Server]"
 mount_point = "/mnt/windows_share"
 
 # Монтируем файловую шару
-mount_cmd = f"sudo mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN}"
+mount_cmd = f"mount -t cifs {share_path} {mount_point} -o username={USERNAME},password={PASSWORD},domain={DOMAIN}"
 mount_result = subprocess.run(mount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
 
 if mount_result.returncode != 0:
@@ -63,7 +63,7 @@ def move_distr_file(version):
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
 # Уберём монтирование диска
-unmount_cmd = f"sudo umount {mount_point}"
+unmount_cmd = f"umount {mount_point}"
 unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
 if unmount_result.returncode != 0:
     print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
