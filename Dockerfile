@@ -14,6 +14,10 @@ RUN mkdir -p /app/logs
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+# Очищаем кэш и обновляем список пакетов
+RUN apt-get clean && \
+    apt-get update --fix-missing
+
 # Устанавливаем дополнительные пакеты, необходимые для подключения к Windows-шаре
 RUN apt-get update && \
     apt-get install -y cifs-utils
