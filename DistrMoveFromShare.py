@@ -38,10 +38,8 @@ def move_distr_file(version):
     """Функция мув дистр на NextCloud"""
     # Создаем папку с названием версии на NextCloud
     create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
-
     # Путь к папке с дистрибутивом на файловой шаре
     distributive_folder = f"/mnt/windows_share/{version}/Release/Mainstream"
-
     # Ищем файл с расширением .exe в папке с дистрибутивами
     executable_file = None
     try:
@@ -55,28 +53,18 @@ def move_distr_file(version):
         print(f"Произошла ошибка при чтении папки {distributive_folder}: {error}")
     except Exception as error:
         print(f"Произошла ошибка при поиске файла дистрибутива с расширением .exe: {error}")
-
     if executable_file is not None:
         # Формируем пути к файлу на файловой шаре и на NextCloud
         local_file_path = os.path.join(distributive_folder, executable_file)
         remote_file_path = f"/1. Актуальный релиз/Дистрибутив/{version}/{executable_file}"
         remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
-
         # Загружаем файл на NextCloud
         upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
-
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
-
-# # Версия, которую нужно скопировать
-# version = "2.61"
-
-# move_distr_file(version)
-
 # Уберём монтирование диска
 unmount_cmd = f"sudo umount {mount_point}"
 unmount_result = subprocess.run(unmount_cmd, shell=True, stderr=subprocess.PIPE, text=True, check=False, timeout=30)
-
 if unmount_result.returncode != 0:
     print(f"Не удалось размонтировать файловую шару. Код возврата: {unmount_result.returncode}. Ошибка: {unmount_result.stderr}")
 else:
