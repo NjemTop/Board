@@ -51,7 +51,7 @@ def move_distr_file(version):
 
     # Создаем соединение с файловой шарой
     try:
-        conn = SMBConnection(user=USERNAME, password=PASSWORD, domain=DOMAIN, client_name="SMBClient")
+        conn = SMBConnection(USERNAME, PASSWORD, "SMBClient")
         conn.connect(SHARE_IP_ADDRESS)
     except SMBAuthenticationError as error:
         print(f"Ошибка аутентификации: {error}")
