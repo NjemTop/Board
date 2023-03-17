@@ -1,9 +1,9 @@
 import json
 from io import BytesIO
 import logging
-from urllib.parse import quote
-from smbprotocol import SMBConnection, SMBFile
+from smbprotocol import SMBConnection, SMBFile, SMBTime
 from smbprotocol.exceptions import SMBAuthenticationError, SMBResponseException
+from urllib.parse import quote
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
 # Настройка логирования
