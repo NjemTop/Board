@@ -68,10 +68,10 @@ def move_distr_file(version):
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
 
-# Версия, которую нужно скопировать
-version = "2.61"
+# # Версия, которую нужно скопировать
+# version = "2.61"
 
-move_distr_file(version)
+# move_distr_file(version)
 
 # Уберём монтирование диска
 unmount_cmd = f"sudo umount {mount_point}"
