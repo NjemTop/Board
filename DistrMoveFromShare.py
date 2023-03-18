@@ -1,9 +1,8 @@
-from io import BytesIO
+import os
+import subprocess
 import json
+from pathlib import Path
 import logging
-import socket
-from smbprotocol.connection import Connection as SMBConnection
-from smbprotocol.exceptions import SMBAuthenticationError, SMBResponseException
 from urllib.parse import quote
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
@@ -43,66 +42,38 @@ NEXTCLOUD_URL = data["NEXT_CLOUD"]["URL"]
 NEXTCLOUD_USERNAME = data["NEXT_CLOUD"]["USER"]
 NEXTCLOUD_PASSWORD = data["NEXT_CLOUD"]["PASSWORD"]
 
-# Задаем параметры файловой шары
-SHARE_IP_ADDRESS = "10.6.75.22"
-SHARE_NAME = "data/Releases/[Server]"
-
 def move_distr_file(version):
     """Функция мув дистр на NextCloud"""
-
-    # Создаем соединение с файловой шарой
-    try:
-        conn = SMBConnection(SHARE_IP_ADDRESS, 445, USERNAME, PASSWORD, "SMBClient")
-        conn.connect()
-    except SMBAuthenticationError as error:
-        print(f"Ошибка аутентификации: {error}")
-        distr_move_error_logger.error(f"Ошибка аутентификации: {error}")
-        return
-    except Exception as error:
-        print(f"Не удалось установить соединение с файловой шарой: {error}")
-        distr_move_error_logger.error(f"Не удалось установить соединение с файловой шарой: {error}")
-        return
-
     # Создаем папку с названием версии на NextCloud
-    try:
-        create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
-    except Exception as error:
-        print(f"Не удалось создать папку на NextCloud: {error}")
-        distr_move_error_logger.error("Не удалось создать папку на NextCloud: %s", error)
-        conn.disconnect()
-        return
-
+    create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     # Путь к папке с дистрибутивом на файловой шаре
-    distributive_folder = f"\\\\{SHARE_IP_ADDRESS}\\{SHARE_NAME}\\{version}\\Release\\Mainstream" 
-
+    distributive_folder = f"/windows_share/{version}/Release/Mainstream"
     # Ищем файл с расширением .exe в папке с дистрибутивами
     executable_file = None
     try:
-        for file_info in conn.list_directory(distributive_folder):
-            if file_info.filename.endswith(".exe"):
-                executable_file = file_info.filename
+        for file in os.listdir(distributive_folder):
+            if file.endswith(".exe"):
+                executable_file = file
                 break
-    except SMBResponseException as error:
-        print(f"Ошибка доступа к файловой шаре: {error}")
+    except FileNotFoundError:
+        print(f"Не удалось найти папку {distributive_folder}. Проверьте доступность файловой шары.")
+    except OSError as error:
+        print(f"Произошла ошибка при чтении папки {distributive_folder}: {error}")
     except Exception as error:
         print(f"Произошла ошибка при поиске файла дистрибутива с расширением .exe: {error}")
-
     if executable_file is not None:
         # Формируем пути к файлу на файловой шаре и на NextCloud
-        local_file_path = f"{distributive_folder}\\{executable_file}"
+        local_file_path = os.path.join(distributive_folder, executable_file)
         remote_file_path = f"/1. Актуальный релиз/Дистрибутив/{version}/{executable_file}"
         remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
-
         # Загружаем файл на NextCloud
-        try:
-            with conn.open_file(conn, local_file_path) as local_file:
-                file_content = BytesIO(local_file.read())
-                upload_to_nextcloud(file_content, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
-        except Exception as error:
-            print(f"Не удалось прочитать файл на файловой шаре: {error}")
-            distr_move_error_logger.error("Не удалось прочитать файл на файловой шаре: %s", error)
+        upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
 
-    # Закрываем соединение с файловой шарой
-    conn.disconnect()
+def move_distr_and_manage_share(version):
+    try:
+        # Перемещаем дистрибутив на NextCloud
+        move_distr_file(version)
+    finally:
+        print("Перемещение успешно произведенно")
