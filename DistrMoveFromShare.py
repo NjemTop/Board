@@ -57,10 +57,13 @@ def move_distr_file(version):
                 break
     except FileNotFoundError:
         print(f"Не удалось найти папку {distributive_folder}. Проверьте доступность файловой шары.")
+        distr_move_error_logger.error("Не удалось найти папку %s. Проверьте доступность файловой шары.", distributive_folder)
     except OSError as error:
         print(f"Произошла ошибка при чтении папки {distributive_folder}: {error}")
+        distr_move_error_logger.error("Произошла ошибка при чтении папки %s. Ошибка: %s", distributive_folder, error)
     except Exception as error:
         print(f"Произошла ошибка при поиске файла дистрибутива с расширением .exe: {error}")
+        distr_move_error_logger.error("Произошла ошибка при поиске файла дистрибутива с расширением .exe: %s", error)
     if executable_file is not None:
         # Формируем пути к файлу на файловой шаре и на NextCloud
         local_file_path = os.path.join(distributive_folder, executable_file)
@@ -70,10 +73,15 @@ def move_distr_file(version):
         upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
+        distr_move_error_logger.error("Не удалось найти файл дистрибутива с расширением .exe")
 
 def move_distr_and_manage_share(version):
     try:
         # Перемещаем дистрибутив на NextCloud
         move_distr_file(version)
+    except Exception as error:
+        print(f"Произошла ошибка при перемещении дистрибутива: {error}")
+        distr_move_error_logger.error("Произошла ошибка при перемещении дистрибутива: %s", error)
     finally:
         print("Перемещение успешно произведенно")
+        distr_move_info_logger.info('Перемещение успешно произведенно')
