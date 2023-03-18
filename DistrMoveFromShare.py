@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import logging
 from urllib.parse import quote
-from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
+from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud, move_internal_folders
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -82,6 +82,21 @@ def move_distr_and_manage_share(version):
     except Exception as error:
         print(f"Произошла ошибка при перемещении дистрибутива: {error}")
         distr_move_error_logger.error("Произошла ошибка при перемещении дистрибутива: %s", error)
+    finally:
+        print("Перемещение успешно произведенно")
+        distr_move_info_logger.info('Перемещение успешно произведенно')
+
+def move_distr_and_manage_share(version):
+    try:
+        # Перемещаем дистрибутив на NextCloud
+        move_distr_file(version)
+        # Перемещаем содержимое папки на NextCloud
+        src_dir = "1. Актуальный релиз/Дистрибутив"
+        dest_dir = f"2. Предыдущие релизы/Дистрибутив"
+        move_internal_folders(src_dir, dest_dir, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+    except Exception as error:
+        print(f"Произошла ошибка при перемещении дистрибутива или содержимого папки с Яндекс.Диска: {error}")
+        distr_move_error_logger.error("Произошла ошибка при перемещении дистрибутива или содержимого папки с Яндекс.Диска: %s", error)
     finally:
         print("Перемещение успешно произведенно")
         distr_move_info_logger.info('Перемещение успешно произведенно')
