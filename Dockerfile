@@ -4,6 +4,8 @@ FROM python:3.10
 RUN wget -q https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt-get update && apt-get install -y powershell
+# Установим пакет smbclient
+RUN apt-get install -y smbclient
 
 # Копируем файлы проекта в контейнер
 COPY . /app
