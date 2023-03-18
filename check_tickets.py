@@ -136,7 +136,7 @@ def process_ticket(ticket_data):
                 assigned_name = get_assigned_name(assigned_to)
                 # print(f"Время последнего ответа клиента в тикете {time_difference}")
 
-                ticket_message = (f'Ожидание ответа клиента более 3 дней.\nНомер тикета:: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
+                ticket_message = (f'Ожидание ответа клиента более 3-х дней.\nНомер тикета:: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
 
                 # Получаем chat_id для отправки сообщения
                 alert_chat_id = get_alert_chat_id(assigned_name)
