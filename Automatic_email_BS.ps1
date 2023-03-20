@@ -212,8 +212,9 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             }
                             ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
                             $PS = New-Object PSObject
-                            $PS | Add-Member -Type NoteProperty "Операция" -Value "Рассылка клиенту отправлена"
                             $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                            $PS | Add-Member -Type NoteProperty "Основной контакт" -Value "$MAIN_EMAIL"
+                            $PS | Add-Member -Type NoteProperty "Копия" -Value "$TO_COPY"
                             $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                             ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
                             $PS = $TABLE_REPORT.Add($PS)
