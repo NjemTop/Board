@@ -1,5 +1,7 @@
-﻿param($version_SB, $support_response_id)
+﻿#param($version_SB, $support_response_id)
 
+$version_SB = 2.62
+$support_response_id = 5
 ### ТАБЛИЦА ДЛЯ ОТЧЕТА ОТПРАВКИ РАССЫЛКИ КЛИЕНТАМ
 $TABLE_REPORT = New-Object system.Collections.ArrayList
 

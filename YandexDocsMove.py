@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from xml.etree import ElementTree as ET
 import logging
 import requests.exceptions
+from MoveFile.move_docs import NextcloudMover, WebDavClient
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -41,12 +42,15 @@ def download_and_upload_pdf_files(access_token, nextcloud_url, username, passwor
         folder_paths (List[str]): Список путей к папкам на Яндекс.Диске, которые нужно обработать.
 
     """
+    # Создание экземпляра класса NextcloudMover
+    nextcloud_mover = NextcloudMover(nextcloud_url, username, password)
     try:
+        
         # Вызов функции перемещения папки внутри Nextcloud
         src_dir = "1. Актуальный релиз/Документация"
         dest_dir = "2. Предыдущие релизы/Документация"
-        move_internal_folders(src_dir, dest_dir, nextcloud_url, username, password)
-
+        # move_internal_folders(src_dir, dest_dir, nextcloud_url, username, password)
+        nextcloud_mover.move_internal_folders(src_dir, dest_dir)
         # Проходимся циклом по всем папкам с Яндекс.Диска
         for folder_path in folder_paths:
             items = get_yandex_disk_files_list(access_token, folder_path)
@@ -211,8 +215,14 @@ def move_internal_folders(src_dir, dest_dir, nextcloud_url, username, password):
     src_url = nextcloud_url + "/remote.php/dav/files/" + username + "/" + src_dir.strip("/")
     dest_url = nextcloud_url + "/remote.php/dav/files/" + username + "/" + dest_dir.strip("/")
 
+    # Создание экземпляра класса WebDavClient с аргументами src_url, username и password
+    client = WebDavClient(src_url, username, password)
+
+    # Получение списка элементов исходной директории с использованием метода propfind_request класса WebDavClient
+    xml_data = client.propfind_request(depth=1)
+
     # Получение списка элементов исходной директории
-    xml_data = propfind_request(src_url, username, password, depth=1)
+    # xml_data = propfind_request(src_url, username, password, depth=1)
 
     # Формирование списка путей элементов исходной директории
     item_paths = [
@@ -272,17 +282,17 @@ def upload_to_nextcloud(local_file_path, remote_file_path, nextcloud_url, userna
         print(f"Ошибка при загрузке файла {local_file_path} на Nextcloud: {response.status_code}, {response.text}")
         YandexDocsMove_error_logger.error("Ошибка при загрузке файла %s на Nextcloud. Код статуса: %s, Текст ошибки: %s", local_file_path, response.status_code, response.text)
 
-# access_token = ""
-# nextcloud_url = "https://cloud.boardmaps.ru"
-# username = "ncloud"
-# password = ""
+access_token = "y0_AgAEA7qkB2AWAAlIKgAAAADel0HQaYRTiTBYSu6efA-81KEa9Yxw9eM"
+nextcloud_url = "https://cloud.boardmaps.ru"
+username = "ncloud"
+password = "G6s6kWaZWyOC0oLt"
 
-# version = "2.61"
-# folder_paths = [
-#     f"/Документация BoardMaps/iPad/{version}/RU",
-#     f"/Документация BoardMaps/Server/{version}/RU",
-#     f"/Документация BoardMaps/Server/{version}/RU/USERS",
-#     f"/Документация BoardMaps/Server/{version}/RU/ADMINISTRATORS",
-# ]
+version = "2.61"
+folder_paths = [
+    f"/Документация BoardMaps/iPad/{version}/RU",
+    f"/Документация BoardMaps/Server/{version}/RU",
+    f"/Документация BoardMaps/Server/{version}/RU/USERS",
+    f"/Документация BoardMaps/Server/{version}/RU/ADMINISTRATORS",
+]
 
-# download_and_upload_pdf_files(access_token, nextcloud_url, username, password, version, folder_paths)
+download_and_upload_pdf_files(access_token, nextcloud_url, username, password, version, folder_paths)
