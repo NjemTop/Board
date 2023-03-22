@@ -136,7 +136,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Формирование клиента на рассылку"
                         $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
                         $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                        Write-Host -ForegroundColor Red -Object "ERROR $($GET_JSON_RESPONSE_CLIENT.name)"
                     }
                 }
             }
@@ -234,8 +233,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                             $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                            Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
-                            Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
+                            # Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
                         }
                     }
                     ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
@@ -245,7 +243,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                         $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                         $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                        Write-Host -ForegroundColor Red -Object "ERROR REPLY $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                 }
                 ### ЕСЛИ ОШИБКА СОЗДАНИИ ТИКЕТА, ЗАПИШЕМ В ТАБЛИЦУ
@@ -254,7 +251,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Создание тикета"
                     $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
                     $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                    Write-Host -ForegroundColor Red -Object "ERROR CREATE $($GET_JSON_RESPONSE_CLIENT.contact_groups.name)"
                 }
                 ### ВЫПОЛНИМ ПОСЛЕДНЕЕ ДЕЙСТВИЕ ПОСЛЕ ОТПРАВКИ РАССЫЛКИ (ОТПИШЕМСЯ ОТ ТИКЕТА, А ТАКЖЕ ЗАКРОЕМ ЕГО)
                 finally {
@@ -275,7 +271,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Отписка от тикета"
                         $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                         $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                        Write-Host -ForegroundColor Red -Object "ERROR отписки от тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                     ### ЗАКРОЕМ ТИКЕТ
                     try {
@@ -300,7 +295,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Закрытие тикета"
                         $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                         $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                        Write-Host -ForegroundColor Red -Object "ERROR закрытия тикета $($CREATE_TICKET_JSON_RESPONSE.id)"
                     }
                 }
             }
@@ -310,7 +304,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                 $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Поиск контакта на рассылку"
                 $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_CLIENT.name)"
                 $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                Write-Host -ForegroundColor Red -Object "ERROR нет контакта на рассылку $($GET_JSON_RESPONSE_CLIENT.name)"
             }
         }
         elseif ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Not active") {
@@ -323,7 +316,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
             $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Проверка статуса клиента"
             $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($GET_JSON_RESPONSE_GROUP.name)"
             $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-            # Write-Host -ForegroundColor Red -Object "Ошибка проверки статуса клиента $($GET_JSON_RESPONSE_GROUP.name)"
         }
     }
 }
@@ -333,7 +325,6 @@ else {
     $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Составление списка клиента"
     $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "ID клиента: $ID_GROUP"
     $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-    Write-Host -ForegroundColor Red -Object "ERROR, ID клиента: $ID_GROUP"
 }
 
 ### СФОРМИРУЕМ ТЕЛО ДЛЯ ПИСЬМА ЕСЛИ ТАБЛИЦА ЗАПОЛНЕНА
@@ -388,9 +379,9 @@ if ($ERROR_BODY_REPORT){
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
-        Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"
+        # Write-Host -ForegroundColor Red -Object "Ошибка отправки сообщения"
     }
 }
 else {
-    Write-Host -ForegroundColor Red -Object "Ошибка. Не правильно сформированно тело отправки запроса"
+    # Write-Host -ForegroundColor Red -Object "Ошибка. Не правильно сформированно тело отправки запроса"
 }
