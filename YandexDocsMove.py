@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from xml.etree import ElementTree as ET
 import logging
 import requests.exceptions
-from MoveFile.move_docs import NextcloudMover, WebDavClient
+from MoveFile.move_docs import NextcloudMover
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
