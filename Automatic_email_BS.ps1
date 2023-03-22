@@ -202,24 +202,32 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                 Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Cc $TO_COPY -Subject $TICKET_SUBJECT -Body $HTML -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                                 -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
                                 Write-Output "$($GET_JSON_RESPONSE_GROUP.name)|$MAIN_EMAIL|$COPY_EMAIL"
+                                ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ 
+                                $PS = New-Object PSObject 
+                                $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)" 
+                                $PS | Add-Member -Type NoteProperty "Основной контакт" -Value "$MAIN_EMAIL" 
+                                $PS | Add-Member -Type NoteProperty "Копия" -Value "$COPY_EMAIL".Replace(', ', ' | ') 
+                                $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)" 
+                                ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ 
+                                $PS = $TABLE_REPORT.Add($PS)
                             }
                             ### ЕСЛИ КОПИИ НЕТ, ПРОСТО ОТПРАВИМ РАССЫЛКУ НА ОСНОВНОЙ КОНТАКТ
                             else {
                                 ### ОТПРАВИМ СООБЩЕНИЕ КЛИЕНТУ
                                 Get-ChildItem -Path "$PSScriptRoot\HTML\Images" | Send-MailMessage -From "support@boardmaps.ru" -To $MAIN_EMAIL -Subject $TICKET_SUBJECT -Body $HTML -BodyAsHtml -Credential $CLIENT_POST_CREDS `
                                 -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -DeliveryNotificationOption 'OnFailure' -WarningAction SilentlyContinue
-                               # Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия - отсутствует`n"
+                                # Write-Host -ForegroundColor Magenta -Object "Рассылка клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_EMAIL`nКопия - отсутствует`n"
                                 Write-Output "$($GET_JSON_RESPONSE_GROUP.name)|$MAIN_EMAIL"
-
+                                ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ 
+                                $PS = New-Object PSObject 
+                                $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)" 
+                                $PS | Add-Member -Type NoteProperty "Основной контакт" -Value "$MAIN_EMAIL" 
+                                $PS | Add-Member -Type NoteProperty "Копия" -Value "Не было" 
+                                $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)" 
+                                ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ 
+                                $PS = $TABLE_REPORT.Add($PS)
                             }
-                            ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
-                            $PS = New-Object PSObject
-                            $PS | Add-Member -Type NoteProperty "Операция" -Value "Рассылка клиенту отправлена"
-                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
-                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
-                            ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
-                            $PS = $TABLE_REPORT.Add($PS)
-                            }
+                        }
                         catch {
                             $ERROR_PS = New-Object PSObject
                             $ERROR_PS | Add-Member -Type NoteProperty "Операция" -Value "Отправка письма на почту"
@@ -376,7 +384,7 @@ if($ERROR_TABLE_REPORT) {
 if ($ERROR_BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
-        Send-MailMessage -From sup-smtp@boardmaps.ru -To $ERROR_TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $ERROR_BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $ERROR_TO -Subject "Информация об отправке рассылки клиентам (Версия: $NUMBER_VERSION)" -Body $ERROR_BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
