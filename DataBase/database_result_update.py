@@ -47,7 +47,7 @@ def upload_db_result(version_number, result):
         continue
 
     # Подключаемся к БД
-    conn = sqlite3.connect('DataBase/database.db')
+    conn = sqlite3.connect('./DataBase/database.db')
     c = conn.cursor()
     # Создаем БД
     c.execute('CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)')
