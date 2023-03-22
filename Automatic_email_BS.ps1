@@ -1,4 +1,4 @@
-﻿#param($version_SB, $support_response_id)
+﻿param($version_SB, $support_response_id)
 
 $version_SB = 2.62
 $support_response_id = 5
@@ -377,7 +377,7 @@ if($ERROR_TABLE_REPORT) {
 if ($ERROR_BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
-        Send-MailMessage -From sup-smtp@boardmaps.ru -To $ERROR_TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $ERROR_BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $ERROR_TO -Subject "Информация об отправке рассылки клиентам (Версия: $NUMBER_VERSION)" -Body $ERROR_BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
