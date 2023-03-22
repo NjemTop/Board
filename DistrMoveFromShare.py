@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import logging
 from urllib.parse import quote
-from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud, move_internal_folders
+from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
