@@ -5,7 +5,7 @@ import sqlite3
 
 def upload_db_result(version_number, result):
     # Запись месяца в дате по-русски
-    locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+    # locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
     # Определяем дату рассылки = текущапя дата запуска скрипта
     today = datetime.now().date().strftime('%d %B %Y')
 
