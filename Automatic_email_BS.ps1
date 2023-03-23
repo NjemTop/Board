@@ -120,6 +120,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     }
                     ### СОСТАВИМ СПИСОК ПО КОПИИ
                     elseif ($GET_JSON_RESPONSE_CLIENT.custom_fields.value -cnotmatch "Основной контакт") {
+                        $COPY_EMAIL_ADD = $null
                         $COPY_EMAIL_ADD = $GET_JSON_RESPONSE_CLIENT.email
                         if ($COPY_EMAIL) {
                             $COPY_EMAIL += ','
