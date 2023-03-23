@@ -233,7 +233,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                             $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                            # Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
+                            #! Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
                         }
                     }
                     ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
