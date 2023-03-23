@@ -192,7 +192,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $BODY_REPLY -ContentType "application/json"
                         try {
                             ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
-                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION").Replace("COPY_EMAIL", "$COPY_EMAIL").Replace("CREATE_TICKET_SUBJECT", "$($CREATE_TICKET_JSON_RESPONSE.subject)").Replace("CREATE_TICKET_DISPLAY_ID", "$($CREATE_TICKET_JSON_RESPONSE.display_id)")
+                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION").Replace("COPY_EMAIL", "$COPY_EMAIL").Replace("CREATE_TICKET_SUBJECT", "$($CREATE_TICKET_JSON_RESPONSE.subject)").Replace("CREATE_TICKET_DISPLAY_ID", "$($CREATE_TICKET_JSON_RESPONSE.display_id)").Replace("CREATE_TICKET_CLIENT_NAME", "$($CREATE_TICKET_JSON_RESPONSE.user.contact_groups.name)")
                             ### ПРОВЕРИМ, ЕСТЬ ЛИ КОПИЯ КОМУ ОТПРАВЛЯТЬ
                             if ($COPY_EMAIL) {
                                 ### ПРЕОБРАЗУЕМ СТРОКУ В МАССИВ СТРОК
@@ -233,7 +233,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                             $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                            #! Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
+                            # Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
                         }
                     }
                     ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
