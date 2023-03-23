@@ -278,7 +278,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             staff = $USER_ID;
                         
                             status = "4";
-            
+                            # Указываем филд "Обновление"
                             "t-cf-26" = "99";
                                         
                         }
