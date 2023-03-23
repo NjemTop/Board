@@ -46,7 +46,7 @@ $ERROR_CSS_STYLE = @"
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
 $TO = "oleg.eliseev@boardmaps.ru"
-#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru"
+#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru", "ekaterina.shneyder@boardmaps.ru"
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА С ОШИБКАМИ
 $ERROR_TO = "oleg.eliseev@boardmaps.ru"
@@ -121,6 +121,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                     }
                     ### СОСТАВИМ СПИСОК ПО КОПИИ
                     elseif ($GET_JSON_RESPONSE_CLIENT.custom_fields.value -cnotmatch "Основной контакт") {
+                        $COPY_EMAIL_ADD = $null
                         $COPY_EMAIL_ADD = $GET_JSON_RESPONSE_CLIENT.email
                         if ($COPY_EMAIL) {
                             $COPY_EMAIL += ','
@@ -192,7 +193,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $BODY_REPLY -ContentType "application/json"
                         try {
                             ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
-                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION").Replace("COPY_EMAIL", "$COPY_EMAIL").Replace("CREATE_TICKET_SUBJECT", "$($CREATE_TICKET_JSON_RESPONSE.subject)").Replace("CREATE_TICKET_DISPLAY_ID", "$($CREATE_TICKET_JSON_RESPONSE.display_id)")
+                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION").Replace("COPY_EMAIL", "$COPY_EMAIL").Replace("CREATE_TICKET_SUBJECT", "$($CREATE_TICKET_JSON_RESPONSE.subject)").Replace("CREATE_TICKET_DISPLAY_ID", "$($CREATE_TICKET_JSON_RESPONSE.display_id)").Replace("CREATE_TICKET_CLIENT_NAME", "$($CREATE_TICKET_JSON_RESPONSE.user.contact_groups.name)")
                             ### ПРОВЕРИМ, ЕСТЬ ЛИ КОПИЯ КОМУ ОТПРАВЛЯТЬ
                             if ($COPY_EMAIL) {
                                 ### ПРЕОБРАЗУЕМ СТРОКУ В МАССИВ СТРОК
@@ -233,7 +234,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             $ERROR_PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
                             $ERROR_PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
                             $ERROR_PS = $ERROR_TABLE_REPORT.Add($ERROR_PS)
-                            #! Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
+                            # Write-Error -Category AuthenticationError -Message "Ошибка отправки сообщения клиенту $($CREATE_TICKET_JSON_RESPONSE.id)"
                         }
                     }
                     ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШЕМ В ТАБЛИЦУ
@@ -351,7 +352,7 @@ $POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “sup
 if ($BODY_REPORT){
     ### ПОПРОБУЕМ ОТПРАВИТЬ РЕПОРТ ОТЧЁТА НА ПОЧТУ ОБ ОТПРАВЛЕННЫХ РАССЫЛКАХ КЛИЕНТАМ
     try {
-        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправки рассылки Bronze и Silver клиентам (Версия: $NUMBER_VERSION)" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
+        Send-MailMessage -From sup-smtp@boardmaps.ru -To $TO -Subject "Информация об отправке рассылки клиентам (Версия: $NUMBER_VERSION)" -Body $BODY_REPORT -BodyAsHtml -Credential $POST_CREDS -SmtpServer smtp.yandex.com -Port 587 –UseSsl -Encoding ([System.Text.Encoding]::UTF8) -WarningAction SilentlyContinue;
         #Write-Host -ForegroundColor Green -Object "Сообщение с информацией о рассылке клиентов Bronze и Silver отправлена на почту"
     }
     catch {
