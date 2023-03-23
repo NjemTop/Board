@@ -45,8 +45,7 @@ $ERROR_CSS_STYLE = @"
 "@
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
-$TO = "oleg.eliseev@boardmaps.ru"
-#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru"
+$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru", "ekaterina.shneyder@boardmaps.ru"
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА С ОШИБКАМИ
 $ERROR_TO = "oleg.eliseev@boardmaps.ru"
