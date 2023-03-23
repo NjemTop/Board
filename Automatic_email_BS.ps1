@@ -192,7 +192,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                         $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $BODY_REPLY -ContentType "application/json"
                         try {
                             ### СФОРМИРУЕМ ФАЙЛ ОТПРАВКИ
-                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION")
+                            $HTML = (Get-Content -Path $TEMPLATEPATH -Raw).Replace("NUMBER_VERSION", "$NUMBER_VERSION").Replace("COPY_EMAIL", "$COPY_EMAIL").Replace("CREATE_TICKET_SUBJECT", "$($CREATE_TICKET_JSON_RESPONSE.subject)").Replace("CREATE_TICKET_DISPLAY_ID", "$($CREATE_TICKET_JSON_RESPONSE.display_id)")
                             ### ПРОВЕРИМ, ЕСТЬ ЛИ КОПИЯ КОМУ ОТПРАВЛЯТЬ
                             if ($COPY_EMAIL) {
                                 ### ПРЕОБРАЗУЕМ СТРОКУ В МАССИВ СТРОК
@@ -205,7 +205,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                 $PS = New-Object PSObject 
                                 $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)" 
                                 $PS | Add-Member -Type NoteProperty "Основной контакт" -Value "$MAIN_EMAIL" 
-                                $PS | Add-Member -Type NoteProperty "Копия" -Value "$COPY_EMAIL".Replace(', ', ' | ') 
+                                $PS | Add-Member -Type NoteProperty "Копия" -Value "$COPY_EMAIL".Replace(',', ' | ')
                                 $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)" 
                                 ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ 
                                 $PS = $TABLE_REPORT.Add($PS)
@@ -280,7 +280,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                             staff = $USER_ID;
                         
                             status = "4";
-                            # Указываем филд "Обновление"
+            
                             "t-cf-26" = "99";
                                         
                         }
