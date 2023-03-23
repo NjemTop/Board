@@ -23,6 +23,7 @@ from email.header import Header
 from writexml import create_xml
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
+from DataBase.database_result_update import upload_db_result
 
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -639,6 +640,7 @@ def inline_button(call):
             move_distr_and_manage_share(version_SB)
             info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
             result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
+            upload_db_result(version_SB, result_SB)
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)

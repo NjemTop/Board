@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 import logging
 from urllib.parse import quote
-from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud, move_internal_folders
+from MoveFile.move_docs import NextcloudMover
+from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -43,7 +44,7 @@ NEXTCLOUD_USERNAME = data["NEXT_CLOUD"]["USER"]
 NEXTCLOUD_PASSWORD = data["NEXT_CLOUD"]["PASSWORD"]
 
 def move_distr_file(version):
-    """Функция мув дистр на NextCloud"""
+    """Функция перемещения дистрибутива на NextCloud"""
     # Создаем папку с названием версии на NextCloud
     create_nextcloud_folder(f"1. Актуальный релиз/Дистрибутив/{version}", NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     # Путь к папке с дистрибутивом на файловой шаре
@@ -69,6 +70,12 @@ def move_distr_file(version):
         local_file_path = os.path.join(distributive_folder, executable_file)
         remote_file_path = f"/1. Актуальный релиз/Дистрибутив/{version}/{executable_file}"
         remote_file_path = quote(remote_file_path, safe="/")  # Кодируем URL-путь
+        # Создание экземпляра класса NextcloudMover
+        nextcloud_mover = NextcloudMover(NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
+        # Перемещаем содержимое папки на NextCloud
+        src_dir = "1. Актуальный релиз/Дистрибутив"
+        dest_dir = f"2. Предыдущие релизы/Дистрибутив"
+        nextcloud_mover.move_internal_folders(src_dir, dest_dir)
         # Загружаем файл на NextCloud
         upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
@@ -77,10 +84,6 @@ def move_distr_file(version):
 
 def move_distr_and_manage_share(version):
     try:
-        # Перемещаем содержимое папки на NextCloud
-        src_dir = "1. Актуальный релиз/Дистрибутив"
-        dest_dir = f"2. Предыдущие релизы/Дистрибутив"
-        move_internal_folders(src_dir, dest_dir, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
         # Перемещаем дистрибутив на NextCloud
         move_distr_file(version)
     except Exception as error:

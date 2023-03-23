@@ -30,6 +30,22 @@ class WebDavClient:
         self.password = password
 
     def propfind_request(self, depth=0):
+        """
+        Функция выполняет PROPFIND-запрос к серверу WebDAV (Nextcloud).
+        PROPFIND-запрос используется для получения свойств и структуры коллекций или ресурсов.
+
+        Args:
+            url (str): URL-адрес, к которому отправляется запрос.
+            username (str): Имя пользователя для аутентификации на сервере WebDAV.
+            password (str): Пароль пользователя для аутентификации на сервере WebDAV.
+            depth (int, optional): Глубина просмотра. 0 для текущего ресурса, 1 для ресурса и его непосредственных дочерних элементов. По умолчанию 0.
+
+        Returns:
+            xml.etree.ElementTree.Element: Возвращает объект ElementTree с данными, полученными в результате PROPFIND-запроса.
+
+        Raises:
+            Exception: Возникает, если код статуса ответа не равен 207.
+        """
         headers = {
             "Depth": str(depth),
             "Content-Type": "application/xml",
@@ -65,6 +81,15 @@ class NextcloudMover:
         self.password = password
 
     def move_internal_folders(self, src_dir, dest_dir):
+        """
+        Функция для перемещения внутренних папок из одной директории в другую на Nextcloud.
+
+        :param src_dir: Исходная директория.
+        :param dest_dir: Целевая директория.
+        :param nextcloud_url: URL-адрес сервера Nextcloud.
+        :param username: Имя пользователя Nextcloud.
+        :param password: Пароль пользователя Nextcloud.
+        """
         ns = {"d": "DAV:"}
         src_url = self.nextcloud_url + "/remote.php/dav/files/" + self.username + "/" + src_dir.strip("/")
         dest_url = self.nextcloud_url + "/remote.php/dav/files/" + self.username + "/" + dest_dir.strip("/")
