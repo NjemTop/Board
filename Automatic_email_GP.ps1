@@ -23,7 +23,8 @@ $CSS_STYLE = @"
 "@
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
-$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
+$TO = "oleg.eliseev@boardmaps.ru"
+#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
 
 ### ТОКЕН ДОСТУПА ДЛЯ API К HAPPYFOX
 $ACCESS_TOKEN = "45357d176a5f4e25b740aebae58f189c:3b9e5c6cc6f34802ad5ae82bafdab3bd"
@@ -96,7 +97,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         ### ВЫТЯНИМ ИНФОРМАЦИЮ О КОНТАКТ ГРУППЕ
         $GET_JSON_RESPONSE_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_group/$($ID_GROUP)/" -Headers $HEADERS -ContentType "application/json"
         ### ПРОВЕРИМ КЛИЕНТА НА ГОЛД ИЛИ ПЛАТИНУМ
-        if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
+        if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum1") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold1")) {
             ### ОБНУЛИМ СПИСОК РАССЫЛКИ КЛИЕНТОВ
             $COPY_EMAIL = $null
             $MAIN_EMAIL = $null

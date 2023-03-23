@@ -45,7 +45,8 @@ $ERROR_CSS_STYLE = @"
 "@
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
-$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru", "ekaterina.shneyder@boardmaps.ru"
+$TO = "oleg.eliseev@boardmaps.ru"
+#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru", "tatiana.shindikova@boardmaps.ru", "maxim.sorokin@boardmaps.ru", "ekaterina.shneyder@boardmaps.ru"
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА С ОШИБКАМИ
 $ERROR_TO = "oleg.eliseev@boardmaps.ru"
@@ -102,7 +103,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         ### ИНФОРМАЦИЯ О КОНТАКТЕ
         $GET_JSON_RESPONSE_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_group/$($ID_GROUP)/" -Headers $HEADERS -ContentType "application/json"
         ### ПРОВЕРИМ СТАТУС КЛИЕНТА И ОТПРАВИМ СТАНДАРТНУЮ РАССЫЛКУ
-        if ($GET_JSON_RESPONSE_GROUP.tagged_domains -in @("Silver", "Bronze", "Platinum", "Gold")) {
+        if ($GET_JSON_RESPONSE_GROUP.tagged_domains -in @("Silver1", "Bronze1", "Platinum1", "Gold1")) {
             ### ОБНУЛИМ СПИСОК РАССЫЛКИ КЛИЕНТОВ
             $COPY_EMAIL = $null
             $MAIN_EMAIL = $null
