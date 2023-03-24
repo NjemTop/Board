@@ -2,7 +2,9 @@
 import logging
 import requests
 from functools import wraps
+from werkzeug.security import check_password_hash
 from flask import Flask, request, jsonify
+from werkzeug.security import generate_password_hash
 from flask import Response
 from flask import render_template
 import sqlite3
@@ -29,16 +31,18 @@ web_info_logger.addHandler(web_info_handler)
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
 
-API_KEY = 'Rfnzkj123123'
+USERNAME = 'Njem'
+PASSWORD = generate_password_hash('Rfnzkj123123')
 
-def require_api_key(api_key):
+def require_basic_auth(username, password):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if request.headers.get('x-api-key') and request.headers.get('x-api-key') == api_key:
+            auth = request.authorization
+            if auth and auth.username == username and check_password_hash(password, auth.password):
                 return f(*args, **kwargs)
             else:
-                return jsonify({'error': 'Invalid API key'}), 403
+                return Response('Authorization required', 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
         return decorated_function
     return decorator
 
@@ -424,7 +428,7 @@ def get_app():
         return response
 
     @app.route('/data_release/api/<string:version>', methods=['GET'])
-    @require_api_key(API_KEY)
+    @require_basic_auth(USERNAME, PASSWORD)
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
         conn = sqlite3.connect('./DataBase/database.db')
