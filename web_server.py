@@ -389,48 +389,52 @@ def get_app():
         
         return "OK", 201
 
-    @app.route('/data_release/api/versions', methods=['GET']) 
-    def api_data_release_versions(): 
-        conn = sqlite3.connect('./DataBase/database.db') 
-        cur = conn.cursor() 
+    @app.route('/data_release/api/versions', methods=['GET'])
+    def api_data_release_versions():
+        conn = sqlite3.connect('./DataBase/database.db')
+        cur = conn.cursor()
         # Получение списка всех номеров релизов
         cur.execute('SELECT DISTINCT Номер_релиза FROM info')
-        rows = cur.fetchall() 
-        conn.close() 
+        rows = cur.fetchall()
+        conn.close()
         # Сформировать список номеров релизов
         versions = [row[0] for row in rows]
-        # Формирование JSON с отступами для улучшения читабельности 
-        json_data = json.dumps(versions, ensure_ascii=False, indent=4) 
+        # Формирование JSON с отступами для улучшения читабельности
+        json_data = json.dumps(versions, ensure_ascii=False, indent=4)
         # Установка заголовка Access-Control-Allow-Origin
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправка ответа JSON 
+        # Отправка ответа JSON
         return response
 
-    @app.route('/data_release/api/<string:version>', methods=['GET']) 
-    def api_data_release(version): 
-        conn = sqlite3.connect('./DataBase/database.db') 
-        cur = conn.cursor() 
+    @app.route('/data_release/api/<string:version>', methods=['GET'])
+    def api_data_release(version):
+        conn = sqlite3.connect('./DataBase/database.db')
+        cur = conn.cursor()
         # Фильтрация данных по номеру релиза
         cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
-        rows = cur.fetchall() 
-        conn.close() 
-        data = [] 
-        for row in rows: 
-            data.append({ 
-                'Дата_рассылки': row[0], 
-                'Номер_релиза': row[1], 
-                'Наименование_клиента': row[2], 
-                'Основной_контакт': row[3], 
-                'Копия': row[4] 
-            }) 
-        # Форматирование JSON с отступами для улучшения читабельности 
-        json_data = json.dumps(data, ensure_ascii=False, indent=4) 
+        rows = cur.fetchall()
+        conn.close()
+        data = []
+        for row in rows:
+            contacts = {
+                'Основной_контакт': row[3],
+                'Копия': row[4]
+            }
+            data.append({
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Контакты на рассылку': contacts
+            })
+        # Форматирование JSON с отступами для улучшения читабельности
+        json_data = json.dumps(data, ensure_ascii=False, indent=4)
         # Установка заголовка Access-Control-Allow-Origin
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправка ответа JSON 
+        # Отправка ответа JSON
         return response
+
     
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
