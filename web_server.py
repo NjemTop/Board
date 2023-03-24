@@ -4,6 +4,7 @@ import requests
 from flask import Flask, request, jsonify
 from flask import Response
 import sqlite3
+import codecs
 import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
@@ -390,7 +391,7 @@ def get_app():
     
     @app.route('/data_release', methods=['GET'])
     def data_release():
-        conn = sqlite3.connect('./DataBase/database.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
         cur.execute('SELECT * FROM info')
         rows = cur.fetchall()
@@ -398,11 +399,11 @@ def get_app():
         data = []
         for row in rows:
             data.append({
-                'Дата_рассылки': row[0],
-                'Номер_релиза': row[1],
-                'Наименование_клиента': row[2],
-                'Основной_контакт': row[3],
-                'Копия': row[4]
+                'Дата_рассылки': codecs.decode(row[0], 'unicode_escape'), 
+                'Номер_релиза': row[1], 
+                'Наименование_клиента': codecs.decode(row[2], 'unicode_escape'), 
+                'Основной_контакт': codecs.decode(row[3], 'unicode_escape'), 
+                'Копия': codecs.decode(row[4], 'unicode_escape')
             })
         return jsonify(data)
         
