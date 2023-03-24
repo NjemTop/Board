@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Release</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Дата рассылки</th>
+                <th>Номер релиза</th>
+                <th>Наименование клиента</th>
+                <th>Основной контакт</th>
+                <th>Копия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+                <tr>
+                    <td>{{ item['Дата_рассылки'] }}</td>
+                    <td>{{ item['Номер_релиза'] }}</td>
+                    <td>{{ item['Наименование_клиента'] }}</td>
+                    <td>{{ item['Основной_контакт'] }}</td>
+                    <td>{{ item['Копия'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
