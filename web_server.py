@@ -418,14 +418,14 @@ def get_app():
         data = []
         for row in rows:
             contacts = {
-                'Основной_контакт': row[3],
-                'Копия': row[4]
+                'Main': row[3],
+                'Copy': row[4]
             }
             data.append({
-                'Дата_рассылки': row[0],
-                'Номер_релиза': row[1],
-                'Наименование_клиента': row[2],
-                'Контакты на рассылку': contacts
+                'Data': row[0],
+                'Number': row[1],
+                'Client': row[2],
+                'Contacts': contacts
             })
         # Форматирование JSON с отступами для улучшения читабельности
         json_data = json.dumps(data, ensure_ascii=False, indent=4)
