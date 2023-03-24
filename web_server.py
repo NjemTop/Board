@@ -389,35 +389,48 @@ def get_app():
         
         return "OK", 201
     
-    @app.route('/data_release', methods=['GET'])
-    def data_release():
-        conn = sqlite3.connect('./DataBase/database.db')
-        cur = conn.cursor()
-        cur.execute('SELECT * FROM info')
-        rows = cur.fetchall()
-        conn.close()
-        data = []
-        for row in rows:
-            data.append({
-                'Дата_рассылки': row[0],
-                'Номер_релиза': row[1],
-                'Наименование_клиента': row[2],
-                'Основной_контакт': row[3],
-                'Копия': row[4]
-            })
-        # 
-        json_data = json.dumps(data, ensure_ascii=False, indent=4)
-        #
-        return Response(json_data, content_type='application/json; charset=utf-8')
+    @app.route('/data_release/<string:version>', methods=['GET']) 
+    def data_release(version): 
+        conn = sqlite3.connect('./DataBase/database.db') 
+        cur = conn.cursor() 
+        # Фильтрация данных по номеру релиза
+        cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
+        rows = cur.fetchall() 
+        conn.close() 
+        data = [] 
+        for row in rows: 
+            data.append({ 
+                'Дата_рассылки': row[0], 
+                'Номер_релиза': row[1], 
+                'Наименование_клиента': row[2], 
+                'Основной_контакт': row[3], 
+                'Копия': row[4] 
+            }) 
+        # Форматирование JSON с отступами для улучшения читабельности 
+        json_data = jsonify(data, ensure_ascii=False, indent=4) 
+        # Установка заголовка Access-Control-Allow-Origin
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправка ответа JSON 
+        return response
+
     
     @app.route('/data_release_html', methods=['GET'])
     def data_release_html():
+        release_number = request.args.get('release_number', 'all')
+
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
-        cur.execute('SELECT * FROM info')
+
+        if release_number == 'all':
+            cur.execute('SELECT * FROM info')
+        else:
+            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
+
         rows = cur.fetchall()
         conn.close()
         data = []
+
         for row in rows:
             data.append({
                 'Дата_рассылки': row[0],
@@ -426,7 +439,7 @@ def get_app():
                 'Основной_контакт': row[3],
                 'Копия': row[4]
             })
-        # 
+
         return render_template('data_release.html', data=data)
         
     return app

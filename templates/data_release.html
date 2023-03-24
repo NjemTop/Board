@@ -2,11 +2,16 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Release</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <table>
+    <h1>Data Release</h1>
+    <label for="release-select">Выберите номер релиза:</label>
+    <select id="release-select">
+        <option value="all">Все релизы</option>
+    </select>
+    <table id="data-table" border="1">
         <thead>
             <tr>
                 <th>Дата рассылки</th>
@@ -28,5 +33,47 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        // Скрипт для фильтрации данных на основе выбранного номера релиза
+        $(document).ready(function () {
+            const jsonData = {{ data | tojson }};
+            const releaseSelect = $('#release-select');
+            const dataTable = $('#data-table tbody');
+    
+            // Заполните выпадающий список номерами релиза
+            const releaseNumbers = [...new Set(jsonData.map(item => item['Номер_релиза']))];
+            releaseNumbers.forEach(number => {
+                releaseSelect.append(`<option value="${number}">${number}</option>`);
+            });
+    
+            // Функция для отображения отфильтрованных данных
+            function displayData(releaseNumber) {
+                dataTable.empty();
+    
+                jsonData.filter(item => releaseNumber === 'all' || item['Номер_релиза'] == releaseNumber)
+                    .forEach(item => {
+                        dataTable.append(`
+                            <tr>
+                                <td>${item['Дата_рассылки']}</td>
+                                <td>${item['Номер_релиза']}</td>
+                                <td>${item['Наименование_клиента']}</td>
+                                <td>${item['Основной_контакт']}</td>
+                                <td>${item['Копия']}</td>
+                            </tr>
+                        `);
+                    });
+            }
+    
+            // Фильтрация данных при изменении значения выпадающего списка
+            releaseSelect.on('change', function () {
+                displayData(this.value);
+            });
+    
+            // Отображение всех данных по умолчанию
+            displayData('all');
+        });
+    </script>
+        
 </body>
 </html>
