@@ -439,17 +439,22 @@ def get_app():
         # Отправка ответа JSON
         return response
 
+    # Определение маршрута для API с аргументом 'version' в URL
     @app.route('/data_release/api/<string:version>', methods=['GET'])
+    # Применение декоратора require_basic_auth для аутентификации пользователей
     @require_basic_auth(USERNAME, PASSWORD)
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
+        # Подключение к базе данных SQLite
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
         # Фильтрация данных по номеру релиза
         cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
         rows = cur.fetchall()
+        # Закрытие соединения с базой данных
         conn.close()
         data = []
+        # Преобразование полученных данных в список словарей
         for row in rows:
             contacts = {
                 'Main': row[3],
@@ -463,8 +468,9 @@ def get_app():
             })
         # Форматирование JSON с отступами для улучшения читабельности
         json_data = json.dumps(data, ensure_ascii=False, indent=4)
-        # Установка заголовка Access-Control-Allow-Origin
+        # Создание ответа с типом содержимого application/json и кодировкой UTF-8
         response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавление заголовка Access-Control-Allow-Origin для разрешения кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON
         return response
