@@ -390,7 +390,7 @@ def get_app():
     
     @app.route('/data_release', methods=['GET'])
     def data_release():
-        conn = sqlite3.connect('./DataBase/database.db')
+        conn = sqlite3.connect('./DataBase/database.db', detect_types=sqlite3.PARSE_DECLTYPES)
         cur = conn.cursor()
         cur.execute('SELECT * FROM info')
         rows = cur.fetchall()
