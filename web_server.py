@@ -389,7 +389,7 @@ def get_app():
         
         return "OK", 201
 
-    @app.route('/data_release/<string:version>', methods=['GET']) 
+    @app.route('/data_release/api/<string:version>', methods=['GET']) 
     def data_release(version): 
         conn = sqlite3.connect('./DataBase/database.db') 
         cur = conn.cursor() 
@@ -416,7 +416,7 @@ def get_app():
 
 
     
-    @app.route('/data_release_html', methods=['GET'])
+    @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
 
