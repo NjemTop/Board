@@ -409,6 +409,25 @@ def get_app():
         json_data = json.dumps(data, ensure_ascii=False, indent=4)
         #
         return Response(json_data, content_type='application/json; charset=utf-8')
+    
+    @app.route('/data_release_html', methods=['GET'])
+    def data_release_html():
+        conn = sqlite3.connect('./DataBase/database.db')
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM info')
+        rows = cur.fetchall()
+        conn.close()
+        data = []
+        for row in rows:
+            data.append({
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
+            })
+        # 
+        return render_template('data_release.html', data=data)
         
     return app
 
