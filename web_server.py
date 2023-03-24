@@ -405,7 +405,10 @@ def get_app():
                 'Основной_контакт': codecs.decode(row[3], 'unicode_escape') if row[3] else None,
                 'Копия': codecs.decode(row[4], 'unicode_escape') if row[4] else None
             })
-        return jsonify(data, ensure_ascii=False)
+        # 
+        json_data = json.dumps(data, ensure_ascii=False)
+        #
+        return Response(json_data, content_type='application/json; charset=utf-8')
         
     return app
 
