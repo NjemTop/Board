@@ -389,8 +389,26 @@ def get_app():
         
         return "OK", 201
 
+    @app.route('/data_release/api/versions', methods=['GET']) 
+    def api_data_release_versions(): 
+        conn = sqlite3.connect('./DataBase/database.db') 
+        cur = conn.cursor() 
+        # Получение списка всех номеров релизов
+        cur.execute('SELECT DISTINCT Номер_релиза FROM info')
+        rows = cur.fetchall() 
+        conn.close() 
+        # Сформировать список номеров релизов
+        versions = [row[0] for row in rows]
+        # Формирование JSON с отступами для улучшения читабельности 
+        json_data = json.dumps(versions, ensure_ascii=False, indent=4) 
+        # Установка заголовка Access-Control-Allow-Origin
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправка ответа JSON 
+        return response
+
     @app.route('/data_release/api/<string:version>', methods=['GET']) 
-    def data_release(version): 
+    def api_data_release(version): 
         conn = sqlite3.connect('./DataBase/database.db') 
         cur = conn.cursor() 
         # Фильтрация данных по номеру релиза
@@ -413,8 +431,6 @@ def get_app():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON 
         return response
-
-
     
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
