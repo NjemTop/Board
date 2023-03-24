@@ -388,7 +388,7 @@ def get_app():
     def handle_post_yandex_oauth_callback():
         
         return "OK", 201
-    
+
     @app.route('/data_release/<string:version>', methods=['GET']) 
     def data_release(version): 
         conn = sqlite3.connect('./DataBase/database.db') 
@@ -407,12 +407,13 @@ def get_app():
                 'Копия': row[4] 
             }) 
         # Форматирование JSON с отступами для улучшения читабельности 
-        json_data = jsonify(data, ensure_ascii=False, indent=4) 
+        json_data = json.dumps(data, ensure_ascii=False, indent=4) 
         # Установка заголовка Access-Control-Allow-Origin
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON 
         return response
+
 
     
     @app.route('/data_release_html', methods=['GET'])
