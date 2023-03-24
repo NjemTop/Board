@@ -391,10 +391,10 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release():
         conn = sqlite3.connect('./DataBase/database.db')
-        cur = conn.cursor
+        cur = conn.cursor()
         cur.execute('SELECT * FROM info')
         rows = cur.fetchall()
-        conn.close
+        conn.close()
         data = []
         for row in rows:
             data.append({
