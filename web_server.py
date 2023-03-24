@@ -4,7 +4,6 @@ import requests
 from flask import Flask, request, jsonify
 from flask import Response
 import sqlite3
-import codecs
 import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
@@ -406,7 +405,7 @@ def get_app():
                 'Копия': row[4]
             })
         # 
-        json_data = json.dumps(data, ensure_ascii=False)
+        json_data = json.dumps(data, ensure_ascii=False, indent=4)
         #
         return Response(json_data, content_type='application/json; charset=utf-8')
         
