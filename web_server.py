@@ -426,7 +426,7 @@ def get_app():
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
         # Получение списка всех номеров релизов и дат создания
-        cur.execute('SELECT DISTINCT Data, Номер_релиза FROM info')
+        cur.execute('SELECT DISTINCT Дата_рассылки, Номер_релиза FROM info')
         rows = cur.fetchall()
         conn.close()
         # Сформировать список словарей с ключами "Data" и "Number"
