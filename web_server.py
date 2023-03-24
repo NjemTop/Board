@@ -405,7 +405,7 @@ def get_app():
                 'Основной_контакт': codecs.decode(row[3], 'unicode_escape') if row[3] else None,
                 'Копия': codecs.decode(row[4], 'unicode_escape') if row[4] else None
             })
-        return jsonify(data)
+        return jsonify(data, ensure_ascii=False)
         
     return app
 
