@@ -1,6 +1,7 @@
 ﻿import json
 import logging
 import requests
+from functools import wraps
 from flask import Flask, request, jsonify
 from flask import Response
 from flask import render_template
@@ -27,6 +28,19 @@ web_info_logger.addHandler(web_info_handler)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
+
+API_KEY = 'Rfnzkj123123'
+
+def require_api_key(api_key):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if request.headers.get('x-api-key') and request.headers.get('x-api-key') == api_key:
+                return f(*args, **kwargs)
+            else:
+                return jsonify({'error': 'Invalid API key'}), 403
+        return decorated_function
+    return decorator
 
 def get_alert_chat_id(header_footer_elements, name):
     """Функция получения chat_id из конфигурационного файла"""
@@ -410,6 +424,7 @@ def get_app():
         return response
 
     @app.route('/data_release/api/<string:version>', methods=['GET'])
+    @require_api_key(API_KEY)
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
         conn = sqlite3.connect('./DataBase/database.db')
