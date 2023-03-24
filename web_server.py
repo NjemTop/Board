@@ -1,8 +1,9 @@
 ﻿import json
 import logging
 import requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask import Response
+import sqlite3
 import xml.etree.ElementTree as ET
 from telegram_bot import send_telegram_message
 
@@ -387,6 +388,24 @@ def get_app():
         
         return "OK", 201
     
+    @app.route('/data_release', methods=['GET'])
+    def data_release():
+        conn = sqlite3.connect('./DataBase/database.db')
+        cur = conn.cursor
+        cur.execute('SELECT * FROM info')
+        rows = cur.fetchall()
+        conn.close
+        data = []
+        for row in rows:
+            data.append({
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
+            })
+        return jsonify(data)
+        
     return app
 
 def run_server():
