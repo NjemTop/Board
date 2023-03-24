@@ -399,11 +399,11 @@ def get_app():
         data = []
         for row in rows:
             data.append({
-                'Дата_рассылки': codecs.decode(row[0], 'unicode_escape'),
+                'Дата_рассылки': row[0],
                 'Номер_релиза': row[1],
-                'Наименование_клиента': codecs.decode(row[2], 'unicode_escape') if row[2] else None,
-                'Основной_контакт': codecs.decode(row[3], 'unicode_escape') if row[3] else None,
-                'Копия': codecs.decode(row[4], 'unicode_escape') if row[4] else None
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
             })
         # 
         json_data = json.dumps(data, ensure_ascii=False)
