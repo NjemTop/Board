@@ -425,12 +425,12 @@ def get_app():
         """Функция получения номеров версий отправки рассылки через API"""
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
-        # Получение списка всех номеров релизов
-        cur.execute('SELECT DISTINCT Номер_релиза FROM info')
+        # Получение списка всех номеров релизов и дат создания
+        cur.execute('SELECT DISTINCT Data, Номер_релиза FROM info')
         rows = cur.fetchall()
         conn.close()
-        # Сформировать список номеров релизов
-        versions = [row[0] for row in rows]
+        # Сформировать список словарей с ключами "Data" и "Number"
+        versions = [{'Data': row[0], 'Number': row[1]} for row in rows]
         # Формирование JSON с отступами для улучшения читабельности
         json_data = json.dumps(versions, ensure_ascii=False, indent=4)
         # Установка заголовка Access-Control-Allow-Origin
