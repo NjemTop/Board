@@ -360,6 +360,7 @@ def get_app():
     
     @app.route('/yandex_oauth_callback', methods=['GET'])
     def handle_get_yandex_oauth_callback():
+        """Функция определения oauth яндекса"""
         # Извлеките авторизационный код из URL
         authorization_code = request.args.get('code')
         if not authorization_code:
@@ -391,6 +392,7 @@ def get_app():
 
     @app.route('/data_release/api/versions', methods=['GET'])
     def api_data_release_versions():
+        """Функция получения номеров версий отправки рассылки через API"""
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
         # Получение списка всех номеров релизов
@@ -409,6 +411,7 @@ def get_app():
 
     @app.route('/data_release/api/<string:version>', methods=['GET'])
     def api_data_release(version):
+        """Функция просмотра контактов, кому ушла рассылка через API"""
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
         # Фильтрация данных по номеру релиза
@@ -438,20 +441,17 @@ def get_app():
     
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
+        """Функция вывода информации об рассылке в HTML странице"""
         release_number = request.args.get('release_number', 'all')
-
         conn = sqlite3.connect('./DataBase/database.db')
         cur = conn.cursor()
-
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
         else:
             cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
-
         rows = cur.fetchall()
         conn.close()
         data = []
-
         for row in rows:
             data.append({
                 'Дата_рассылки': row[0],
@@ -460,7 +460,6 @@ def get_app():
                 'Основной_контакт': row[3],
                 'Копия': row[4]
             })
-
         return render_template('data_release.html', data=data)
         
     return app
