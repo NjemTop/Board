@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 import logging
 import os
 import platform
+from docxtpl import DocxTemplate
 import string
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -25,6 +26,7 @@ from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
 from ButtonClasses.button_clients import ButtonClients
+from Report_client.formirovanie_otcheta_tele2 import create_report_tele2
 
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -386,68 +388,27 @@ def inline_button(call):
         bot.edit_message_text('Для просмотра списка клиентов, пожалуйста, перейдите по ссылке:\nhttps://apps.boardmaps.ru/app/creg/page1-63bd167887eafa565f728b82.', call.message.chat.id, call.message.message_id,reply_markup=button_list_of_clients)
     # УРОВЕНЬ 3 "ВЕРСИИ КЛИЕНТОВ". Добавляем кнопки [Общий список версий] / [Узнать версию клиента]
     elif call.data == "button_clients_version":
-        button_clients_version = types.InlineKeyboardMarkup()
-        button_version_main_list = types.InlineKeyboardButton(text='Общий список версий', callback_data='button_version_main_list')
-        button_version = types.InlineKeyboardButton(text= 'Узнать версию клиента', callback_data='button_version')
-        button_clients_version.add(button_version_main_list, button_version, row_width=2)
-        back_from_button_clients_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_clients_version.add(back_from_button_clients_version, main_menu, row_width=2)
+        button_clients_version = ButtonClients.button_clients_version()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_clients_version)
     ### УРОВЕНЬ 4 "ОБЩИЙ СПИСОК ВЕРСИЙ". Добавляем ссылку на список
     elif call.data == "button_version_main_list":
-        button_version_main_list = types.InlineKeyboardMarkup()
-        back_from_button_version_main_list = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients_version')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_version_main_list.add(back_from_button_version_main_list, main_menu, row_width=2)
+        button_version_main_list = ButtonClients.button_version_main_list()
         bot.edit_message_text('Для просмотра списка версий клиентов, пожалуйста, перейдите по ссылке:\nhttps://apps.boardmaps.ru/app/creg/page1-63bd167887eafa565f728b82.', call.message.chat.id, call.message.message_id,reply_markup=button_version_main_list)
     ### УРОВЕНЬ 4 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА"
     elif call.data == "button_version":  
-        button_version = types.InlineKeyboardMarkup()
-        back_from_button_version = types.InlineKeyboardButton(text='Отмена', callback_data='button_clients_version') 
-        main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
-        button_version.add(back_from_button_version, main_menu, row_width=2)
-        test=bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
-        bot.register_next_step_handler(test,send_text_version)
-
+        button_version = ButtonClients.button_version()
+        bvers=bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
+        bot.register_next_step_handler(bvers,send_text_version)
     # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
-        button_templates = types.InlineKeyboardMarkup()
-        button_tele2 = types.InlineKeyboardButton(text='Теле2', callback_data='button_tele2')
-        button_psb = types.InlineKeyboardButton(text='ПСБ', callback_data='button_psb')
-        button_rez = types.InlineKeyboardButton(text='РЭЦ', callback_data='button_rez')
-        button_pochtaR = types.InlineKeyboardButton(text='Почта России', callback_data='button_pochtaR')
-        button_templates.add(button_tele2, button_psb, button_rez, button_pochtaR, row_width=2)
-        back_from_button_templates = types.InlineKeyboardButton(text='Назад', callback_data='button_clients')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_templates.add(back_from_button_templates, main_menu, row_width=2)
+        button_templates = ButtonClients.button_templates()
         bot.edit_message_text('Шаблон какого клиента необходимо выгрузить?', call.message.chat.id, call.message.message_id,reply_markup=button_templates)
     ### УРОВЕНЬ 4 "ТЕЛЕ2" 
     elif call.data == "button_tele2":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        setup_script = 'Report_tele2.ps1'
-        try:
-            result_tele2 = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
-            # Записываем в лог информацию о пользователе, сформировавшем отчет
-            xml_data = None
-            with open('data.xml', encoding='utf-8-sig') as file_data:
-                xml_data = file_data.read()
-                root = ET.fromstring(xml_data)
-                chat_id = root.find('chat_id').text
-                if str(call.message.chat.id) == chat_id:
-                    name = root.find('header_footer/name').text
-                    info_logger.info("Пользователь: %s сформировал отчет.", name)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
-            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
-        else:
-            if platform.system() == 'Windows':
-                # формируем путь к файлу отчета в директории AppData\Local
-                report_path = os.path.join(local_appdata_path, 'Report_tele2.docx').replace('\\', '/')
-            elif platform.system() == 'Linux':
-                report_path = os.path.join(local_appdata_path, 'Report_tele2.docx')
-            with open(report_path, 'rb') as report_file:
-                bot.send_document(call.message.chat.id, report_file)
+        client_report_id = 9
+        docx = DocxTemplate("Temp_report_tele2.docx")
+        create_report_tele2(client_report_id, docx)
     
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
