@@ -57,7 +57,7 @@ def create_report_tele2(client_report_id, docx):
     """Функция ... """
     ### ЗАПОЛНЯЕМ ШАПКУ
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
-    today = datetime.now().date().strftime('%d %B %Y')
+    today = datetime.now().date().strftime('%d %B %Y').encode('latin1').decode('utf-8')
     # start_date
     # end_date
     auth, headers, param, pages_len = auth_hf_tele2(client_report_id)
