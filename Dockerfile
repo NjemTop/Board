@@ -5,6 +5,14 @@ RUN wget -q https://packages.microsoft.com/config/debian/10/packages-microsoft-p
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt-get update && apt-get install -y powershell
 
+# Устанавливаем локаль ru_RU.UTF-8
+RUN apt-get update && \
+    apt-get install -y locales && \
+    locale-gen ru_RU.UTF-8
+ENV LANG ru_RU.UTF-8
+ENV LANGUAGE ru_RU:en
+ENV LC_ALL ru_RU.UTF-8
+
 # Копируем файлы проекта в контейнер
 COPY . /app
 
