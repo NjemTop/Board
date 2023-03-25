@@ -399,6 +399,17 @@ def inline_button(call):
         button_version = ButtonClients.button_version()
         bvers=bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
         bot.register_next_step_handler(bvers,send_text_version)
+        # Сохраняем chat_id, чтобы использовать его в обработчиках "Отмена" и "Главное меню"
+        bot.chat_id_in_process = call.message.chat.id
+    # Обработчик кнопки "Отмена"
+    elif call.data == "cancel":
+        bot.clear_step_handler_by_chat_id(bot.chat_id_in_process)
+        bot.edit_message_text('Вы отменили действие.', call.message.chat.id, call.message.message_id)  
+    # Обработчик кнопки "Главное меню"
+    elif call.data == "mainmenu":
+        bot.clear_step_handler_by_chat_id(bot.chat_id_in_process)
+        main_menu = ButtonClients.main_menu()
+        bot.edit_message_text('Вы вернулись в главное меню.', call.message.chat.id, call.message.message_id,reply_markup=main_menu)
     # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
         button_templates = ButtonClients.button_templates()
