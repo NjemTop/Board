@@ -352,7 +352,8 @@ def sd_sb_message(message_update):
     else:
         bot.send_message(message_update.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-@bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_SD_update"])
+@bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
+        "button_version", "cancel_button_version", "button_templates", "button_tele2", "button_psb", "button_rez", "button_pochtaR"])
 # Добавляем подуровни к разделу Клиенты
 def inline_button_clients(call):
     """Функция возврата в главное меню. Кнопки [Клиенты] / [Обновление версии]"""
@@ -446,7 +447,7 @@ def inline_button_clients(call):
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
 @bot.callback_query_handler(func=lambda call: call.data.startswith("button_SD_update"))
-def inline_button_update(call):
+def inline_button_SD_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
         button_SD_update = ButtonUpdate.button_SD_update()
