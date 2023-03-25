@@ -88,6 +88,8 @@ NEXTCLOUD_PASSWORD = DATA["NEXT_CLOUD"]["PASSWORD"]
 
 # Создаем бота
 bot=telebot.TeleBot(TOKEN)
+# Переменная состояния для пользователей
+user_states = {}
 
 # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
 def send_telegram_message(alert_chat_id, alert_text):
@@ -397,14 +399,12 @@ def inline_button(call):
     ### УРОВЕНЬ 4 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА"
     elif call.data == "button_version":  
         button_version = ButtonClients.button_version()
-        bvers=bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
+        bvers = bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
+        user_states[call.message.chat.id] = "waiting_for_client_name"
         bot.register_next_step_handler(bvers,send_text_version)
-        # Сохраняем chat_id, чтобы использовать его в обработчиках "Отмена" и "Главное меню"
-        bot.chat_id_in_process = call.message.chat.id
-    # Обработчик кнопки "Отмена"
-    elif call.data == "cancel":
-        bot.clear_step_handler_by_chat_id(bot.chat_id_in_process)
-        bot.edit_message_text('Вы отменили действие.', call.message.chat.id, call.message.message_id)  
+    elif call.data == "cancel_button_version":
+        user_states[call.message.chat.id] = "canceled"
+
     # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
         button_templates = ButtonClients.button_templates()
@@ -690,37 +690,41 @@ def on_cances_button(call):
 # ФУНКЦИИ К КНОПКЕ ВЕРСИИ КЛИЕНТА
 def send_text_version(result_client_version):
     """Функция по созданию списка версий и формирования ответа"""
-    bot.add_poll_answer_handler
-    url = API_ENDPOINT + '/contact_groups/'
-    res = requests.get(url,auth=auth, headers=headers).json()
-    global list_info_zero
-    list_info_zero = []
-    for person in res:
-        list_name = person.get('name')
-        list_version = person.get('description')
-        if '---' in str(list_version):
-            continue
+    user_state = user_states.get(result_client_version.chat.id)
+    if user_state == "waiting_for_client_name":
+        bot.add_poll_answer_handler
+        url = API_ENDPOINT + '/contact_groups/'
+        res = requests.get(url,auth=auth, headers=headers).json()
+        global list_info_zero
+        list_info_zero = []
+        for person in res:
+            list_name = person.get('name')
+            list_version = person.get('description')
+            if '---' in str(list_version):
+                continue
+            else:
+                list_info_zero.append(list_name + ': ' + str(list_version))
+        if result_client_version.text.lower() in str(list_info_zero).lower():
+            counter = 0
+            list = []
+            for i in range (len(list_info_zero)):
+                if result_client_version.text.lower() in str(list_info_zero[i]).lower():
+                    counter += 1
+                    list.append(list_info_zero[i])
+            if counter == 1:
+                button_version = ButtonClients.button_version_answer()
+                question = (''.join(map(str, list)) + '\nХотите запросить версию другого клиента?')
+                bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version) 
+            elif counter > 1:
+                button_version = ButtonClients.button_version_answer()
+                question = ('В списке клиентов обнаружено несколько совпадений c запросом "' + result_client_version.text + '":\n' + ('\n'.join(map(str, list))) + '\nХотите запросить версию другого клиента?')
+                bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version)
         else:
-            list_info_zero.append(list_name + ': ' + str(list_version))
-    if result_client_version.text.lower() in str(list_info_zero).lower():
-        counter = 0
-        list = []
-        for i in range (len(list_info_zero)):
-            if result_client_version.text.lower() in str(list_info_zero[i]).lower():
-                counter += 1
-                list.append(list_info_zero[i])
-        if counter == 1:
             button_version = ButtonClients.button_version_answer()
-            question = (''.join(map(str, list)) + '\nХотите запросить версию другого клиента?')
+            question = 'Не найдено совпадений.\nХотите направить запрос ещё раз?'
             bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version) 
-        elif counter > 1:
-            button_version = ButtonClients.button_version_answer()
-            question = ('В списке клиентов обнаружено несколько совпадений c запросом "' + result_client_version.text + '":\n' + ('\n'.join(map(str, list))) + '\nХотите запросить версию другого клиента?')
-            bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version)
     else:
-        button_version = ButtonClients.button_version_answer()
-        question = 'Не найдено совпадений.\nХотите направить запрос ещё раз?'
-        bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version) 
+        pass
 
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
 @bot.chosen_inline_handler(func=lambda result_GP_update_version: True)
