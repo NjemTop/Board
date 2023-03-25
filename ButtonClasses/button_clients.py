@@ -55,3 +55,13 @@ class ButtonClients():
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_templates.add(back_from_button_templates, main_menu, row_width=2)
         return button_templates
+
+    def button_version_answer():
+        """Функция по созданию списка версий и формирования ответа"""
+        button_version = types.InlineKeyboardMarkup()
+        button_version_reply = types.InlineKeyboardButton(text= 'Запросить', callback_data='button_version')
+        button_version.add(button_version_reply, row_width=1)
+        back_from_result_client_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients_version')
+        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+        button_version.add(back_from_result_client_version, main_menu, row_width=2)
+        return button_version

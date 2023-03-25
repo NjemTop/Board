@@ -410,7 +410,6 @@ def inline_button(call):
         create_report_tele2(client_report_id)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
-    
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -437,7 +436,6 @@ def inline_button(call):
                 report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_ПСБ.docx')
             with open(report_path, 'rb') as report_file:
                 bot.send_document(call.message.chat.id, report_file)
-
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -702,30 +700,15 @@ def send_text_version(result_client_version):
                 counter += 1
                 list.append(list_info_zero[i])
         if counter == 1:
-            button_version = types.InlineKeyboardMarkup()
-            button_version_reply = types.InlineKeyboardButton(text= 'Запросить', callback_data='button_version')
-            button_version.add(button_version_reply, row_width=1)
-            back_from_result_client_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients_version')
-            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-            button_version.add(back_from_result_client_version, main_menu, row_width=2)
+            button_version = ButtonClients.button_version_answer()
             question = (''.join(map(str, list)) + '\nХотите запросить версию другого клиента?')
             bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version) 
         elif counter > 1:
-            button_version = types.InlineKeyboardMarkup()
-            button_version_reply = types.InlineKeyboardButton(text= 'Запросить', callback_data='button_version')
-            button_version.add(button_version_reply, row_width=1)
-            back_from_result_client_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients_version')
-            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-            button_version.add(back_from_result_client_version, main_menu, row_width=2)
+            button_version = ButtonClients.button_version_answer()
             question = ('В списке клиентов обнаружено несколько совпадений c запросом "' + result_client_version.text + '":\n' + ('\n'.join(map(str, list))) + '\nХотите запросить версию другого клиента?')
             bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version)
     else:
-        button_version = types.InlineKeyboardMarkup()
-        button_version_reply = types.InlineKeyboardButton(text= 'Запросить', callback_data='button_version')
-        button_version.add(button_version_reply, row_width=1)
-        back_from_result_client_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients_version')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_version.add(back_from_result_client_version, main_menu, row_width=2)
+        button_version = ButtonClients.button_version_answer()
         question = 'Не найдено совпадений.\nХотите направить запрос ещё раз?'
         bot.send_message(result_client_version.from_user.id, text=question, reply_markup=button_version) 
 
