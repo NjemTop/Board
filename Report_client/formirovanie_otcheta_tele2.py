@@ -5,8 +5,6 @@ import requests
 
 def auth_hf_tele2(client_report_id):
     ############################## ШАБЛОН ДЛЯ ТЕЛЕ2
-    ## Создаем файл и делаем русскую локализацию для даты
-    locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     ## Авторизация в HappyFox и нахождение кол-ва страниц по url первой страницы
     auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
     headers = {'Content-Type': 'application/json'}
@@ -53,8 +51,11 @@ def info_from_ticket_id(ticket_id, auth, headers, param):
     else:
         result  = 'Выполнено'
     return name_of_ticket, date_ticket_start, date_ticket_close, sla, result
-def create_report_tele2(client_report_id, docx):
+def create_report_tele2(client_report_id):
     """Функция ... """
+    ## Создаем файл и делаем русскую локализацию для даты
+    docx = DocxTemplate("./templates/Temp_report_tele2.docx")
+    locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     ### ЗАПОЛНЯЕМ ШАПКУ
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
