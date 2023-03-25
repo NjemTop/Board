@@ -39,7 +39,7 @@ class ButtonClients():
     def button_version():
         """ УРОВЕНЬ 4 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА" """
         button_version = types.InlineKeyboardMarkup()
-        back_from_button_version = types.InlineKeyboardButton(text='Отмена', callback_data='button_clients_version') 
+        back_from_button_version = types.InlineKeyboardButton(text='Отмена', callback_data='cancel_button_version') 
         main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
         button_version.add(back_from_button_version, main_menu, row_width=2)
         return button_version
