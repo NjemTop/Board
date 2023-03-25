@@ -368,9 +368,9 @@ def sd_gp_message(message_sd_gp):
     else:
         bot.send_message(message_sd_gp.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-# Добавляем подуровни к кнопкам выше
 @bot.callback_query_handler(func=lambda call: True)
-def inline_button(call):
+# Добавляем подуровни к разделу Клиенты
+def inline_button_clients(call):
     """Функция возврата в главное меню. Кнопки [Клиенты] / [ServiceDesk (Gold & Platinum)] / [ServiceDesk (Silver & Bronze)]"""
     if call.data == "mainmenu":
         main_menu = types.InlineKeyboardMarkup()
@@ -379,7 +379,6 @@ def inline_button(call):
         button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
         main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
         bot.edit_message_text('Главное меню:', call.message.chat.id, call.message.message_id, reply_markup=main_menu)
-    
 # УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны]
     elif call.data == "button_clients":
         button_clients = ButtonClients.button_clients()
@@ -455,7 +454,6 @@ def inline_button(call):
         #         report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx')
         #     with open(report_path, 'rb') as report_file:
         #         bot.send_document(call.message.chat.id, report_file)
-
     ### УРОВЕНЬ 4 "ПОЧТА РОССИИ" ///////////////////////////////////////// в работе
     elif call.data == "button_pochtaR":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -463,9 +461,10 @@ def inline_button(call):
         create_report_tele2(client_report_id)
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
-
+# Добавляем подуровни к разделу Обновление версии
+def inline_button_update(call):
 # УРОВЕНЬ 2 "SD (GOLD & PLATINUM)". Добавляем кнопки [Обновление версии приложения] / [Остальные тикеты]
-    elif call.data == "button_SD_Gold_Platinum":
+    if call.data == "button_SD_Gold_Platinum":
         button_SD_Gold_Platinum = types.InlineKeyboardMarkup()
         button_update_tickets_GP = types.InlineKeyboardButton(text='Обновление версии приложения (G&P)', callback_data='button_update_tickets_GP')
         button_else_GP = types.InlineKeyboardButton(text= 'Остальные тикеты (G&P)', callback_data='button_else_GP')
