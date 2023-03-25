@@ -177,9 +177,8 @@ def start_message(message_start):
         # Главное меню
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text='Клиенты', callback_data='button_clients')
-        button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDesk (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
-        button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
-        main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
+        button_SD_update = types.InlineKeyboardButton('Обновление версии', callback_data='button_SD_update')
+        main_menu.add(button_clients, button_SD_update, row_width=1)
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
     else:
         question_email = bot.send_message(message_start.chat.id,"Привет! Вашей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
@@ -314,9 +313,8 @@ def check_pass_answer(password_message, access_password, email_access):
             ## Показываем пользователю главное меню
             main_menu = types.InlineKeyboardMarkup()
             button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
-            button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDesk (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
-            button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
-            main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
+            button_SD_update = types.InlineKeyboardButton('Обновление версии', callback_data='button_SD_update')
+            main_menu.add(button_clients, button_SD_update, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
         elif password_message.text == '/start':
             start_message(password_message.chat.id)
@@ -345,40 +343,24 @@ def clients_message(message_clients):
     else:
         bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
 # Обработчик вызова /sd_sb
-@bot.message_handler(commands=['sd_sb'])
-def sd_sb_message(message_sd_sb):
-    """Функция вызова кнопки /sd_sb"""
-    if check_user_in_file(message_sd_sb.chat.id):
-        button_SD_Silver_Bronze = types.InlineKeyboardMarkup()
-        button_update_tickets_SB = types.InlineKeyboardButton(text='Обновление версии приложения (S&B)', callback_data='button_update_tickets_SB')
-        button_else_SB = types.InlineKeyboardButton(text= 'Остальные тикеты (S&B)', callback_data='button_else_SB')
-        button_SD_Silver_Bronze.add(button_update_tickets_SB, button_else_SB, row_width=1)
-        bot.send_message(message_sd_sb.chat.id, 'Выберите раздел:', reply_markup=button_SD_Silver_Bronze)
+@bot.message_handler(commands=['update'])
+def sd_sb_message(message_update):
+    """Функция вызова кнопки /update"""
+    if check_user_in_file(message_update.chat.id):
+        button_SD_update = ButtonUpdate.button_SD_update()
+        bot.send_message(message_update.chat.id, 'Выберите раздел:', reply_markup=button_SD_update)
     else:
-        bot.send_message(message_sd_sb.chat.id,"К сожалению, у Вас отсутствует доступ.")
-# Обработчик вызова /sd_gp
-@bot.message_handler(commands=['sd_gp'])
-def sd_gp_message(message_sd_gp):
-    """Функция вызова кнопки /sd_gp"""
-    if check_user_in_file(message_sd_gp.chat.id):
-        button_SD_Gold_Platinum = types.InlineKeyboardMarkup()
-        button_update_tickets_GP = types.InlineKeyboardButton(text='Обновление версии приложения (G&P)', callback_data='button_update_tickets_GP')
-        button_else_GP = types.InlineKeyboardButton(text= 'Остальные тикеты (G&P)', callback_data='button_else_GP')
-        button_SD_Gold_Platinum.add(button_update_tickets_GP, button_else_GP, row_width=1)
-        bot.send_message(message_sd_gp.chat.id,"Выберите раздел:", reply_markup=button_SD_Gold_Platinum)
-    else:
-        bot.send_message(message_sd_gp.chat.id,"К сожалению, у Вас отсутствует доступ.")
+        bot.send_message(message_update.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-@bot.callback_query_handler(func=lambda call: True)
+@bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients"])
 # Добавляем подуровни к разделу Клиенты
 def inline_button_clients(call):
-    """Функция возврата в главное меню. Кнопки [Клиенты] / [ServiceDesk (Gold & Platinum)] / [ServiceDesk (Silver & Bronze)]"""
+    """Функция возврата в главное меню. Кнопки [Клиенты] / [Обновление версии]"""
     if call.data == "mainmenu":
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
-        button_SD_Gold_Platinum = types.InlineKeyboardButton('ServiceDesk (Gold & Platinum)', callback_data='button_SD_Gold_Platinum')
-        button_SD_Silver_Bronze = types.InlineKeyboardButton('ServiceDesk (Silver & Bronze)', callback_data='button_SD_Silver_Bronze')
-        main_menu.add(button_clients, button_SD_Gold_Platinum, button_SD_Silver_Bronze, row_width=1)
+        button_update = types.InlineKeyboardButton(text= 'Обновление версии', callback_data='button_SD_update')
+        main_menu.add(button_clients, button_update, row_width=1)
         bot.edit_message_text('Главное меню:', call.message.chat.id, call.message.message_id, reply_markup=main_menu)
 # УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны]
     elif call.data == "button_clients":
@@ -463,6 +445,7 @@ def inline_button_clients(call):
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
+@bot.callback_query_handler(func=lambda call: call.data.startswith("button_SD"))
 def inline_button_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
@@ -480,7 +463,7 @@ def inline_button_update(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов с запросом сервисного окна. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+        bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
         setup_script = Path('Automatic_email.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
@@ -505,11 +488,10 @@ def inline_button_update(call):
             # Отправляем вывод всего результата в телеграмм бота
             bot.send_document(call.message.chat.id, file_send)
         button_choise_yes = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes.add(back_from_button_choise_yes, main_menu, row_width=2)
+        button_choise_yes.add(main_menu, row_width=2)
         info_logger.info("Рассылка клиентам успешно отправлена.")
-        bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты с запросом сервисного окна созданы. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes)   
+        bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes)   
         try:
             os.remove(f'/app/logs/report_send({version_release}).log')
         except FileNotFoundError as error_message:
@@ -552,7 +534,6 @@ def inline_button_update(call):
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
         bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
-
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
 @bot.chosen_inline_handler(func=lambda result_update_version: True)
 def send_text_for_create(result_update_version):
@@ -562,13 +543,7 @@ def send_text_for_create(result_update_version):
         global version_release
         version_release = result_update_version.text 
         if '.' in version_release:
-            button_release = types.InlineKeyboardMarkup()
-            button_choise_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes')
-            button_release.add(button_choise_yes, row_width=1)
-            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
-            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-            button_release.add(back_from_result_update_version, main_menu, row_width=2)
-            question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_release)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
+            button_release, question = ButtonUpdate.button_release(version_release)
             bot.send_message(result_update_version.from_user.id, text=question, reply_markup=button_release)   
         else:
             button_release = types.InlineKeyboardMarkup()
@@ -588,12 +563,11 @@ def send_text_for_stat_update(result_update_statistic):
         global version_stat
         version_stat = result_update_statistic.text 
         if '.' in version_stat:
-            question = 'Формируем статистику по версии релиза "' + str(version_stat)  + '"?'
-            button_update_statistics = ButtonUpdate.button_update_statistics()
+            button_update_statistics, question = ButtonUpdate.button_update_statistics(version_stat)
             bot.send_message(result_update_statistic.from_user.id, text=question, reply_markup=button_update_statistics) 
         else:
             button_update_statistics = types.InlineKeyboardMarkup()
-            back_from_result_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_statistics')
+            back_from_result_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_update')
             main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
             button_update_statistics.add(back_from_result_update_statistic, main_menu, row_width=2)
             bot.send_message(result_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics) 
@@ -658,7 +632,6 @@ def send_text_version(result_client_version):
 #         bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_statistics_else_tickets_SB)
 
 
-@bot.chosen_inline_handler(func=lambda result_SB_update_statistic: True)    
 def start_telegram_bot():
     """"Функция запуска телебота"""
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

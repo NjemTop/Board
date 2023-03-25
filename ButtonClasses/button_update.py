@@ -17,7 +17,16 @@ class ButtonUpdate():
         button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update')
         button_release.add(button_release_cancel, row_width=1)
         return button_release
-    
+    def correct_version_release(version_release):
+        button_release = types.InlineKeyboardMarkup()
+        button_choise_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes')
+        button_release.add(button_choise_yes, row_width=1)
+        back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
+        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+        button_release.add(back_from_result_update_version, main_menu, row_width=2)
+        question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_release)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
+        return button_release, question
+
     def button_localizable():
         """переход к списку клиентов для создания файла локализации"""
         button_localizable = types.InlineKeyboardMarkup()
@@ -69,10 +78,11 @@ class ButtonUpdate():
         button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_reply_request')
         button_reply_request.add(button_reply_request_yes, button_reply_request_cancel, row_width=1)
         return button_reply_request
-    def button_update_statistics():
+    def button_update_statistics(version_stat):
         button_update_statistics = types.InlineKeyboardMarkup()
         button_update_statistics_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_update_statistics_yes')
         button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_update_statistics')
         button_update_statistics.add(button_update_statistics_yes, button_update_statistics_cancel, row_width=1)
-        return button_update_statistics
+        question = 'Формируем статистику по версии релиза "' + str(version_stat)  + '"?'
+        return button_update_statistics, question
     
