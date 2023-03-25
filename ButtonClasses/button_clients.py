@@ -9,8 +9,7 @@ class ButtonClients():
         button_templates = types.InlineKeyboardButton(text='Статистика по тикетам за период (шаблоны)', callback_data='button_templates')
         button_clients.add(button_list_of_clients, button_clients_version, button_templates, row_width=1)
         back_from_button_clients = types.InlineKeyboardButton(text='Назад', callback_data='mainmenu')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_clients.add(back_from_button_clients, main_menu, row_width=2)
+        button_clients.add(back_from_button_clients, row_width=1)
         return button_clients
     def button_list_of_clients():
         """ УРОВЕНЬ 3. Вызов кнопки "СПИСОК КЛИЕНТОВ" """
