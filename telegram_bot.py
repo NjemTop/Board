@@ -447,7 +447,7 @@ def inline_button_clients(call):
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
 @bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable",
-            "button_reply_request", "button_reply_request_yes", "button_update_statistics_1", "button_update_statistics_yes"])
+            "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
 def inline_button_SD_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
@@ -526,12 +526,17 @@ def inline_button_SD_update(call):
         setup_script = 'Auto_ping_test.ps1'
         subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout)
         bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
-    elif call.data == "button_update_statistics_1":
+    elif call.data == "button_update_statistics":
         """ УРОВЕНЬ 3: СТАТИСТИКА ПО ОБНОВЛЕНИЮ """
-        
-        ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.60.', call.message.chat.id, call.message.message_id, reply_markup=ButtonUpdate.button_update_statistics_1())
+        button_update_statistics = ButtonUpdate.button_update_statistics()
+        ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.60.', call.message.chat.id, call.message.message_id, reply_markup=button_update_statistics)
         user_states[call.message.chat.id] = "waiting_for_client_name"
         bot.register_next_step_handler(ask_stat_number_version, send_text_for_stat_update)
+    elif call.data == "cancel_SD_update_statistics":
+        user_states[call.message.chat.id] = "canceled"
+        # Возвращаемся на уровень выше
+        button_SD_update = ButtonUpdate.button_SD_update()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
     elif call.data == "button_update_statistics_yes":
         """ ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам update """
         bot.edit_message_text('Отлично! Произвожу расчеты. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
@@ -572,8 +577,8 @@ def send_text_for_stat_update(result_update_statistic):
         global version_stat
         version_stat = result_update_statistic.text 
         if '.' in version_stat:
-            button_update_statistics, question = ButtonUpdate.button_update_statistics(version_stat)
-            bot.send_message(result_update_statistic.from_user.id, text=question, reply_markup=button_update_statistics) 
+            button_update_statistics1, question = ButtonUpdate.button_update_statistics1(version_stat)
+            bot.send_message(result_update_statistic.from_user.id, text=question, reply_markup=button_update_statistics1) 
         else:
             button_update_statistics = types.InlineKeyboardMarkup()
             back_from_result_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_update')

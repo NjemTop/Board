@@ -79,15 +79,13 @@ class ButtonUpdate():
         button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_SD_update')
         button_reply_request.add(button_reply_request_yes, button_reply_request_cancel, row_width=1)
         return button_reply_request
-    @staticmethod
-    def button_update_statistics_1():
-        button_update_statistics_1 = types.InlineKeyboardMarkup()
-        button_yes = types.InlineKeyboardButton(text='Да', callback_data='button_update_statistics_yes')
-        button_no = types.InlineKeyboardButton(text='Нет', callback_data='button_update_statistics_no')
-        button_update_statistics_1.add(button_yes, button_no, row_width=2)
-        return button_update_statistics_1
     
-    def button_update_statistics(version_stat):
+    def button_update_statistics():
+        button_update_statistics = types.InlineKeyboardMarkup()
+        button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update_statistics')
+        button_update_statistics.add(button_update_statistics_cancel, row_width=1)
+        return button_update_statistics
+    def button_update_statistics1(version_stat):
         button_update_statistics = types.InlineKeyboardMarkup()
         button_update_statistics_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_update_statistics_yes')
         button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_SD_update')
