@@ -34,10 +34,12 @@ class ButtonUpdate():
         button_GPB = types.InlineKeyboardButton(text='ГПБ', callback_data='button_GPB')
         button_Alfa = types.InlineKeyboardButton(text='Альфа-Банк', callback_data='button_Alfa')
         button_IBS = types.InlineKeyboardButton(text='IBS', callback_data='button_IBS')
-        button_localizable.add(button_AFK, button_GPB, button_Alfa, button_IBS, row_width=2)
+        localizable_button = types.InlineKeyboardButton(text='Локализация', callback_data='button_localizable')
+        button_localizable.add(button_AFK, button_GPB, button_Alfa, button_IBS, localizable_button, row_width=2)
         back_from_button_SD_update = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_update')
         button_localizable.add(back_from_button_SD_update, row_width=2)
         return button_localizable
+
     def button_AFK_localizable():
         button_AFK_localizable = types.InlineKeyboardMarkup()
         button_AFK_loc_IPad = types.InlineKeyboardButton(text= 'Локализация для iPad', callback_data='button_AFK_loc_IPad')
