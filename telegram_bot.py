@@ -366,8 +366,6 @@ def sd_gp_message(message_sd_gp):
     else:
         bot.send_message(message_sd_gp.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-bot.version_button_state = False
-
 # Добавляем подуровни к кнопкам выше
 @bot.callback_query_handler(func=lambda call: True)
 def inline_button(call):
@@ -401,20 +399,12 @@ def inline_button(call):
         button_version = ButtonClients.button_version()
         bvers=bot.edit_message_text('Просьба отправить в чат сообщение с наименованием клиента, версию которого Вы хотите узнать.', call.message.chat.id, call.message.message_id,reply_markup=button_version)
         bot.register_next_step_handler(bvers,send_text_version)
-        bot.version_button_state = True  # сохраняем состояние
-        
-    elif bot.version_button_state:  # если в состоянии обработки кнопки "Узнать версию клиента"
-        if call.data == "cancel":
-            bot.version_button_state = False
-            bot.clear_step_handler_by_chat_id(call.message.chat.id)
-            bot.edit_message_text('Вы отменили действие.', call.message.chat.id, call.message.message_id)
-        elif call.data == "mainmenu":
-            bot.version_button_state = False
-            bot.clear_step_handler_by_chat_id(call.message.chat.id)
-            main_menu = ButtonClients.main_menu()
-            bot.edit_message_text('Вы вернулись в главное меню.', call.message.chat.id, call.message.message_id,reply_markup=main_menu)
-        else:
-            send_text_version(call.message)  # обрабатываем ввод пользователя только в состоянии обработки кнопки "Узнать версию клиента"
+        # Сохраняем chat_id, чтобы использовать его в обработчиках "Отмена" и "Главное меню"
+        bot.chat_id_in_process = call.message.chat.id
+    # Обработчик кнопки "Отмена"
+    elif call.data == "cancel":
+        bot.clear_step_handler_by_chat_id(bot.chat_id_in_process)
+        bot.edit_message_text('Вы отменили действие.', call.message.chat.id, call.message.message_id)  
     # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
         button_templates = ButtonClients.button_templates()
@@ -691,6 +681,10 @@ def inline_button(call):
         button_update_statistics_yes_SB.add(back_from_button_update_statistics_yes_SB, main_menu, row_width=2)
         bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics_yes_SB)
 
+@bot.callback_query_handler(func=lambda call: call.data == 'back_from_button_version')
+def on_cances_button(call):
+    bot.send_message(call.from_user.id, text="Действие отменено. Выберите другую опцию или введите новый запрос.")
+
 # УРОВЕНЬ 3 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА" - ФОРМИРОВАНИЕ СПИСКА И ВЫЗОВ ФУНКЦИИ:
 @bot.chosen_inline_handler(func=lambda result_client_version: True)
 # ФУНКЦИИ К КНОПКЕ ВЕРСИИ КЛИЕНТА
@@ -751,7 +745,6 @@ def send_text_for_create_GP(result_GP_update_version):
         bot.send_message(result_GP_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_create_tickets_GP) 
 
 @bot.chosen_inline_handler(func=lambda result_SB_update_version: True) 
-
 def send_text_for_create_SB(result_SB_update_version):
     """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
     global version_SB
@@ -774,7 +767,6 @@ def send_text_for_create_SB(result_SB_update_version):
 
 # ФУНКЦИИ К КНОПКЕ ФОРМИРОВАНИЯ СТАТИСТИКИ []
 @bot.chosen_inline_handler(func=lambda result_SB_update_statistic: True) 
-
 def send_text_for_stat_update_SB(result_SB_update_statistic):
     """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
     global version_stat
