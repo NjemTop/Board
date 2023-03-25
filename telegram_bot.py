@@ -407,9 +407,11 @@ def inline_button(call):
     elif call.data == "button_tele2":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         client_report_id = 9
-        docx = DocxTemplate("Temp_report_tele2.docx")
+        docx = DocxTemplate("./templates/Temp_report_tele2.docx")
         create_report_tele2(client_report_id, docx)
-    
+        with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
+                bot.send_document(call.message.chat.id, report_file)
+
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')

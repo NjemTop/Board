@@ -77,5 +77,5 @@ def create_report_tele2(client_report_id, docx):
     context = {'today' : today, 'table_rows': table_rows}
     docx.render(context)
     # сохраняем файл
-    docx.save("Temp_report_tele2_final.docx")
+    docx.save("./Temp_report_tele2_final.docx")
 
