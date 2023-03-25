@@ -446,7 +446,7 @@ def inline_button_clients(call):
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
-@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", 
+@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "localizable", "button_AFK_localizable",
             "button_reply_request", "button_reply_request_yes", "button_update_statistics", "button_update_statistics_yes"])
 def inline_button_SD_update(call):
     if call.data == "button_SD_update":
@@ -510,6 +510,12 @@ def inline_button_SD_update(call):
         # Возвращаемся на уровень выше
         button_SD_update = ButtonUpdate.button_SD_update()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
+    elif call.data == "localizable":
+        button_localizable = ButtonUpdate.button_localizable()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_localizable)
+    elif call.data == "button_AFK_localizable":
+        button_AFK_localizable = ButtonUpdate.button_AFK_localizable()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_AFK_localizable)
     elif call.data == "button_reply_request":
         """ УРОВЕНЬ 3: ПОВТОРНЫЙ ЗАПРОС СЕРВИСНОГО ОКНА" (G&P) """
         button_reply_request = ButtonUpdate.button_reply_request()

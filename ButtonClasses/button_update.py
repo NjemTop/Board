@@ -75,7 +75,7 @@ class ButtonUpdate():
         """переход к вопросу "Вы собираетесь запустить повторную отправку запросов. и дальше по списку"""
         button_reply_request = types.InlineKeyboardMarkup()
         button_reply_request_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_reply_request_yes')
-        button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_reply_request')
+        button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_release')
         button_reply_request.add(button_reply_request_yes, button_reply_request_cancel, row_width=1)
         return button_reply_request
     def button_update_statistics(version_stat):
