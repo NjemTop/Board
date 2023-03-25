@@ -24,6 +24,7 @@ from writexml import create_xml
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
+from ButtonClasses.button_clients import ButtonClients
 
 # создаем форматирование
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -377,21 +378,11 @@ def inline_button(call):
     
 # УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны]
     elif call.data == "button_clients":
-        button_clients = types.InlineKeyboardMarkup()
-        button_list_of_clients = types.InlineKeyboardButton(text='Список клиентов', callback_data='button_list_of_clients')
-        button_clients_version = types.InlineKeyboardButton(text='Версии клиентов', callback_data='button_clients_version')
-        button_templates = types.InlineKeyboardButton(text='Статистика по тикетам за период (шаблоны)', callback_data='button_templates')
-        button_clients.add(button_list_of_clients, button_clients_version, button_templates, row_width=2)
-        back_from_button_clients = types.InlineKeyboardButton(text='Назад', callback_data='mainmenu')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_clients.add(back_from_button_clients, main_menu, row_width=2)
+        button_clients = ButtonClients.button_clients()
         bot.edit_message_text('Какую информацию хотите получить?', call.message.chat.id, call.message.message_id,reply_markup=button_clients)
     # УРОВЕНЬ 3. Вызов кнопки "СПИСОК КЛИЕНТОВ"
     elif call.data == 'button_list_of_clients':
-        button_list_of_clients = types.InlineKeyboardMarkup()
-        back_from_button_list_of_clients = types.InlineKeyboardButton(text= 'Назад', callback_data='button_clients')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_list_of_clients.add(back_from_button_list_of_clients, main_menu, row_width=2)
+        button_list_of_clients = ButtonClients.button_list_of_clients()
         bot.edit_message_text('Для просмотра списка клиентов, пожалуйста, перейдите по ссылке:\nhttps://apps.boardmaps.ru/app/creg/page1-63bd167887eafa565f728b82.', call.message.chat.id, call.message.message_id,reply_markup=button_list_of_clients)
     # УРОВЕНЬ 3 "ВЕРСИИ КЛИЕНТОВ". Добавляем кнопки [Общий список версий] / [Узнать версию клиента]
     elif call.data == "button_clients_version":
