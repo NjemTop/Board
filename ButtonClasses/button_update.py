@@ -75,13 +75,13 @@ class ButtonUpdate():
         """переход к вопросу "Вы собираетесь запустить повторную отправку запросов. и дальше по списку"""
         button_reply_request = types.InlineKeyboardMarkup()
         button_reply_request_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_reply_request_yes')
-        button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_release')
+        button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_SD_update')
         button_reply_request.add(button_reply_request_yes, button_reply_request_cancel, row_width=1)
         return button_reply_request
     def button_update_statistics(version_stat):
         button_update_statistics = types.InlineKeyboardMarkup()
         button_update_statistics_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_update_statistics_yes')
-        button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_update_statistics')
+        button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='button_SD_update')
         button_update_statistics.add(button_update_statistics_yes, button_update_statistics_cancel, row_width=1)
         question = 'Формируем статистику по версии релиза "' + str(version_stat)  + '"?'
         return button_update_statistics, question

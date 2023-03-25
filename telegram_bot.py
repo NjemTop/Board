@@ -528,7 +528,8 @@ def inline_button_SD_update(call):
         bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
     elif call.data == "button_update_statistics":
         """ УРОВЕНЬ 3: СТАТИСТИКА ПО ОБНОВЛЕНИЮ """
-        ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.61.', call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
+        button_update_statistics = ButtonUpdate.button_update_statistics()
+        ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
         user_states[call.message.chat.id] = "waiting_for_client_name"
         bot.register_next_step_handler(ask_stat_number_version, send_text_for_stat_update)
     elif call.data == "button_update_statistics_yes":
