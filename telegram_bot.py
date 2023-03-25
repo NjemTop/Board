@@ -421,58 +421,48 @@ def inline_button(call):
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        setup_script = 'Скрипт_формирования_отчёта_клиента_ПСБ.ps1'
-        try:
-            result_psb = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
-            # Записываем в лог информацию о пользователе, сформировавшем отчет
-            xml_data = None
-            with open('data.xml', encoding='utf-8-sig') as file_data:
-                xml_data = file_data.read()
-                root = ET.fromstring(xml_data)
-                chat_id = root.find('chat_id').text
-                if str(call.message.chat.id) == chat_id:
-                    name = root.find('header_footer/name').text
-                    info_logger.info("Пользователь: %s сформировал отчет.", name)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
-            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
-        else:
-            if platform.system() == 'Windows':
-                # формируем путь к файлу отчета в директории AppData\Local
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_ПСБ.docx').replace('\\', '/')
-            elif platform.system() == 'Linux':
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_ПСБ.docx')
-            with open(report_path, 'rb') as report_file:
-                bot.send_document(call.message.chat.id, report_file)
+        client_report_id = 11
+        create_report_tele2(client_report_id)
+        with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
+            bot.send_document(call.message.chat.id, report_file)
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        setup_script = 'Скрипт_формирования_отчёта_клиента_РЭЦ.ps1'
-        try:
-            result_rez = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
-            # Записываем в лог информацию о пользователе, сформировавшем отчет
-            xml_data = None
-            with open('data.xml', encoding='utf-8-sig') as file_data:
-                xml_data = file_data.read()
-                root = ET.fromstring(xml_data)
-                chat_id = root.find('chat_id').text
-                if str(call.message.chat.id) == chat_id:
-                    name = root.find('header_footer/name').text
-                    info_logger.info("Пользователь: %s сформировал отчет.", name)
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
-            bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
-        else:
-            if platform.system() == 'Windows':
-                # формируем путь к файлу отчета в директории AppData\Local
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx').replace('\\', '/')
-            elif platform.system() == 'Linux':
-                report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx')
-            with open(report_path, 'rb') as report_file:
-                bot.send_document(call.message.chat.id, report_file)
+        client_report_id = 12
+        create_report_tele2(client_report_id)
+        with open("./Temp_report_REC_final.docx", 'rb') as report_file:
+            bot.send_document(call.message.chat.id, report_file)
+        # setup_script = 'Скрипт_формирования_отчёта_клиента_РЭЦ.ps1'
+        # try:
+        #     result_rez = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
+        #     # Записываем в лог информацию о пользователе, сформировавшем отчет
+        #     xml_data = None
+        #     with open('data.xml', encoding='utf-8-sig') as file_data:
+        #         xml_data = file_data.read()
+        #         root = ET.fromstring(xml_data)
+        #         chat_id = root.find('chat_id').text
+        #         if str(call.message.chat.id) == chat_id:
+        #             name = root.find('header_footer/name').text
+        #             info_logger.info("Пользователь: %s сформировал отчет.", name)
+        # except subprocess.CalledProcessError as error_message:
+        #     error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
+        #     bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
+        # else:
+        #     if platform.system() == 'Windows':
+        #         # формируем путь к файлу отчета в директории AppData\Local
+        #         report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx').replace('\\', '/')
+        #     elif platform.system() == 'Linux':
+        #         report_path = os.path.join(local_appdata_path, 'Отчёт_клиента_РЭЦ.docx')
+        #     with open(report_path, 'rb') as report_file:
+        #         bot.send_document(call.message.chat.id, report_file)
 
     ### УРОВЕНЬ 4 "ПОЧТА РОССИИ" ///////////////////////////////////////// в работе
-    #elif call.data == "button_pochtaR": 
+    elif call.data == "button_pochtaR":
+        bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
+        client_report_id = 13
+        create_report_tele2(client_report_id)
+        with open("./Temp_report_PR_final.docx", 'rb') as report_file:
+            bot.send_document(call.message.chat.id, report_file)
 
 # УРОВЕНЬ 2 "SD (GOLD & PLATINUM)". Добавляем кнопки [Обновление версии приложения] / [Остальные тикеты]
     elif call.data == "button_SD_Gold_Platinum":

@@ -96,4 +96,4 @@ for ticket_id in all_tickets_id_list: # ticket_id - номер тикета
 context = {'today' : today, 'table_rows': table_rows}
 docx.render(context)
 # сохраняем файл
-docx.save("Temp_report_PSB_final.docx")
+docx.save("./Temp_report_PSB_final.docx")

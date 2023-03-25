@@ -224,7 +224,7 @@ for ticket_id in all_tickets_id_list:
 context = {'today' : today, 'table_rows' : table_rows}
 docx.render(context)
 # сохраняем файл
-docx.save("Temp_report_PR_final.docx")
+docx.save("./Temp_report_PR_final.docx")
 
 
 #### Нет разграничения по параметрам на новые и прошлого периода. Выводит все тиакеты. Парамс.
