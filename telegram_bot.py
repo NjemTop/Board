@@ -446,9 +446,9 @@ def inline_button_clients(call):
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
-@bot.callback_query_handler(func=lambda call: call.startswith("button_update") or call.data in ["button_release", "button_choise_yes", "cancel_SD_update", 
+@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", 
             "button_reply_request", "button_reply_request_yes", "button_update_statistics", "button_update_statistics_yes"])
-def inline_button_update(call):
+def inline_button_SD_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
         button_SD_update = ButtonUpdate.button_SD_update()
