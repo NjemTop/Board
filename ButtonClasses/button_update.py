@@ -1,0 +1,78 @@
+from telebot import types
+
+class ButtonUpdate():
+    def button_SD_update():
+        """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Локализация | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
+        button_SD_update = types.InlineKeyboardMarkup()
+        button_release = types.InlineKeyboardButton(text='Отправить рассылку', callback_data='button_release')
+        button_localizable = types.InlineKeyboardButton(text='Локализация', callback_data='button_localizable')
+        button_reply_request = types.InlineKeyboardButton(text='Повторный запрос сервисного окна (G&P)', callback_data='button_reply_request')
+        button_update_statistics = types.InlineKeyboardButton(text='Статистика по тикетам', callback_data='button_update_statistics')
+        back_from_mainmenu = types.InlineKeyboardButton(text= 'Назад', callback_data='mainmenu')
+        button_SD_update.add(button_release, button_localizable, button_reply_request, button_update_statistics, back_from_mainmenu, row_width=1)
+        return button_SD_update
+    def button_release():
+        """переход к вопросу "напишите номер версии". и дальше по списку"""
+        button_release = types.InlineKeyboardMarkup()
+        button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update')
+        button_release.add(button_release_cancel, row_width=1)
+        return button_release
+    
+    def button_localizable():
+        """переход к списку клиентов для создания файла локализации"""
+        button_localizable = types.InlineKeyboardMarkup()
+        button_AFK = types.InlineKeyboardButton(text='АФК', callback_data='button_AFK')
+        button_GPB = types.InlineKeyboardButton(text='ГПБ', callback_data='button_GPB')
+        button_Alfa = types.InlineKeyboardButton(text='Альфа-Банк', callback_data='button_Alfa')
+        button_IBS = types.InlineKeyboardButton(text='IBS', callback_data='button_IBS')
+        button_localizable.add(button_AFK, button_localizable, button_GPB, button_Alfa, button_IBS, row_width=2)
+        back_from_button_SD_update = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_update')
+        button_localizable.add(back_from_button_SD_update, row_width=2)
+        return button_localizable
+    def button_AFK_localizable():
+        button_AFK_localizable = types.InlineKeyboardMarkup()
+        button_AFK_loc_IPad = types.InlineKeyboardButton(text= 'Локализация для iPad', callback_data='button_AFK_loc_IPad')
+        button_AFK_loc_Web = types.InlineKeyboardButton(text= 'Локализация для Web', callback_data='button_AFK_loc_Web')
+        button_AFK_localizable.add(button_AFK_loc_IPad, button_AFK_loc_Web, row_width=1)
+        back_from_button_AFK_loc = types.InlineKeyboardButton(text= 'Назад', callback_data='button_localizable')
+        button_AFK_localizable.add(back_from_button_AFK_loc, row_width=1)
+        return button_AFK_localizable
+    def button_GPB_localizable():
+        button_GPB_localizable = types.InlineKeyboardMarkup()
+        button_GPB_loc_IPad = types.InlineKeyboardButton(text= 'Локализация для iPad', callback_data='button_GPB_loc_IPad')
+        button_GPB_loc_Web = types.InlineKeyboardButton(text= 'Локализация для Web', callback_data='button_GPB_loc_Web')
+        button_GPB_localizable.add(button_GPB_loc_IPad, button_GPB_loc_Web, row_width=1)
+        back_from_button_GPB_loc = types.InlineKeyboardButton(text= 'Назад', callback_data='button_localizable')
+        button_GPB_localizable.add(back_from_button_GPB_loc, row_width=1)
+        return button_GPB_localizable
+    def button_Alfa_localizable():
+        button_Alfa_localizable = types.InlineKeyboardMarkup()
+        button_Alfa_loc_IPad = types.InlineKeyboardButton(text= 'Локализация для iPad', callback_data='button_Alfa_loc_IPad')
+        button_Alfa_loc_Web = types.InlineKeyboardButton(text= 'Локализация для Web', callback_data='button_Alfa_loc_Web')
+        button_Alfa_localizable.add(button_Alfa_loc_IPad, button_Alfa_loc_Web, row_width=1)
+        back_from_button_Alfa_loc = types.InlineKeyboardButton(text= 'Назад', callback_data='button_localizable')
+        button_Alfa_localizable.add(back_from_button_Alfa_loc, row_width=1)
+        return button_Alfa_localizable
+    def button_IBS_localizable():
+        button_IBS_localizable = types.InlineKeyboardMarkup()
+        button_IBS_loc_IPad = types.InlineKeyboardButton(text= 'Локализация для iPad', callback_data='button_IBS_loc_IPad')
+        button_IBS_loc_Web = types.InlineKeyboardButton(text= 'Локализация для Web', callback_data='button_IBS_loc_Web')
+        button_IBS_localizable.add(button_IBS_loc_IPad, button_IBS_loc_Web, row_width=1)
+        back_from_button_IBS_loc = types.InlineKeyboardButton(text= 'Назад', callback_data='button_localizable')
+        button_IBS_localizable.add(back_from_button_IBS_loc, row_width=1)
+        return button_IBS_localizable
+    
+    def button_reply_request():
+        """переход к вопросу "Вы собираетесь запустить повторную отправку запросов. и дальше по списку"""
+        button_reply_request = types.InlineKeyboardMarkup()
+        button_reply_request_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_reply_request_yes')
+        button_reply_request_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_reply_request')
+        button_reply_request.add(button_reply_request_yes, button_reply_request_cancel, row_width=1)
+        return button_reply_request
+    def button_update_statistics():
+        button_update_statistics = types.InlineKeyboardMarkup()
+        button_update_statistics_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_update_statistics_yes')
+        button_update_statistics_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_update_statistics')
+        button_update_statistics.add(button_update_statistics_yes, button_update_statistics_cancel, row_width=1)
+        return button_update_statistics
+    

@@ -26,6 +26,7 @@ from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
 from ButtonClasses.button_clients import ButtonClients
+from ButtonClasses.button_update import ButtonUpdate
 from Report_client.formirovanie_otcheta_tele2 import create_report_tele2
 
 # создаем форматирование
@@ -463,149 +464,54 @@ def inline_button_clients(call):
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
 def inline_button_update(call):
-# УРОВЕНЬ 2 "SD (GOLD & PLATINUM)". Добавляем кнопки [Обновление версии приложения] / [Остальные тикеты]
-    if call.data == "button_SD_Gold_Platinum":
-        button_SD_Gold_Platinum = types.InlineKeyboardMarkup()
-        button_update_tickets_GP = types.InlineKeyboardButton(text='Обновление версии приложения (G&P)', callback_data='button_update_tickets_GP')
-        button_else_GP = types.InlineKeyboardButton(text= 'Остальные тикеты (G&P)', callback_data='button_else_GP')
-        button_SD_Gold_Platinum.add(button_update_tickets_GP, button_else_GP, row_width=1)
-        back_from_button_SD_Gold_Platinum = types.InlineKeyboardButton(text= 'Назад', callback_data='mainmenu')
-        button_SD_Gold_Platinum.add(back_from_button_SD_Gold_Platinum, row_width=1)
-        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_Gold_Platinum)
-    # УРОВЕНЬ 3 "ОБНОВЛЕНИЕ ВЕРСИИ ПРИЛОЖЕНИЯ" (G&P). Добавляем кнопки [Создать тикеты по списку] / [Повторный запрос сервисного окна]
-    elif call.data == "button_update_tickets_GP":
-        button_update_tickets_GP = types.InlineKeyboardMarkup()
-        button_create_tickets_GP = types.InlineKeyboardButton(text='Создать тикеты по списку (G&P)', callback_data='button_create_tickets_GP')
-        button_reply_request_GP = types.InlineKeyboardButton(text= 'Повторный запрос сервисного окна (G&P)', callback_data='button_reply_request_GP')
-        button_update_tickets_GP.add(button_create_tickets_GP, button_reply_request_GP, row_width=1)
-        back_from_button_update_tickets_GP = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_Gold_Platinum')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_update_tickets_GP.add(back_from_button_update_tickets_GP, main_menu, row_width=2)
-        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_update_tickets_GP)
-    ### УРОВЕНЬ 4 "СОЗДАТЬ ТИКЕТЫ ПО СПИСКУ" (G&P)
-    elif call.data == "button_create_tickets_GP":
-        button_create_tickets_GP = types.InlineKeyboardMarkup()
-        back_from_button_create_tickets_GP = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_tickets_GP.add(back_from_button_create_tickets_GP, main_menu, row_width=2)
-        create = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_create_tickets_GP)
-        bot.register_next_step_handler(create,send_text_for_create_GP)
-    ### УРОВЕНЬ 4 "ПОВТОРНЫЙ ЗАПРОС СЕРВИСНОГО ОКНА" (G&P)
-    elif call.data == "button_reply_request_GP":
-        button_reply_request_GP = types.InlineKeyboardMarkup()
-        button_reply_request_GP_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_reply_request_GP_yes')
-        button_reply_request_GP.add(button_reply_request_GP_yes, row_width=1)
-        back_from_button_reply_request_GP = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
-        button_reply_request_GP.add(back_from_button_reply_request_GP, main_menu, row_width=2)
-        bot.edit_message_text('Вы собираетесь запустить повторную отправку запросов на предоставление сервисного окна для Gold и Platinum клиентов. Подтвердите свой выбор.', call.message.chat.id, call.message.message_id,reply_markup=button_reply_request_GP)
-    #### УРОВЕНЬ 5: при нажатии кнопки ДА по повторной отправке запроса сервисного окна для G&P     
-    elif call.data == "button_reply_request_GP_yes":
-        bot.send_message(call.message.chat.id, text='Процесс запущен, ожидайте.')
-        setup_script = 'Auto_ping_test.ps1'
-        subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout)
-        bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
-    
-    # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (G&P) ///////////////////////////////////////////////// в работе
-    elif call.data == "button_else_GP":    
-        button_else_GP = types.InlineKeyboardMarkup()
-        back_from_button_else_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_SD_Gold_Platinum')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_else_GP.add(back_from_button_else_GP, main_menu, row_width=2)
-        bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_else_GP)
-# УРОВЕНЬ 2 "SD (SILVER & BRONZE)". Добавляем кнопки [Обновление версии приложения] / [Остальные тикеты]
-    elif call.data == "button_SD_Silver_Bronze":
-        button_SD_Silver_Bronze = types.InlineKeyboardMarkup()
-        button_update_tickets_SB = types.InlineKeyboardButton(text='Обновление версии приложения (S&B)', callback_data='button_update_tickets_SB')
-        button_else_SB = types.InlineKeyboardButton(text= 'Остальные тикеты (S&B)', callback_data='button_else_SB')
-        button_SD_Silver_Bronze.add(button_update_tickets_SB, button_else_SB, row_width=1)
-        back_from_button_SD_Silver_Bronze = types.InlineKeyboardButton(text= 'Назад', callback_data='mainmenu')
-        button_SD_Silver_Bronze.add(back_from_button_SD_Silver_Bronze, row_width=1)
-        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_Silver_Bronze)
-    # УРОВЕНЬ 3 "ОБНОВЛЕНИЕ ВЕРСИИ ПРИЛОЖЕНИЯ" (S&B). Добавляем кнопки [Создать тикеты по списку] / [Получить статистику по тикетам] 
-    elif call.data == "button_update_tickets_SB":
-        button_update_tickets_SB = types.InlineKeyboardMarkup()
-        button_create_update_tickets_SB = types.InlineKeyboardButton(text='Создать тикеты по списку (S&B)', callback_data='button_create_update_tickets_SB')
-        button_update_statistics_SB = types.InlineKeyboardButton(text= 'Получить статистику по тикетам (S&B)', callback_data='button_update_statistics_SB')
-        button_update_tickets_SB.add(button_create_update_tickets_SB, button_update_statistics_SB, row_width=1)
-        back_from_button_update_tickets_SB = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_Silver_Bronze')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_update_tickets_SB.add(back_from_button_update_tickets_SB, main_menu, row_width=2)
-        bot.edit_message_text('Какое действие необходимо выполнить?', call.message.chat.id, call.message.message_id,reply_markup=button_update_tickets_SB)
-    ### УРОВЕНЬ 4 "СОЗДАТЬ ТИКЕТЫ ПО СПИСКУ" (S&B) [ОБНОВЛЕНИЕ]
-    elif call.data == "button_create_update_tickets_SB":
-        button_create_update_tickets_SB = types.InlineKeyboardMarkup()
-        back_from_button_create_update_tickets_SB = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_tickets_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_update_tickets_SB.add(back_from_button_create_update_tickets_SB, main_menu, row_width=2)
-        choice = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_create_update_tickets_SB)
-        bot.register_next_step_handler(choice,send_text_for_create_SB)
-
-    ### УРОВЕНЬ 4 "ПОЛУЧИТЬ СТАТИСТИКУ ПО ТИКЕТАМ" (S&B) [ОБНОВЛЕНИЕ] 
-    elif call.data == "button_update_statistics_SB":
-        button_update_statistics_SB = types.InlineKeyboardMarkup()
-        back_from_button_update_statistics_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_update_tickets_SB')
-        main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
-        button_update_statistics_SB.add(back_from_button_update_statistics_SB, main_menu, row_width=2)
-        choice_stat_version = bot.edit_message_text('Пожалуйста, напишите в чат номер версии, в разрезе которой необходимо сформировать статистику. Пример: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics_SB)
-        bot.register_next_step_handler(choice_stat_version, send_text_for_stat_update_SB)
-
-    # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (S&B) Добавляем кнопки [Получить статистику по тикетам] ///////////////////////////////////////////////// в работе
-    elif call.data == "button_else_SB": 
-        button_else_SB = types.InlineKeyboardMarkup()
-        button_statistics_else_tickets_SB = types.InlineKeyboardButton(text= 'Получить статистику по тикетам', callback_data='button_statistics_else_tickets_SB')
-        button_else_SB.add(button_statistics_else_tickets_SB, row_width=1)
-        back_from_button_else_SB = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_Silver_Bronze')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_else_SB.add(back_from_button_else_SB, main_menu, row_width=2)
-        bot.edit_message_text('Какое действие необходимо выполнить?', call.message.chat.id, call.message.message_id,reply_markup=button_else_SB)
-    ### УРОВЕНЬ 4 "ПОЛУЧИТЬ СТАТИСТИКУ ПО ТИКЕТАМ" [ОСТАЛЬНЫЕ]  ///////////////////////////////////////////////// в работе
-    elif call.data == "button_statistics_else_tickets_SB":
-        button_statistics_else_tickets_SB = types.InlineKeyboardMarkup()
-        back_from_button_statistics_else_tickets_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_else_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_statistics_else_tickets_SB.add(back_from_button_statistics_else_tickets_SB, main_menu, row_width=2)
-        bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_statistics_else_tickets_SB)
-
-#### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по корректности темы в рассылке тикетов по обновлению
-    ## ДЛЯ SB
-    elif call.data == "button_choise_yes_SB":
+    if call.data == "button_SD_update":
+        """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
+        button_SD_update = ButtonUpdate.button_SD_update()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
+    elif call.data == "button_release":
+        """ УРОВЕНЬ 3: ОБНОВЛЕНИЕ ВЕРСИИ. """
+        button_release = ButtonUpdate.button_release()
+        ask_version_update = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_release)
+        user_states[call.message.chat.id] = "waiting_for_client_name"
+        bot.register_next_step_handler(ask_version_update, send_text_for_create)
+    elif call.data == "button_choise_yes":
+        """ ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по корректности темы в рассылке тикетов по обновлению"""
         support_response_id = get_header_footer_id(call.message.chat.id)
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
         bot.edit_message_text('Отлично! Начат процесс создания тикетов с запросом сервисного окна. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email_BS.ps1')
+        setup_script = Path('Automatic_email.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
             # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
-            updated_folder_paths = [folder_path.format(version_SB=version_SB) for folder_path in YANDEX_DISK_FOLDERS]
+            updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
             # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
-            info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
-            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_SB, updated_folder_paths)
+            info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
-            info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
-            move_distr_and_manage_share(version_SB)
-            info_logger.info("Запуск скрипта по отправке рассылки BS, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_SB)
-            result_SB = subprocess.run(["pwsh", "-File", setup_script, str(version_SB), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
-            upload_db_result(version_SB, result_SB)
+            info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            move_distr_and_manage_share(version_release)
+            info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            release_result = subprocess.run(["pwsh", "-File", setup_script, str(version_release), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
+            upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки BS: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки BS:", error_message)
+            error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
+            print("Ошибка запуска скрипта по отправке рассылки:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open(f'/app/logs/report_send_SB({version_SB}).log', 'a+', encoding='utf-8-sig') as file_send:
-            file_send.write(result_SB)
+        with open(f'/app/logs/report_send({version_release}).log', 'a+', encoding='utf-8-sig') as file_send:
+            file_send.write(release_result)
             file_send.seek(0)  # перематываем указатель в начало файла
             # Отправляем вывод всего результата в телеграмм бота
             bot.send_document(call.message.chat.id, file_send)
-        button_choise_yes_SB = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets_SB')
+        button_choise_yes = types.InlineKeyboardMarkup()
+        back_from_button_choise_yes = types.InlineKeyboardButton(text='Назад', callback_data='button_create_update_tickets')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes_SB.add(back_from_button_choise_yes_SB, main_menu, row_width=2)
-        info_logger.info("Рассылка клиентам BS успешно отправлена.")
-        bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты с запросом сервисного окна созданы. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes_SB)   
+        button_choise_yes.add(back_from_button_choise_yes, main_menu, row_width=2)
+        info_logger.info("Рассылка клиентам успешно отправлена.")
+        bot.send_message(call.from_user.id, text='Процесс завершен. Тикеты с запросом сервисного окна созданы. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes)   
         try:
-            os.remove(f'/app/logs/report_send_SB({version_SB}).log')
+            os.remove(f'/app/logs/report_send({version_release}).log')
         except FileNotFoundError as error_message:
             error_logger.error('Файл не найден: %s', error_message)
             print('Файл не найден: %s', error_message)
@@ -615,66 +521,84 @@ def inline_button_update(call):
         except OSError as error_message:
             error_logger.error('Ошибка при удалении файла: %s', error_message)
             print('Ошибка при удалении файла: %s', error_message)
-        
-    ## ДЛЯ GP
-    elif call.data == "button_choise_yes_GP":
-        support_response_id = get_header_footer_id(call.message.chat.id)
-        if support_response_id is None:
-            bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
-            return
-        bot.edit_message_text('Отлично! Начат процесс создания тикетов и рассылки писем по списку. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email_GP.ps1')
-        try:
-            name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по запросу сервисного окна клиентам GP, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_GP)
-            result_GP = subprocess.run(["pwsh", "-File", setup_script, str(version_GP), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
-        except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
-        # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open(f'/app/logs/report_send_GP({version_GP}).log', 'a+', encoding='utf-8-sig') as file_send:
-            file_send.write(result_GP)
-            file_send.seek(0)  # перематываем указатель в начало файла
-            # Отправляем вывод всего результата в телеграмм бота
-            bot.send_document(call.message.chat.id, file_send)
-        button_choise_yes_GP = types.InlineKeyboardMarkup()
-        back_from_button_choise_yes_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_create_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes_GP.add(back_from_button_choise_yes_GP, main_menu, row_width=2)
-        info_logger.info("Запрос сервисного окна клиентам GP отправлен")
-        bot.edit_message_text('Процесс завершен. Тикеты созданы, рассылка отправлена. Файл с результатами отправлен на почту.', call.message.chat.id, call.message.message_id,reply_markup=button_choise_yes_GP)
-        try:
-            os.remove(f'/app/logs/report_send_GP({version_GP}).log')
-        except FileNotFoundError as error_message:
-            error_logger.error('Файл не найден: %s', error_message)
-            print('Файл не найден: %s', error_message)
-        except PermissionError as error_message:
-            error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
-            print('Недостаточно прав для удаления файла: %s', error_message)
-        except OSError as error_message:
-            error_logger.error('Ошибка при удалении файла: %s', error_message)
-            print('Ошибка при удалении файла: %s', error_message)
-
-#### ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам SB update
-    elif call.data == "button_update_statistics_yes_SB":
+    elif call.data == "cancel_SD_update":
+        user_states[call.message.chat.id] = "canceled"
+        # Возвращаемся на уровень выше
+        button_SD_update = ButtonUpdate.button_SD_update()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
+    elif call.data == "button_reply_request":
+        """ УРОВЕНЬ 3: ПОВТОРНЫЙ ЗАПРОС СЕРВИСНОГО ОКНА" (G&P) """
+        button_reply_request = ButtonUpdate.button_reply_request()
+        bot.edit_message_text('Вы собираетесь запустить повторную отправку запросов на предоставление сервисного окна для Gold и Platinum клиентов. Подтвердите свой выбор.', call.message.chat.id, call.message.message_id,reply_markup=button_reply_request)
+    elif call.data == "button_reply_request_yes":
+        """ УРОВЕНЬ 5: при нажатии кнопки ДА по повторной отправке запроса сервисного окна для G&P """
+        bot.send_message(call.message.chat.id, text='Процесс запущен, ожидайте.')
+        setup_script = 'Auto_ping_test.ps1'
+        subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout)
+        bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
+    elif call.data == "button_update_statistics":
+        """ УРОВЕНЬ 3: СТАТИСТИКА ПО ОБНОВЛЕНИЮ """
+        ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.61.', call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
+        user_states[call.message.chat.id] = "waiting_for_client_name"
+        bot.register_next_step_handler(ask_stat_number_version, send_text_for_stat_update)
+    elif call.data == "button_update_statistics_yes":
+        """ ДОПОЛНИТЕЛЬНО: при нажатии кнопки ДА по формированию статистики по тикетам update """
         bot.edit_message_text('Отлично! Произвожу расчеты. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Ticket_Check_SB_update_statistics.ps1')
+        setup_script = Path('Ticket_Check_update_statistics.ps1')
         try:
             result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout, check=True)
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по отправке рассылки GP, пользователем: %s", name_who_run_script)
+            info_logger.info("Запуск скрипта по формированию статистики, пользователем: %s", name_who_run_script)
         except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки GP: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки GP:", error_message)
-        button_update_statistics_yes_SB = types.InlineKeyboardMarkup()
-        back_from_button_update_statistics_yes_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_update_statistics_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_update_statistics_yes_SB.add(back_from_button_update_statistics_yes_SB, main_menu, row_width=2)
-        bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics_yes_SB)
+            error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
+        bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
 
-@bot.callback_query_handler(func=lambda call: call.data == 'back_from_button_version')
-def on_cances_button(call):
-    bot.send_message(call.from_user.id, text="Действие отменено. Выберите другую опцию или введите новый запрос.")
+# ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
+@bot.chosen_inline_handler(func=lambda result_update_version: True)
+def send_text_for_create(result_update_version):
+    """Функция по обработке номера версии от пользака и подтверждению темы"""
+    user_state = user_states.get(result_update_version.chat.id)
+    if user_state == "waiting_for_client_name":
+        global version_release
+        version_release = result_update_version.text 
+        if '.' in version_release:
+            button_release = types.InlineKeyboardMarkup()
+            button_choise_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes')
+            button_release.add(button_choise_yes, row_width=1)
+            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_release.add(back_from_result_update_version, main_menu, row_width=2)
+            question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_release)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
+            bot.send_message(result_update_version.from_user.id, text=question, reply_markup=button_release)   
+        else:
+            button_release = types.InlineKeyboardMarkup()
+            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_release.add(back_from_result_update_version, main_menu, row_width=2)
+            bot.send_message(result_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_release) 
+    else:
+        pass
+
+# ФУНКЦИИ К КНОПКЕ ФОРМИРОВАНИЯ СТАТИСТИКИ []
+@bot.chosen_inline_handler(func=lambda button_update_statistics: True)
+def send_text_for_stat_update(result_update_statistic):
+    """Функция по обработке номера версии от пользака и подтверждению темы"""
+    user_state = user_states.get(result_update_statistic.chat.id)
+    if user_state == "waiting_for_client_name":
+        global version_stat
+        version_stat = result_update_statistic.text 
+        if '.' in version_stat:
+            question = 'Формируем статистику по версии релиза "' + str(version_stat)  + '"?'
+            button_update_statistics = ButtonUpdate.button_update_statistics()
+            bot.send_message(result_update_statistic.from_user.id, text=question, reply_markup=button_update_statistics) 
+        else:
+            button_update_statistics = types.InlineKeyboardMarkup()
+            back_from_result_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_statistics')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_update_statistics.add(back_from_result_update_statistic, main_menu, row_width=2)
+            bot.send_message(result_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics) 
+    else:
+        pass
 
 # УРОВЕНЬ 3 "УЗНАТЬ ВЕРСИЮ КЛИЕНТА" - ФОРМИРОВАНИЕ СПИСКА И ВЫЗОВ ФУНКЦИИ:
 @bot.chosen_inline_handler(func=lambda result_client_version: True)
@@ -717,71 +641,24 @@ def send_text_version(result_client_version):
     else:
         pass
 
-# ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
-@bot.chosen_inline_handler(func=lambda result_GP_update_version: True)
-def send_text_for_create_GP(result_GP_update_version):
-    """Функция по обработке номера версии от пользака (G&P) и подтверждению темы"""
-    global version_GP
-    version_GP = result_GP_update_version.text 
-    if '.' in version_GP:
-        button_create_tickets_GP = types.InlineKeyboardMarkup()
-        button_choise_yes_GP = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes_GP')
-        button_create_tickets_GP.add(button_choise_yes_GP, row_width=1)
-        back_from_result_GP_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_create_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_tickets_GP.add(back_from_result_GP_update_version, main_menu, row_width=2)
-        question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_GP)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
-        bot.send_message(result_GP_update_version.from_user.id, text=question, reply_markup=button_create_tickets_GP)   
-    else:
-        button_create_tickets_GP = types.InlineKeyboardMarkup()
-        back_from_result_GP_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_create_tickets_GP')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_tickets_GP.add(back_from_result_GP_update_version, main_menu, row_width=2)
-        bot.send_message(result_GP_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_create_tickets_GP) 
 
-@bot.chosen_inline_handler(func=lambda result_SB_update_version: True) 
-def send_text_for_create_SB(result_SB_update_version):
-    """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
-    global version_SB
-    version_SB = result_SB_update_version.text
-    if '.' in version_SB:
-        button_create_update_tickets_SB = types.InlineKeyboardMarkup()
-        button_choise_yes_SB = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes_SB')
-        button_create_update_tickets_SB.add(button_choise_yes_SB, row_width=1)
-        back_from_result_SB_update_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_create_update_tickets_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_update_tickets_SB.add(back_from_result_SB_update_version, main_menu, row_width=2)
-        question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_SB)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
-        bot.send_message(result_SB_update_version.from_user.id, text=question, reply_markup=button_create_update_tickets_SB) 
-    else:
-        button_create_update_tickets_SB = types.InlineKeyboardMarkup()
-        back_from_result_SB_update_version = types.InlineKeyboardButton(text= 'Назад', callback_data='button_create_update_tickets_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_create_update_tickets_SB.add(back_from_result_SB_update_version, main_menu, row_width=2)
-        bot.send_message(result_SB_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_create_update_tickets_SB) 
+# @bot.callback_query_handler(func=lambda call: True)
+# def ...():
+#     # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (G&P) ///////////////////////////////////////////////// в работе
+#     if call.data == "button_else_GP":    
+#         button_else_GP = ButtonUpdate.button_else_GP()
+#         bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_else_GP)
+#     # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (S&B) Добавляем кнопки [Получить статистику по тикетам] ///////////////////////////////////////////////// в работе
+#     elif call.data == "button_else_SB": 
+#         button_else_SB = ButtonUpdate.button_else_SB()
+#         bot.edit_message_text('Какое действие необходимо выполнить?', call.message.chat.id, call.message.message_id,reply_markup=button_else_SB)
+#     ### УРОВЕНЬ 4 "ПОЛУЧИТЬ СТАТИСТИКУ ПО ТИКЕТАМ" [ОСТАЛЬНЫЕ]  ///////////////////////////////////////////////// в работе
+#     elif call.data == "button_statistics_else_tickets_SB":
+#         button_statistics_else_tickets_SB = ButtonUpdate.button_statistics_else_tickets_SB()
+#         bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_statistics_else_tickets_SB)
 
-# ФУНКЦИИ К КНОПКЕ ФОРМИРОВАНИЯ СТАТИСТИКИ []
-@bot.chosen_inline_handler(func=lambda result_SB_update_statistic: True) 
-def send_text_for_stat_update_SB(result_SB_update_statistic):
-    """Функция по обработке номера версии от пользака (S&B) и подтверждению темы"""
-    global version_stat
-    version_stat = result_SB_update_statistic.text 
-    if '.' in version_stat:
-        button_update_statistics_SB = types.InlineKeyboardMarkup()
-        button_update_statistics_yes_SB = types.InlineKeyboardButton(text= 'Да', callback_data='button_update_statistics_yes_SB')
-        button_update_statistics_SB.add(button_update_statistics_yes_SB, row_width=1)
-        back_from_result_SB_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_statistics_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
-        question = 'Формируем статистику по версии релиза "' + str(version_stat)  + '"?'
-        bot.send_message(result_SB_update_statistic.from_user.id, text=question, reply_markup=button_update_statistics_SB) 
-    else:
-        button_update_statistics_SB = types.InlineKeyboardMarkup()
-        back_from_result_SB_update_statistic = types.InlineKeyboardButton(text= 'Назад', callback_data='button_update_statistics_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_update_statistics_SB.add(back_from_result_SB_update_statistic, main_menu, row_width=2)
-        bot.send_message(result_SB_update_statistic.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_update_statistics_SB) 
-   
+
+@bot.chosen_inline_handler(func=lambda result_SB_update_statistic: True)    
 def start_telegram_bot():
     """"Функция запуска телебота"""
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

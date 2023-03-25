@@ -1,4 +1,4 @@
-﻿param($version_SB, $support_response_id)
+﻿param($version_release, $support_response_id)
 
 ### ТАБЛИЦА ДЛЯ ОТЧЕТА ОТПРАВКИ РАССЫЛКИ КЛИЕНТАМ
 $TABLE_REPORT = New-Object system.Collections.ArrayList
@@ -66,7 +66,7 @@ $HEADERS = @{}
 $HEADERS.Add("Authorization", "Basic $AuthorizationInfo")
 
 ### НОМЕР ВЕРСИИ !!!!!!!!!!!
-$NUMBER_VERSION = $version_SB
+$NUMBER_VERSION = $version_release
 
 ### ЗАДАДИМ ПУТЬ К HTML ФАЙЛУ РАССЫЛКИ
 $TEMPLATEPATH = "$PSScriptRoot\HTML\index.html"
