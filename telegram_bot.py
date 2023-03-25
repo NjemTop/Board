@@ -411,12 +411,13 @@ def inline_button(call):
         create_report_tele2(client_report_id, docx)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
+    
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         setup_script = 'Скрипт_формирования_отчёта_клиента_ПСБ.ps1'
         try:
-            result_rez = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
+            result_psb = subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout, check=True)
             # Записываем в лог информацию о пользователе, сформировавшем отчет
             xml_data = None
             with open('data.xml', encoding='utf-8-sig') as file_data:
