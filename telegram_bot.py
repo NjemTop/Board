@@ -334,11 +334,7 @@ def check_pass_answer(password_message, access_password, email_access):
 def clients_message(message_clients):
     """Функция вызова кнопки /clients"""
     if check_user_in_file(message_clients.chat.id):
-        button_clients = types.InlineKeyboardMarkup()
-        button_list_of_clients = types.InlineKeyboardButton(text='Список клиентов', callback_data='button_list_of_clients')
-        button_clients_version = types.InlineKeyboardButton(text='Версии клиентов', callback_data='button_clients_version')
-        button_templates = types.InlineKeyboardButton(text='Статистика по тикетам за период (шаблоны)', callback_data='button_templates')
-        button_clients.add(button_list_of_clients, button_clients_version, button_templates, row_width=2)
+        button_clients = ButtonClients.button_clients()
         bot.send_message(message_clients.chat.id, 'Какую информацию хотите получить?', reply_markup=button_clients)
     else:
         bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
@@ -363,7 +359,7 @@ def inline_button_clients(call):
         button_SD_update = types.InlineKeyboardButton(text= 'Обновление версии', callback_data='button_SD_update')
         main_menu.add(button_clients, button_SD_update, row_width=1)
         bot.edit_message_text('Главное меню:', call.message.chat.id, call.message.message_id, reply_markup=main_menu)
-# УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны]
+# УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Квартальные отчеты за период]
     elif call.data == "button_clients":
         button_clients = ButtonClients.button_clients()
         bot.edit_message_text('Какую информацию хотите получить?', call.message.chat.id, call.message.message_id,reply_markup=button_clients)
@@ -390,7 +386,7 @@ def inline_button_clients(call):
         # Возвращаемся на уровень выше
         button_clients_version = ButtonClients.button_clients_version()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_clients_version)
-    # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
+    # УРОВЕНЬ 3 "Квартальные отчеты за период". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
         button_templates = ButtonClients.button_templates()
         bot.edit_message_text('Шаблон какого клиента необходимо выгрузить?', call.message.chat.id, call.message.message_id,reply_markup=button_templates)

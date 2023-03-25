@@ -2,12 +2,12 @@ from telebot import types
 
 class ButtonClients():
     def button_clients():
-        """ УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны] """
+        """ УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Квартальные отчеты за период] """
         button_clients = types.InlineKeyboardMarkup()
         button_list_of_clients = types.InlineKeyboardButton(text='Список клиентов', callback_data='button_list_of_clients')
         button_clients_version = types.InlineKeyboardButton(text='Версии клиентов', callback_data='button_clients_version')
         button_clients.add(button_list_of_clients, button_clients_version, row_width=2)
-        button_templates = types.InlineKeyboardButton(text='Статистика по тикетам за период (шаблоны)', callback_data='button_templates')
+        button_templates = types.InlineKeyboardButton(text='Квартальные отчеты за период', callback_data='button_templates')
         button_clients.add(button_templates, row_width=1)
         back_from_button_clients = types.InlineKeyboardButton(text='Назад', callback_data='mainmenu')
         button_clients.add(back_from_button_clients, row_width=1)
