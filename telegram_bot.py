@@ -352,15 +352,15 @@ def sd_sb_message(message_update):
     else:
         bot.send_message(message_update.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-@bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients"])
+@bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_SD_update"])
 # Добавляем подуровни к разделу Клиенты
 def inline_button_clients(call):
     """Функция возврата в главное меню. Кнопки [Клиенты] / [Обновление версии]"""
     if call.data == "mainmenu":
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
-        button_update = types.InlineKeyboardButton(text= 'Обновление версии', callback_data='button_SD_update')
-        main_menu.add(button_clients, button_update, row_width=1)
+        button_SD_update = types.InlineKeyboardButton(text= 'Обновление версии', callback_data='button_SD_update')
+        main_menu.add(button_clients, button_SD_update, row_width=1)
         bot.edit_message_text('Главное меню:', call.message.chat.id, call.message.message_id, reply_markup=main_menu)
 # УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Шаблоны]
     elif call.data == "button_clients":
@@ -445,7 +445,7 @@ def inline_button_clients(call):
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
-@bot.callback_query_handler(func=lambda call: call.data.startswith("button_SD"))
+@bot.callback_query_handler(func=lambda call: call.data.startswith("button_SD_update"))
 def inline_button_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
@@ -533,7 +533,7 @@ def inline_button_update(call):
             info_logger.info("Запуск скрипта по формированию статистики, пользователем: %s", name_who_run_script)
         except subprocess.CalledProcessError as error_message:
             error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
-        bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_update_statistics)
+        bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
 @bot.chosen_inline_handler(func=lambda result_update_version: True)
 def send_text_for_create(result_update_version):
