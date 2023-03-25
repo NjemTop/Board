@@ -6,7 +6,7 @@ import requests
 def auth_hf_tele2(client_report_id):
     ############################## ШАБЛОН ДЛЯ ТЕЛЕ2
     ## Создаем файл и делаем русскую локализацию для даты
-    locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+    locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     ## Авторизация в HappyFox и нахождение кол-ва страниц по url первой страницы
     auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
     headers = {'Content-Type': 'application/json'}
@@ -57,7 +57,7 @@ def create_report_tele2(client_report_id, docx):
     """Функция ... """
     ### ЗАПОЛНЯЕМ ШАПКУ
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
-    today = datetime.now().date().strftime('%d %B %Y').encode('latin1').decode('utf-8')
+    today = datetime.now().date().strftime('%d %B %Y')
     # start_date
     # end_date
     auth, headers, param, pages_len = auth_hf_tele2(client_report_id)
