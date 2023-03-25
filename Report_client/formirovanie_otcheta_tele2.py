@@ -60,7 +60,7 @@ def create_report_tele2(client_report_id, docx):
     today = datetime.now().date().strftime('%d %B %Y')
     # start_date
     # end_date
-    auth, headers, param, pages_len = auth_hf_tele2()
+    auth, headers, param, pages_len = auth_hf_tele2(client_report_id)
     # Номера тикетов для вывода в файл
     all_tickets_id_list = list_of_rows(client_report_id, pages_len, auth, headers, param)
     # Формируем общий список для добавления в файл
