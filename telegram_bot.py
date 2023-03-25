@@ -405,8 +405,8 @@ def inline_button(call):
     elif call.data == "cancel_button_version":
         user_states[call.message.chat.id] = "canceled"
         # Возвращаемся на уровень выше
-        button_clients = ButtonClients.button_clients()
-        bot.edit_message_text('Какую информацию хотите получить?', call.message.chat.id, call.message.message_id, reply_markup=button_clients)
+        button_clients_version = ButtonClients.button_clients_version()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_clients_version)
     # УРОВЕНЬ 3 "ШАБЛОНЫ". Добавляем кнопки [Теле2] / [ПСБ] / [РЭЦ] / [Почта России]
     elif call.data == "button_templates": 
         button_templates = ButtonClients.button_templates()
