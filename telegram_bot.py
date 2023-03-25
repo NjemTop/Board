@@ -510,7 +510,7 @@ def inline_button_SD_update(call):
         # Возвращаемся на уровень выше
         button_SD_update = ButtonUpdate.button_SD_update()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
-    elif call.data == "localizable":
+    elif call.data == "button_localizable":
         button_localizable = ButtonUpdate.button_localizable()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_localizable)
     elif call.data == "button_AFK_localizable":
@@ -526,7 +526,7 @@ def inline_button_SD_update(call):
         setup_script = 'Auto_ping_test.ps1'
         subprocess.run(["pwsh", "-File", setup_script],stdout=sys.stdout)
         bot.send_message(call.message.chat.id, text='Процесс завершен. Повторные запросы направлены клиентам.')
-    elif call.data == "button_update_statistics":
+    elif call.data == "button_update_statistics_1":
         """ УРОВЕНЬ 3: СТАТИСТИКА ПО ОБНОВЛЕНИЮ """
         
         ask_stat_number_version = bot.edit_message_text('Введите номер версии, по которой необходимо сформировать статистику. Например: 2.60.', call.message.chat.id, call.message.message_id, reply_markup=ButtonUpdate.button_update_statistics_1())
