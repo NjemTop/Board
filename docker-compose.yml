@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile.db
     container_name: db
     volumes:
-      - ./DataBase:/usr/src/app/
+      - ./DataBase:/usr/src/app/DataBase
     networks:
       network_for_bot:
         ipv4_address: 172.28.1.30

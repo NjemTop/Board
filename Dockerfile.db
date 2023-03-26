@@ -1,4 +1,10 @@
-FROM sqlite:3.36.0
+FROM alpine:3.13.5
+
+# Устанавливаем SQLite
+RUN apk add --no-cache sqlite
 
 # Копируем файл базы данных в новый контейнер
 COPY ./DataBase/database.db /usr/src/app/
+
+# Задаем рабочую директорию
+WORKDIR /app
