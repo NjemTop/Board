@@ -456,8 +456,12 @@ def get_app():
         data = []
         # Преобразование полученных данных в список словарей
         for row in rows:
+            copy_addresses = []
             # Разбиваем строку со списком адресов электронной почты для копии на отдельные адреса
-            copy_addresses = row[4].split(', ')
+            if row[4] is None:
+                copy_dict = {'1': 'Копией не было'}
+            else:
+                copy_addresses = row[4].split(', ')
             # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
             copy_dict = {f"{i+1}": copy_addresses[i] for i in range(len(copy_addresses))}
             contacts = {
