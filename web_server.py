@@ -428,7 +428,8 @@ def get_app():
     @app.route('/data_release/api/versions', methods=['GET'])
     def api_data_release_versions():
         """Функция получения номеров версий отправки рассылки через API"""
-        conn = sqlite3.connect('./DataBase/database.db')
+        # Подключение к базе данных SQLite
+        conn = sqlite3.connect('file:/usr/src/app/database.db', uri=True)
         cur = conn.cursor()
         # Получение списка всех номеров релизов и дат создания
         cur.execute('SELECT DISTINCT Дата_рассылки, Номер_релиза FROM info')
@@ -454,7 +455,7 @@ def get_app():
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
-        conn = sqlite3.connect('./DataBase/database.db')
+        conn = sqlite3.connect('file:/usr/src/app/database.db', uri=True)
         cur = conn.cursor()
         # Фильтрация данных по номеру релиза
         cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
@@ -497,7 +498,8 @@ def get_app():
     def data_release_html():
         """Функция вывода информации об рассылке в HTML странице"""
         release_number = request.args.get('release_number', 'all')
-        conn = sqlite3.connect('./DataBase/database.db')
+        # Подключение к базе данных SQLite
+        conn = sqlite3.connect('file:/usr/src/app/database.db', uri=True)
         cur = conn.cursor()
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
