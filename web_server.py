@@ -456,20 +456,14 @@ def get_app():
         data = []
         # Преобразование полученных данных в список словарей
         for row in rows:
-            copy_items = []
             # Разбиваем строку со списком адресов электронной почты для копии на отдельные адреса
-            if row[4] is None:
-                copy_items = [{'Type': 'Copy', 'Email': 'Копии отсутствуют'}]
-            else:
-                copy_addresses = row[4].split(', ')
-                # Формируем список словарей для копий, где каждый словарь содержит тип контакта ('Copy') и адрес электронной почты
-                copy_items = [{'Type': 'Copy', 'Email': copy_address} for copy_address in copy_addresses]
-            
-            main_contact = {
-                'Type': 'Main',
-                'Email': row[3]
+            copy_addresses = row[4].split(', ')
+            # Формируем список словарей для копий, который содержит словарь с адресом электронной почты и ключом
+            copy_list = [ {str(i+1): copy_addresses[i]} for i in range(len(copy_addresses)) ]
+            contacts = {
+                'Main': row[3],
+                'Copy': copy_list
             }
-            contacts = [main_contact] + copy_items
             data.append({
                 'Data': row[0],
                 'Number': row[1],
@@ -484,6 +478,7 @@ def get_app():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON
         return response
+
     
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
