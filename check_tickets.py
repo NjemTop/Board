@@ -7,7 +7,7 @@ import schedule
 import time
 import datetime
 import xml.etree.ElementTree as ET
-from telegram_bot import send_telegram_message
+from System_func.send_telegram_message import Alert
 
 # Создание объекта логгера для ошибок и критических событий
 check_error_logger = logging.getLogger('Check_Ticket_Error')
@@ -25,6 +25,9 @@ check_info_handler = logging.FileHandler('./logs/check_ticket-info.log')
 check_info_handler.setLevel(logging.INFO)
 check_info_handler.setFormatter(formatter)
 check_info_logger.addHandler(check_info_handler)
+
+# Создаем объект класса Alert
+alert = Alert()
 
 ### Авторизация в HappyFox
 # Указываем путь к файлу с данными
@@ -142,11 +145,7 @@ def process_ticket(ticket_data):
                 alert_chat_id = get_alert_chat_id(assigned_name)
                 
                 # Отправляем сообщение в телеграм-бот
-                # print(ticket_message)
-                # print('--'*30)
-                # print(alert_chat_id)
-                # print('**'*30)
-                send_telegram_message(alert_chat_id, ticket_message)
+                alert.send_telegram_message(alert_chat_id, ticket_message)
                 check_info_logger.info('Сотруднику: %s в чат отправлена информация о 3х дневном неотвеченном тикете: %s', assigned_name, ticket_id)
 
 def get_tickets():
