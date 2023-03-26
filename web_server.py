@@ -456,6 +456,7 @@ def get_app():
         rows = cur.fetchall()
         # Закрытие соединения с базой данных
         conn.close()
+        # Создаём пустой массив
         data = []
         # Преобразование полученных данных в список словарей
         for row in rows:
@@ -471,6 +472,7 @@ def get_app():
                 'Main': row[3],
                 'Copy': copy_dict
             }
+            # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
             data.append({
                 'Data': row[0],
                 'Number': row[1],
@@ -485,7 +487,7 @@ def get_app():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON
         return response
-    
+
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         """Функция вывода информации об рассылке в HTML странице"""
