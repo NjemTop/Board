@@ -9,7 +9,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import xml.etree.ElementTree as ET
-from telegram_bot import send_telegram_message
+from System_func.send_telegram_message import Alert
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 # Создание объекта логгера для ошибок и критических событий
@@ -33,6 +33,9 @@ CONFIG_FILE = "Main.config"
 
 USERNAME = 'Njem'
 PASSWORD = generate_password_hash('Rfnzkj123123')
+
+# Создаем объект класса Alert
+alert = Alert()
 
 # Создаем функцию-декоратор для аутентификации Basic Auth
 def require_basic_auth(username, password):
@@ -116,7 +119,7 @@ def handle_client_reply(json_data):
             web_error_logger.error("Не удалось найти файл data.xml. Ошибка: %s", error_message)
             return None, 'Не удалось найти файл data.xml.'
         # Отправляем сообщение в телеграм-бот
-        send_telegram_message(alert_chat_id, ticket_message)
+        alert.send_telegram_message(alert_chat_id, ticket_message)
         web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
         # Отправляем ответ о том, что всё принято и всё хорошо (201)
         return "OK", None
@@ -152,7 +155,7 @@ def handle_assignee_change(json_data):
                 # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
                 return "OK", None
             # Отправляем сообщение в телеграм-бот
-            send_telegram_message(alert_chat_id, new_assignee_name_message)
+            alert.send_telegram_message(alert_chat_id, new_assignee_name_message)
             web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
             # Отправляем ответ о том, что всё принято и всё хорошо (201)
             return "OK", None
@@ -187,7 +190,7 @@ def handle_unresponded_info_60(json_data):
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
-                send_telegram_message(alert_chat_id, ping_ticket_message)
+                alert.send_telegram_message(alert_chat_id, ping_ticket_message)
                 web_info_logger.info('В чат %s, повторно отправлена информация о новом сообщении без ответа час в тикете: %s', assignee_name, ticket_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
@@ -224,7 +227,7 @@ def handle_unresponded_info_120(json_data):
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
-                send_telegram_message(alert_chat_id, ping_ticket_message)
+                alert.send_telegram_message(alert_chat_id, ping_ticket_message)
                 web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s два часа в тикете: %s', assignee_name, ticket_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
@@ -261,7 +264,7 @@ def handle_unresponded_info_180(json_data):
                     # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
-                send_telegram_message(alert_chat_id, ping_ticket_message)
+                alert.send_telegram_message(alert_chat_id, ping_ticket_message)
                 web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s три часа в тикете: %s', assignee_name, ticket_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
@@ -317,7 +320,7 @@ def get_app():
             data = json.load(file)
         # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
         alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
-        send_telegram_message(alert_chat_id, ticket_message)
+        alert.send_telegram_message(alert_chat_id, ticket_message)
         web_info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
         # Отправляем ответ о том, что всё принято и всё хорошо
         return "OK", 201

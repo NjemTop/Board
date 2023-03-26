@@ -92,15 +92,6 @@ bot=telebot.TeleBot(TOKEN)
 # Переменная состояния для пользователей
 user_states = {}
 
-# ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
-def send_telegram_message(alert_chat_id, alert_text):
-    """Отправляет сообщение в телеграм-бот"""
-    url = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
-    headers_server = {'Content-type': 'application/json'}
-    data = {'chat_id': alert_chat_id, 'text': f'{alert_text}'}
-    response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)
-    print(response)
-
 # УРОВЕНЬ 1 проверка вызова "старт" и доступа к боту
 def check_user_in_file(chat_id):
     """Функция для проверки наличия данных в файле data.xml"""
