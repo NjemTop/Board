@@ -35,4 +35,4 @@ RUN apt-get clean && \
 WORKDIR /app
 
 # Запускаем команду для запуска приложения
-CMD ["bash", "-c", "python3.10 web_server.py"]
+CMD ["python", "main.py"]
