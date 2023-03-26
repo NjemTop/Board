@@ -10,3 +10,13 @@ services:
       - ./DataBase:/app/DataBase
     environment:
       - TZ=Europe/Moscow
+  telegram_bot:
+    build: .
+    container_name: telegram_bot
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - TZ=Europe/Moscow
+    command: python3.10 main.py
