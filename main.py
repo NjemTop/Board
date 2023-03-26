@@ -27,19 +27,30 @@ app_info_handler.setLevel(logging.INFO)
 app_info_handler.setFormatter(formatter)
 app_info_logger.addHandler(app_info_handler)
 
+# Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты
+def start_socket_server():
+    """Функция запуска ВЭБ-СЕРВЕРА в паралельной сессии"""
+    script_path = os.path.abspath(os.path.dirname(__file__))
+    subprocess.Popen(['python3.10', os.path.join(script_path, 'web_server.py')])
+
 # Функция запуска задачи по проверке 3х дневных тикетов
 def start_check_tickets():
     """Функция запуска задачи по проверке 3х дневных тикетов"""
     script_path = os.path.abspath(os.path.dirname(__file__))
     subprocess.Popen(['python3.10', os.path.join(script_path, 'check_tickets.py')])
 
-# запуск двух функций (запуск скрипта телебота)
+# запуск двух функций (запуск скрипта ВЭБ-СЕРВЕРА и запуск скрипта телебота)
 if __name__ == '__main__':
     start_check_tickets()
     try:
+        p1 = multiprocessing.Process(target=start_socket_server)
+        # Здесь мы используем threading.Thread для запуска функции start_telegram_bot в отдельном потоке, который не блокирует выполнение остального кода.
         p2 = threading.Thread(target=start_telegram_bot)
+        p1.start()
+        app_info_logger.info("Вэб-сервер запущен")
         p2.start()
         app_info_logger.info("Телебот запущен")
+        p1.join()
         p2.join()
     except requests.exceptions.ConnectionError as error_message:
         app_error_logger.error("Error in Telegram bot: %s", error_message)
