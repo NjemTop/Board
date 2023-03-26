@@ -462,8 +462,8 @@ def get_app():
                 copy_dict = {'1': 'Копией не было'}
             else:
                 copy_addresses = row[4].split(', ')
-            # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
-            copy_dict = {f"{i+1}": copy_addresses[i] for i in range(len(copy_addresses))}
+                # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
+                copy_dict = {f"{i+1}": copy_addresses[i] for i in range(len(copy_addresses))}
             contacts = {
                 'Main': row[3],
                 'Copy': copy_dict
