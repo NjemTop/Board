@@ -11,6 +11,8 @@ import sqlite3
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
+logging.basicConfig(level=logging.DEBUG, filename='web_server.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 # Создание объекта логгера для ошибок и критических событий
 web_error_logger = logging.getLogger('WebError')
