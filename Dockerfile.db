@@ -1,0 +1,4 @@
+FROM sqlite:latest
+
+# Копируем файл базы данных в новый контейнер
+COPY ./DataBase/database.db /usr/src/app/
