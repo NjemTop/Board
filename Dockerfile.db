@@ -6,5 +6,8 @@ RUN apk add --no-cache sqlite
 # Копируем файл базы данных в новый контейнер
 COPY ./DataBase/database.db /usr/src/app/
 
+# Добавляем права на чтение файла
+RUN chmod a+r /usr/src/app/database.db
+
 # Задаем рабочую директорию
 WORKDIR /app
