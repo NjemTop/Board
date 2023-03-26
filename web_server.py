@@ -499,8 +499,13 @@ def get_app():
         """Функция вывода информации об рассылке в HTML странице"""
         release_number = request.args.get('release_number', 'all')
         # Подключение к базе данных SQLite
-        conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
-        cur = conn.cursor()
+        try:
+            conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
+            cur = conn.cursor()
+        except sqlite3.Error as error_message:
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
         else:
