@@ -442,6 +442,9 @@ def get_app():
     # Определение маршрута для API с аргументом 'version' в URL
     @app.route('/data_release/api/<string:version>', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
+    # Определение маршрута для API с аргументом 'version' в URL
+    @app.route('/data_release/api/<string:version>', methods=['GET'])
+    # Применение декоратора require_basic_auth для аутентификации пользователей
     @require_basic_auth(USERNAME, PASSWORD)
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
@@ -459,11 +462,11 @@ def get_app():
             copy_addresses = []
             # Разбиваем строку со списком адресов электронной почты для копии на отдельные адреса
             if row[4] is None:
-                copy_dict = {'1': 'Копии отсутствуют'}
+                copy_dict = [{'1': 'Копии отсутствуют'}]
             else:
                 copy_addresses = row[4].split(', ')
                 # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
-                copy_dict = {f"{i+1}": copy_addresses[i] for i in range(len(copy_addresses))}
+                copy_dict = [{f"{i+1}": copy_addresses[i]} for i in range(len(copy_addresses))]
             contacts = {
                 'Main': row[3],
                 'Copy': copy_dict
