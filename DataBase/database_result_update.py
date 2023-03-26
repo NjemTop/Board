@@ -47,7 +47,7 @@ def upload_db_result(version_number, result):
         continue
 
     # Подключение к базе данных SQLite
-    conn = sqlite3.connect('file:/usr/src/app/database.db', uri=True)
+    conn = sqlite3.connect('/usr/src/app/database.db', uri=True)
     c = conn.cursor()
     # Создаем БД
     c.execute('CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)')
