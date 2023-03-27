@@ -524,7 +524,7 @@ def get_app():
                 'Основной_контакт': row[3],
                 'Копия': row[4]
             })
-        return render_template('./templates/data_release.html', data=data)
+        return render_template('data_release.html', data=data)
     
     @app.route('/data/api/client', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
