@@ -515,7 +515,7 @@ def get_app():
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
-            return "Ошибка с БД", error_message
+            return error_message
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
         else:
