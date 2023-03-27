@@ -7,6 +7,7 @@ services:
       - "3030:3030"
     volumes:
       - ./logs:/app/logs
+    restart: always
     environment:
       - TZ=Europe/Moscow
     command: python3.10 web_server.py
@@ -21,6 +22,7 @@ services:
       - "8443:8443"
     volumes:
       - ./logs:/app/logs
+    restart: always
     environment:
       - TZ=Europe/Moscow
     networks:
@@ -34,6 +36,7 @@ services:
     container_name: db
     volumes:
       - ./DataBase:/var/lib/sqlite
+    restart: always
     ports:
       - "5000:5000"
     networks:
