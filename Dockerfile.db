@@ -13,4 +13,4 @@ RUN chmod a+r /usr/src/app/database.db
 WORKDIR /usr/src/app
 
 # Запускаем SQLite при старте контейнера
-CMD ["sqlite3", "/usr/src/app/database.db"]
+CMD ["sqlite3", "/usr/src/app/DataBase/database.db"]
