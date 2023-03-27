@@ -521,7 +521,7 @@ def get_app():
         except requests.exceptions.RequestException as e:
             abort(500, "Error connecting to the database API: " + str(e))
 
-        rows = response.json()['rows']
+        rows = response.json()[0]['rows']
         data = []
         for row in rows:
             data.append({
