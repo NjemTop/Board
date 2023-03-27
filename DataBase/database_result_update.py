@@ -2,6 +2,7 @@ import pandas as pd
 import locale
 from datetime import datetime
 import sqlite3
+import requests
 
 def upload_db_result(version_number, result):
     # Запись месяца в дате по-русски
@@ -46,12 +47,20 @@ def upload_db_result(version_number, result):
             result_db.append([today, version_number, client_name, main_contact, copy_contact])
         continue
 
-    # Подключение к базе данных SQLite
-    conn = sqlite3.connect('/usr/src/app/database.db', uri=True)
-    c = conn.cursor()
+    # Замените следующую строку на актуальный адрес API Datasette
+    datasette_url = "http://172.28.1.30:5000/database/info.json"
+
     # Создаем БД
-    c.execute('CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)')
-    conn.commit()
+    requests.post(datasette_url, json={
+        "sql": 'CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)'
+    })
     # Наполняем БД
-    df = pd.DataFrame(result_db, columns = ["Дата_рассылки", "Номер_релиза", "Наименование_клиента", "Основной_контакт", "Копия"])
-    df.to_sql('info', conn, if_exists='append', index = False)
+    df = pd.DataFrame(result_db, columns=["Дата_рассылки", "Номер_релиза", "Наименование_клиента", "Основной_контакт", "Копия"])
+    for index, row in df.iterrows():
+        data = {
+            "Дата_рассылки": row["Дата_рассылки"],
+            "Номер_релиза": row["Номер_релиза"],
+            "Наименование_клиента": row["Наименование_клиента"],
+            "Основной_контакт": row["Основной_контакт"],
+            "Копия": row["Копия"]
+        }
