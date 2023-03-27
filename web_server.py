@@ -497,12 +497,6 @@ def get_app():
         # Отправка ответа JSON
         return response
 
-    @app.route('/data_release/api/client', methods=['GET'])
-    # Применение декоратора require_basic_auth для аутентификации пользователей
-    @require_basic_auth(USERNAME, PASSWORD)
-    def data_release_api():
-        ...
-
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
@@ -524,6 +518,12 @@ def get_app():
                 'Копия': row[4]
             })
         return render_template('./templates/data_release.html', data=data)
+    
+    @app.route('/data/api/client', methods=['GET'])
+    # Применение декоратора require_basic_auth для аутентификации пользователей
+    @require_basic_auth(USERNAME, PASSWORD)
+    def data_release_api():
+        ...
         
     return app
 
