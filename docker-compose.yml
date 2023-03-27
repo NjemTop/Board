@@ -8,7 +8,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - db-data:/var/lib/sqlite
-      - backup:/app/backup
+      - bot_tg_backup:/app/backup
     restart: always
     environment:
       - TZ=Europe/Moscow
@@ -16,7 +16,7 @@ services:
     networks:
       network_for_bot:
         ipv4_address: 172.28.1.10
-      
+
   telegram_bot:
     build: .
     container_name: telegram_bot
@@ -33,7 +33,7 @@ services:
         ipv4_address: 172.28.1.20
 
   db:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.db
     container_name: db
@@ -50,7 +50,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-        
+
 networks:
   network_for_bot:
     driver: bridge
@@ -61,7 +61,7 @@ networks:
 
 volumes:
   db-data:
-  backup:
+  bot_tg_backup:
     driver: local
     driver_opts:
       type: none
