@@ -624,7 +624,7 @@ def send_text_version(result_client_version):
 def inline_button_else_tickets(call):
     """УРОВЕНЬ 2 "ОСТАЛЬНЫЕ ТИКЕТЫ"""
     if call.data == "button_else_tickets":
-        button_else_tickets = ButtonElseTickets.button_else_tickets()
+        button_else_tickets = ButtonElseTickets.get_info_else_tickets()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id, reply_markup=button_else_tickets)
     ### УРОВЕНЬ 3. Статистика по остальным тикетам
     elif call.data == "button_else_tickets_stat":
@@ -632,13 +632,13 @@ def inline_button_else_tickets(call):
         bot.edit_message_text('Всего "в работе": ' + all_ticket_count + '. Из них:\n- Новые без исполнителя: ' + new_ticket + '\n- Без ответа от саппорта: ' + without_support_answer + '\n- Без ответа от клиента: ' + without_client_ansrew, call.message.chat.id, call.message.message_id, reply_markup=button_else_tickets_stat)
     ### УРОВЕНЬ 3. Статистика по отдельному тикету
     elif call.data == "button_one_ticket_stat":
-        button_one_ticket_stat = ButtonElseTickets.button_one_ticket_stat()
+        button_one_ticket_stat = ButtonElseTickets.get_info_else_tickets_stat()
         info_about_ticket = bot.edit_message_text('Напишите номер тикета. Например: 5886', call.message.chat.id, call.message.message_id, reply_markup=button_one_ticket_stat)
         bot.register_next_step_handler(info_about_ticket, get_number_else_ticket)
     elif call.data == "cancel_else_tickets":
         user_states[call.message.chat.id] = "canceled"
         # Возвращаемся на уровень выше
-        button_else_tickets = ButtonElseTickets.button_else_tickets()
+        button_else_tickets = ButtonElseTickets.get_info_one_ticket_stat()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_else_tickets)
 
 @bot.chosen_inline_handler(func=lambda get_number_else_ticket: True)
