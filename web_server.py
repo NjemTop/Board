@@ -497,9 +497,11 @@ def get_app():
         # Отправка ответа JSON
         return response
 
-    # @app.route('/data_release/api/client', methods=['GET'])
-    #  Применение декоратора require_basic_auth для аутентификации пользователей
-    # @require_basic_auth(USERNAME, PASSWORD)
+    @app.route('/data_release/api/client', methods=['GET'])
+    # Применение декоратора require_basic_auth для аутентификации пользователей
+    @require_basic_auth(USERNAME, PASSWORD)
+    def data_release_api():
+        ...
 
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
