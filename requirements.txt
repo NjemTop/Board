@@ -11,3 +11,4 @@ python-telegram-bot==13.14
 schedule==1.1.0
 smbprotocol==1.10.1
 docxtpl==0.16.5
+peewee==3.16.0

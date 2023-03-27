@@ -15,11 +15,17 @@ ENV LANG ru_RU.UTF-8
 ENV LANGUAGE ru_RU:en
 ENV LC_ALL ru_RU.UTF-8
 
+# Создаём папку на хост машине в директории проекта
+RUN mkdir -p ./backup
+
 # Копируем файлы проекта в контейнер
 COPY . /app
 
 # Создаем директорию logs внутри контейнера
 RUN mkdir -p /app/logs
+
+# Создаем директорию backup внутри контейнера
+RUN mkdir -p /app/backup
 
 # Обновляем pip
 RUN pip install --upgrade pip

@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 from flask import Response
 from flask import render_template
 import sqlite3
+from DataBase.model_class import Info
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
@@ -40,6 +41,8 @@ PASSWORD = generate_password_hash('Rfnzkj123123')
 
 # Создаем объект класса Alert
 alert = Alert()
+
+db_filename = '/var/lib/sqlite/database.db'
 
 # Создаем функцию-декоратор для аутентификации Basic Auth
 def require_basic_auth(username, password):
@@ -430,20 +433,11 @@ def get_app():
     @app.route('/data_release/api/versions', methods=['GET'])
     def api_data_release_versions():
         """Функция получения номеров версий отправки рассылки через API"""
-        # Подключение к базе данных SQLite
-        try:
-            conn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
-            cur = conn.cursor()
-        except sqlite3.Error as error_message:
-            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-            print("Ошибка подключения к базе данных SQLite:", error_message)
-            return "Ошибка с БД"
         # Получение списка всех номеров релизов и дат создания
-        cur.execute('SELECT DISTINCT Дата_рассылки, Номер_релиза FROM info')
-        rows = cur.fetchall()
-        conn.close()
-        # Сформировать список словарей с ключами "Data" и "Number"
-        versions = [{'Data': row[0], 'Number': row[1]} for row in rows]
+        with Info:
+            rows = Info.select(Info.date, Info.release_number).distinct()
+            # Сформировать список словарей с ключами "Data" и "Number"
+            versions = [{'Data': row.date, 'Number': row.release_number} for row in rows]
         # Формирование JSON с отступами для улучшения читабельности
         json_data = json.dumps(versions, ensure_ascii=False, indent=4)
         # Установка заголовка Access-Control-Allow-Origin
@@ -455,15 +449,12 @@ def get_app():
     # Определение маршрута для API с аргументом 'version' в URL
     @app.route('/data_release/api/<string:version>', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
-    # Определение маршрута для API с аргументом 'version' в URL
-    @app.route('/data_release/api/<string:version>', methods=['GET'])
-    # Применение декоратора require_basic_auth для аутентификации пользователей
     @require_basic_auth(USERNAME, PASSWORD)
     def api_data_release(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
+            conn = sqlite3.connect(f'file:{db_filename}')
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
@@ -506,10 +497,14 @@ def get_app():
         # Отправка ответа JSON
         return response
 
+    @app.route('/data_release/api/client', methods=['GET'])
+    # Применение декоратора require_basic_auth для аутентификации пользователей
+    @require_basic_auth(USERNAME, PASSWORD)
+
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        onn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
+        onn = sqlite3.connect(f'file:{db_filename}')
         cur = onn.cursor()
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
