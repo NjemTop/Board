@@ -521,15 +521,19 @@ def get_app():
         except requests.exceptions.RequestException as e:
             abort(500, "Error connecting to the database API: " + str(e))
 
-        rows = response.json()[0]['data']
+        data = response.json()
+        if 'rows' in data:
+            rows = data['rows']
+        else:
+            abort(500, "Error retrieving data from database")
         data = []
         for row in rows:
             data.append({
-                'Дата_рассылки': row['Дата_рассылки'],
-                'Номер_релиза': row['Номер_релиза'],
-                'Наименование_клиента': row['Наименование_клиента'],
-                'Основной_контакт': row['Основной_контакт'],
-                'Копия': row['Копия']
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
             })
         return render_template('data_release.html', data=data)
         

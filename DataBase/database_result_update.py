@@ -2,7 +2,6 @@ import pandas as pd
 import locale
 from datetime import datetime
 import sqlite3
-import requests
 
 def upload_db_result(version_number, result):
     # Запись месяца в дате по-русски
@@ -47,34 +46,12 @@ def upload_db_result(version_number, result):
             result_db.append([today, version_number, client_name, main_contact, copy_contact])
         continue
 
-    # Замените следующую строку на актуальный адрес API Datasette
-    datasette_url = "http://172.28.1.30:5000/database/info.json"
-
-    # Создаем БД
-    requests.post(datasette_url, json={
-        "sql": 'CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)'
-    })
-    # Наполняем БД
-    df = pd.DataFrame(result_db, columns=["Дата_рассылки", "Номер_релиза", "Наименование_клиента", "Основной_контакт", "Копия"])
-    for index, row in df.iterrows():
-        data = {
-            "Дата_рассылки": row["Дата_рассылки"],
-            "Номер_релиза": row["Номер_релиза"],
-            "Наименование_клиента": row["Наименование_клиента"],
-            "Основной_контакт": row["Основной_контакт"],
-            "Копия": row["Копия"]
-        }
-    # Замените следующую строку на путь к файлу базы данных SQLite на хосте
-    db_path = '/path/to/your/database.db'
-
-    # Подключение к базе данных SQLite на хосте
-    conn = sqlite3.connect(db_path)
+    # Подключение к базе данных SQLite
+    conn = sqlite3.connect('file:/usr/src/app/database.db', uri=True)
     c = conn.cursor()
-
-    # Вставляем данные в БД
-    c.execute('INSERT INTO info (Дата_рассылки, Номер_релиза, Наименование_клиента, Основной_контакт, Копия) VALUES (?, ?, ?, ?, ?)', 
-            (data["Дата_рассылки"], data["Номер_релиза"], data["Наименование_клиента"], data["Основной_контакт"], data["Копия"]))
-
-    # Закрываем соединение с базой данных
+    # Создаем БД
+    c.execute('CREATE TABLE IF NOT EXISTS info (Дата_рассылки date, Номер_релиза number, Наименование_клиента text, Основной_контакт text, Копия text)')
     conn.commit()
-    conn.close()
+    # Наполняем БД
+    df = pd.DataFrame(result_db, columns = ["Дата_рассылки", "Номер_релиза", "Наименование_клиента", "Основной_контакт", "Копия"])
+    df.to_sql('info', conn, if_exists='append', index = False)
