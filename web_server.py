@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 from flask import Response
 from flask import render_template
 import sqlite3
+import peewee
 from DataBase.model_class import Info
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
@@ -433,11 +434,16 @@ def get_app():
     @app.route('/data_release/api/versions', methods=['GET'])
     def api_data_release_versions():
         """Функция получения номеров версий отправки рассылки через API"""
-        # Получение списка всех номеров релизов и дат создания
-        with Info:
-            rows = Info.select(Info.date, Info.release_number).distinct()
-            # Сформировать список словарей с ключами "Data" и "Number"
-            versions = [{'Data': row.date, 'Number': row.release_number} for row in rows]
+        try:
+            versions = []
+            conn = sqlite3.connect(f'file:{db_filename}')
+            with conn:
+                for row in Info.select(Info.date, Info.release_number).distinct():
+                    versions.append({'Data': row.date, 'Number': row.release_number})
+        except peewee.OperationalError as error_message:
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return "Ошибка с БД"
         # Формирование JSON с отступами для улучшения читабельности
         json_data = json.dumps(versions, ensure_ascii=False, indent=4)
         # Установка заголовка Access-Control-Allow-Origin
@@ -445,6 +451,7 @@ def get_app():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправка ответа JSON
         return response
+
 
     # Определение маршрута для API с аргументом 'version' в URL
     @app.route('/data_release/api/<string:version>', methods=['GET'])
