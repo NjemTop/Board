@@ -1,7 +1,7 @@
 import peewee
 
 # Имя файла базы данных
-db_filename = 'DataBase/app/database.db'
+db_filename = '/var/lib/sqlite/database.db'
 
 # Подключение к базе данных SQLite
 conn = peewee.SqliteDatabase(f'file:{db_filename}')
