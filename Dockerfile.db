@@ -8,6 +8,7 @@ COPY ./DataBase/database.db /usr/src/app/
 
 # Добавляем права на чтение файла
 RUN chmod a+r /usr/src/app/database.db
+RUN chmod a+rw /usr/src/app/DataBase/database.db
 
 # Задаем рабочую директорию
 WORKDIR /app

@@ -430,7 +430,7 @@ def get_app():
         """Функция получения номеров версий отправки рассылки через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
@@ -461,7 +461,7 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
@@ -510,7 +510,7 @@ def get_app():
         release_number = request.args.get('release_number', 'all')
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
