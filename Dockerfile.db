@@ -3,9 +3,6 @@ FROM alpine:3.13.5
 # Устанавливаем SQLite
 RUN apk add --no-cache sqlite
 
-# Копируем файл базы данных в новый контейнер
-COPY ./DataBase/database.db /var/lib/sqlite/
-
 # Задаем рабочую директорию
 WORKDIR /var/lib/sqlite/
 
