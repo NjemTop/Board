@@ -7,10 +7,10 @@ RUN apk add --no-cache sqlite
 COPY ./DataBase/database.db /app
 
 # Добавляем права на чтение файла
-RUN chmod a+r /app/database.db
+RUN chmod a+r /app/DataBase/database.db
 
 # Задаем рабочую директорию
 WORKDIR /app
 
 # Устанавливаем точку входа
-CMD ["sqlite3", "/app/database.db"]
+CMD ["sqlite3", "/app/DataBase/database.db"]
