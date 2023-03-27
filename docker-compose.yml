@@ -35,6 +35,7 @@ services:
       dockerfile: Dockerfile.db
     container_name: db
     volumes:
+      - ./DataBase:/var/lib/sqlite
       - db-data:/var/lib/sqlite
     restart: always
     ports:
@@ -42,6 +43,11 @@ services:
     networks:
       network_for_bot:
         ipv4_address: 172.28.1.30
+    healthcheck:
+      test: ["CMD", "sqlite3", "/var/lib/sqlite/database.db", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
         
 networks:
   network_for_bot:
