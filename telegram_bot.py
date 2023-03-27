@@ -641,12 +641,12 @@ def inline_button_else_tickets(call):
         button_else_tickets = ButtonElseTickets.button_else_tickets()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_else_tickets)
 
-@bot.send_text_for_info_else_ticket(func=lambda get_number_else_ticket: True)
+@bot.chosen_inline_handler(func=lambda get_number_else_ticket: True)
 def get_number_else_ticket(result_number_else_ticket):
     user_state = user_states.get(result_number_else_ticket.chat.id)
     if user_state == "waiting_for_client_name":
         button_else_tickets = ButtonElseTickets.button_else_tickets()
-        bot.send_message(result_number_else_ticket.from_user.id, text="Скоро здесь будет инфо тиикета.", reply_markup=button_else_tickets).text.lower()
+        bot.send_message(result_number_else_ticket.from_user.id, text="Скоро здесь будет инфо тикета.", reply_markup=button_else_tickets).text.lower()
     else:
         pass
 
