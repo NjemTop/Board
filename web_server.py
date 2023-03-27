@@ -430,12 +430,12 @@ def get_app():
         """Функция получения номеров версий отправки рассылки через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
-            return
+            return "Ошибка с БД"
         # Получение списка всех номеров релизов и дат создания
         cur.execute('SELECT DISTINCT Дата_рассылки, Номер_релиза FROM info')
         rows = cur.fetchall()
@@ -461,12 +461,12 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
-            return
+            return "Ошибка с БД"
         # Фильтрация данных по номеру релиза
         cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
         rows = cur.fetchall()
@@ -510,12 +510,12 @@ def get_app():
         release_number = request.args.get('release_number', 'all')
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
+            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db?mode=ro', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
-            return
+            return "Ошибка с БД", error_message
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
         else:
