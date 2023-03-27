@@ -3,6 +3,12 @@ FROM alpine:3.13.5
 # Устанавливаем SQLite
 RUN apk add --no-cache sqlite
 
+# Копируем файл базы данных в новый контейнер
+#COPY ./DataBase/database.db /var/lib/sqlite/
+
+# Добавляем healthcheck
+HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
+
 # Задаем рабочую директорию
 WORKDIR /var/lib/sqlite/
 

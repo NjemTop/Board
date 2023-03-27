@@ -509,10 +509,10 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        if not os.access('file:/app/database.db', os.R_OK):
+        if not os.access('file:/var/lib/sqlite/database.db', os.R_OK):
             abort(500, "Database file not accessible")
         # Подключение к базе данных SQLite
-        conn = sqlite3.connect('file:/app/database.db?mode=ro', uri=True)
+        conn = sqlite3.connect('file:/var/lib/sqlite/database.db?mode=ro', uri=True)
         cur = conn.cursor()
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
