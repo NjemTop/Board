@@ -1,10 +1,14 @@
-FROM alpine:3.13.5
+FROM python:3.10-alpine
 
 # Устанавливаем SQLite
 RUN apk add --no-cache sqlite
 
+# Устанавливаем Datasette
+RUN pip install --upgrade pip
+RUN pip install datasette
+
 # Копируем файл базы данных в новый контейнер
-#COPY ./DataBase/database.db /var/lib/sqlite/
+COPY ./DataBase/database.db /var/lib/sqlite/
 
 # Добавляем healthcheck
 HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
@@ -13,4 +17,4 @@ HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
 WORKDIR /var/lib/sqlite/
 
 # Устанавливаем точку входа
-CMD ["sqlite3", "database.db"]
+CMD ["datasette", "serve", "--host", "0.0.0.0", "--port", "5000", "database.db"]
