@@ -509,17 +509,19 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        if not os.access('file:/var/lib/sqlite/database.db', os.R_OK):
-            abort(500, "Database file not accessible")
-        # Подключение к базе данных SQLite
-        conn = sqlite3.connect('file:/var/lib/sqlite/database.db?mode=ro', uri=True)
-        cur = conn.cursor()
-        if release_number == 'all':
-            cur.execute('SELECT * FROM info')
-        else:
-            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
-        rows = cur.fetchall()
-        conn.close()
+        datasette_url = "http://172.28.1.30:5000/database/info.json"
+        params = {"_shape": "array"}
+
+        if release_number != 'all':
+            params["Номер_релиза"] = release_number
+
+        try:
+            response = requests.get(datasette_url, params=params)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            abort(500, "Error connecting to the database API: " + str(e))
+
+        rows = response.json()['rows']
         data = []
         for row in rows:
             data.append({
