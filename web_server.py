@@ -509,7 +509,7 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        datasette_url = "http://172.28.1.30:5000/database/info.json"
+        datasette_url = "http://172.28.1.30:5000/database/data_release"
         params = {"_shape": "array"}
 
         if release_number != 'all':
@@ -521,17 +521,17 @@ def get_app():
         except requests.exceptions.RequestException as e:
             abort(500, "Error connecting to the database API: " + str(e))
 
-        rows = response.json()[0]['data']
-        data = []
-        for row in rows:
-            data.append({
+        data = response.json()['data']
+        data_formatted = []
+        for row in data:
+            data_formatted.append({
                 'Дата_рассылки': row[0],
                 'Номер_релиза': row[1],
                 'Наименование_клиента': row[2],
                 'Основной_контакт': row[3],
                 'Копия': row[4]
             })
-        return render_template('data_release.html', data=data)
+        return render_template('data_release.html', data=data_formatted)
         
     return app
 
