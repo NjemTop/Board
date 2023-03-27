@@ -65,5 +65,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./backup
+      device: ${PWD}/backup
       o: bind
