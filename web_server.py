@@ -369,6 +369,7 @@ def get_app():
         
         if error:
             return Response(error, status=400)
+        print(result, 'Successful request processing. Response status: 201')
         return Response(result, status=201)
 
     @app.route('/undersponed_ticket', methods=['POST'])
