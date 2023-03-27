@@ -8,7 +8,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - db-data:/var/lib/sqlite
-      - backup:/app/backup
+      - bot_tg_backup:/app/backup
     restart: always
     environment:
       - TZ=Europe/Moscow
@@ -61,7 +61,7 @@ networks:
 
 volumes:
   db-data:
-  backup:
+  bot_tg_backup:
     driver: local
     driver_opts:
       type: none
