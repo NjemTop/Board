@@ -4,6 +4,8 @@ import requests
 from functools import wraps
 from werkzeug.security import check_password_hash
 from flask import Flask, request, jsonify
+import os
+from flask import abort
 from werkzeug.security import generate_password_hash
 from flask import Response
 from flask import render_template
@@ -506,16 +508,12 @@ def get_app():
 
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
-        """Функция вывода информации об рассылке в HTML странице"""
         release_number = request.args.get('release_number', 'all')
         # Подключение к базе данных SQLite
-        try:
-            conn = sqlite3.connect('file:/usr/src/app/DataBase/database.db', uri=True)
-            cur = conn.cursor()
-        except sqlite3.Error as error_message:
-            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-            print("Ошибка подключения к базе данных SQLite:", error_message)
-            return error_message
+        conn = sqlite3.connect('file:/usr/src/app/database.db?mode=ro', uri=True)
+        cur = conn.cursor()
+        if not os.access('/usr/src/app/database.db', os.R_OK):
+            abort(500, "Database file not accessible")
         if release_number == 'all':
             cur.execute('SELECT * FROM info')
         else:
