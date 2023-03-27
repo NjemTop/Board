@@ -170,7 +170,8 @@ def start_message(message_start):
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text='Клиенты', callback_data='button_clients')
         button_SD_update = types.InlineKeyboardButton('Обновление версии', callback_data='button_SD_update')
-        main_menu.add(button_clients, button_SD_update, row_width=1)
+        button_else_tickets = types.InlineKeyboardButton(text= 'Текущие тикеты', callback_data='button_else_tickets')
+        main_menu.add(button_clients, button_SD_update, button_else_tickets,row_width=1)
         bot.send_message(message_start.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
     else:
         question_email = bot.send_message(message_start.chat.id,"Привет! Вашей учётной записи нет в базе.\nПожалуйста, введите адрес рабочей почты.")
@@ -306,7 +307,8 @@ def check_pass_answer(password_message, access_password, email_access):
             main_menu = types.InlineKeyboardMarkup()
             button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
             button_SD_update = types.InlineKeyboardButton('Обновление версии', callback_data='button_SD_update')
-            main_menu.add(button_clients, button_SD_update, row_width=1)
+            button_else_tickets = types.InlineKeyboardButton(text= 'Текущие тикеты', callback_data='button_else_tickets')
+            main_menu.add(button_clients, button_SD_update, button_else_tickets, row_width=1)
             bot.send_message(password_message.chat.id, 'Приветствую! Выберите нужное действие:', reply_markup=main_menu)
         elif password_message.text == '/start':
             start_message(password_message.chat.id)
