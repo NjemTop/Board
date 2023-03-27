@@ -10,7 +10,7 @@ COPY ./DataBase/database.db /usr/src/app/
 RUN chmod a+r /usr/src/app/database.db
 
 # Задаем рабочую директорию
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Запускаем SQLite при старте контейнера
-CMD ["sqlite3", "/usr/src/app/DataBase/database.db"]
+# Устанавливаем точку входа
+CMD ["sqlite3", "/usr/src/app/database.db"]
