@@ -13,4 +13,4 @@ RUN chmod a+r /app/database.db
 WORKDIR /app
 
 # Устанавливаем точку входа
-CMD ["sqlite3", "/usr/src/app/database.db"]
+CMD ["sqlite3", "/app/database.db"]
