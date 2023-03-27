@@ -509,7 +509,7 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        datasette_url = "http://172.28.1.30:5000/database/data_release"
+        datasette_url = "http://172.28.1.30:5000/database/info.json"
         params = {"_shape": "array"}
 
         if release_number != 'all':
