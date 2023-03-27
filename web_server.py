@@ -435,23 +435,28 @@ def get_app():
     def api_data_release_versions():
         """Функция получения номеров версий отправки рассылки через API"""
         try:
+            # Определяем список для хранения версий рассылок
             versions = []
+            # Устанавливаем соединение с БД
             conn = sqlite3.connect(f'file:{db_filename}')
+            # Используем контекстный менеджер для выполнения операций с БД
             with conn:
+                # Делаем выборку из таблицы Info по уникальным значениям даты и номера релиза
                 for row in Info.select(Info.date, Info.release_number).distinct():
+                    # Добавляем в список версий новую версию рассылки
                     versions.append({'Data': row.date, 'Number': row.release_number})
         except peewee.OperationalError as error_message:
+            # Обработка исключения при возникновении ошибки подключения к БД
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
             return "Ошибка с БД"
-        # Формирование JSON с отступами для улучшения читабельности
+        # Формируем JSON с отступами для улучшения читабельности
         json_data = json.dumps(versions, ensure_ascii=False, indent=4)
-        # Установка заголовка Access-Control-Allow-Origin
+        # Устанавливаем заголовок Access-Control-Allow-Origin
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправка ответа JSON
+        # Отправляем ответ JSON
         return response
-
 
     # Определение маршрута для API с аргументом 'version' в URL
     @app.route('/data_release/api/<string:version>', methods=['GET'])
@@ -462,37 +467,34 @@ def get_app():
         # Подключение к базе данных SQLite
         try:
             conn = sqlite3.connect(f'file:{db_filename}')
-            cur = conn.cursor()
-        except sqlite3.Error as error_message:
+            with conn:
+                # Фильтрация данных по номеру релиза
+                rows = Info.select().where(Info.release_number == version).execute()
+        except peewee.OperationalError as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
             return error_message
-        # Фильтрация данных по номеру релиза
-        cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
-        rows = cur.fetchall()
-        # Закрытие соединения с базой данных
-        conn.close()
         # Создаём пустой массив
         data = []
         # Преобразование полученных данных в список словарей
         for row in rows:
             copy_addresses = []
             # Разбиваем строку со списком адресов электронной почты для копии на отдельные адреса
-            if row[4] is None:
+            if row.copy is None:
                 copy_dict = [{'1': 'Копии отсутствуют'}]
             else:
-                copy_addresses = row[4].split(', ')
+                copy_addresses = row.copy.split(', ')
                 # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
                 copy_dict = [{f"{i+1}": copy_addresses[i]} for i in range(len(copy_addresses))]
             contacts = {
-                'Main': row[3],
+                'Main': row.main_contact,
                 'Copy': copy_dict
             }
             # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
             data.append({
-                'Data': row[0],
-                'Number': row[1],
-                'Client': row[2],
+                'Data': row.date,
+                'Number': row.release_number,
+                'Client': row.client_name,
                 'Contacts': contacts
             })
         # Форматирование JSON с отступами для улучшения читабельности
@@ -506,25 +508,50 @@ def get_app():
 
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
+        # Получаем значение параметра release_number из GET-запроса
         release_number = request.args.get('release_number', 'all')
-        onn = sqlite3.connect(f'file:{db_filename}')
-        cur = onn.cursor()
+        try:
+            # Подключение к базе данных SQLite
+            conn = sqlite3.connect(f'file:{db_filename}')
+            # Создание курсора для выполнения запросов к базе данных
+            cur = conn.cursor()
+        except sqlite3.Error as error_message:
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return error_message
+        # Выполнение SQL-запроса на получение данных из таблицы "info"
         if release_number == 'all':
-            cur.execute('SELECT * FROM info')
+            rows = Info.select().dicts()
         else:
-            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
-        rows = cur.fetchall()
-        onn.close()
+            rows = Info.select().where(Info.release_number == release_number).dicts()
+        # Закрытие соединения с базой данных
+        conn.close()
+        # Создание пустого массива для данных
         data = []
+        # Преобразование полученных данных в список словарей
         for row in rows:
+            # Преобразование списка адресов электронной почты для копии в словарь, где ключами являются цифры от 1 до N,
+            # а значениями - адреса электронной почты
+            copy_addresses = []
+            if row['copy'] is None:
+                copy_dict = [{'1': 'Копии отсутствуют'}]
+            else:
+                copy_addresses = row['copy'].split(', ')
+                copy_dict = [{f"{i+1}": copy_addresses[i]} for i in range(len(copy_addresses))]
+            contacts = {
+                'Main': row['main_contact'],
+                'Copy': copy_dict
+            }
+            # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
             data.append({
-                'Дата_рассылки': row[0],
-                'Номер_релиза': row[1],
-                'Наименование_клиента': row[2],
-                'Основной_контакт': row[3],
-                'Копия': row[4]
+                'Data': row['date'],
+                'Number': row['release_number'],
+                'Client': row['client_name'],
+                'Contacts': contacts
             })
+        # Отправляем полученные данные в шаблон HTML-страницы
         return render_template('data_release.html', data=data)
+
     
     @app.route('/data/api/client', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
