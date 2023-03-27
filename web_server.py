@@ -432,7 +432,7 @@ def get_app():
         """Функция получения номеров версий отправки рассылки через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/app/database.db', uri=True)
+            conn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
@@ -463,12 +463,12 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect('file:/app/database.db', uri=True)
+            conn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
             cur = conn.cursor()
         except sqlite3.Error as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
-            return "Ошибка с БД"
+            return error_message
         # Фильтрация данных по номеру релиза
         cur.execute('SELECT * FROM info WHERE Номер_релиза = ?', (version,))
         rows = cur.fetchall()
