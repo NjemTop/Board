@@ -33,7 +33,7 @@ BOT_TOKEN = DATA['TELEGRAM_SETTINGS']['BOT_TOKEN']
 
 class Alert():
     # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
-    def send_telegram_message(alert_chat_id, alert_text):
+    def send_telegram_message(self, alert_chat_id, alert_text):
         """Отправляет сообщение в телеграм-бот"""
         url = f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage'
         headers_server = {'Content-type': 'application/json'}
