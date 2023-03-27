@@ -8,6 +8,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - db-data:/var/lib/sqlite
+      - backup:/backup
     restart: always
     environment:
       - TZ=Europe/Moscow
@@ -60,3 +61,9 @@ networks:
 
 volumes:
   db-data:
+  backup:
+    driver: local
+    driver_opts:
+      type: none
+      device: /backup
+      o: bind
