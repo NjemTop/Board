@@ -509,23 +509,14 @@ def get_app():
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
         release_number = request.args.get('release_number', 'all')
-        datasette_url = "http://172.28.1.30:5000/database/info.json"
-        params = {"_shape": "array"}
-
-        if release_number != 'all':
-            params["Номер_релиза"] = release_number
-
-        try:
-            response = requests.get(datasette_url, params=params)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            abort(500, "Error connecting to the database API: " + str(e))
-
-        data = response.json()
-        if 'rows' in data:
-            rows = data['rows']
+        onn = sqlite3.connect('file:/var/lib/sqlite/database.db', uri=True)
+        cur = onn.cursor()
+        if release_number == 'all':
+            cur.execute('SELECT * FROM info')
         else:
-            abort(500, "Error retrieving data from database")
+            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
+        rows = cur.fetchall()
+        onn.close()
         data = []
         for row in rows:
             data.append({
@@ -536,6 +527,7 @@ def get_app():
                 'Копия': row[4]
             })
         return render_template('data_release.html', data=data)
+
         
     return app
 
