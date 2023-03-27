@@ -40,5 +40,4 @@ class Alert():
         data = {'chat_id': alert_chat_id, 'text': f'{alert_text}'}
         response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)
         # Добавляем логгирование для отладки
-        web_info_logger.info("Response from Telegram API: %s", response)
         print(response)
