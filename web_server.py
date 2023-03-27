@@ -506,52 +506,28 @@ def get_app():
         # Отправка ответа JSON
         return response
 
+    # Обработчик сайта с данными о релизе
     @app.route('/data_release', methods=['GET'])
     def data_release_html():
-        # Получаем значение параметра release_number из GET-запроса
         release_number = request.args.get('release_number', 'all')
-        try:
-            # Подключение к базе данных SQLite
-            conn = sqlite3.connect(f'file:{db_filename}')
-            # Создание курсора для выполнения запросов к базе данных
-            cur = conn.cursor()
-        except sqlite3.Error as error_message:
-            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-            print("Ошибка подключения к базе данных SQLite:", error_message)
-            return error_message
-        # Выполнение SQL-запроса на получение данных из таблицы "info"
+        onn = sqlite3.connect(f'file:{db_filename}')
+        cur = onn.cursor()
         if release_number == 'all':
-            rows = Info.select().dicts()
+            cur.execute('SELECT * FROM info')
         else:
-            rows = Info.select().where(Info.release_number == release_number).dicts()
-        # Закрытие соединения с базой данных
-        conn.close()
-        # Создание пустого массива для данных
+            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
+        rows = cur.fetchall()
+        onn.close()
         data = []
-        # Преобразование полученных данных в список словарей
         for row in rows:
-            # Преобразование списка адресов электронной почты для копии в словарь, где ключами являются цифры от 1 до N,
-            # а значениями - адреса электронной почты
-            copy_addresses = []
-            if row['copy'] is None:
-                copy_dict = [{'1': 'Копии отсутствуют'}]
-            else:
-                copy_addresses = row['copy'].split(', ')
-                copy_dict = [{f"{i+1}": copy_addresses[i]} for i in range(len(copy_addresses))]
-            contacts = {
-                'Main': row['main_contact'],
-                'Copy': copy_dict
-            }
-            # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
             data.append({
-                'Data': row['date'],
-                'Number': row['release_number'],
-                'Client': row['client_name'],
-                'Contacts': contacts
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
             })
-        # Отправляем полученные данные в шаблон HTML-страницы
         return render_template('data_release.html', data=data)
-
     
     @app.route('/data/api/client', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
