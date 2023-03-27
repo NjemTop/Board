@@ -35,7 +35,6 @@ services:
       dockerfile: Dockerfile.db
     container_name: db
     volumes:
-      - ./DataBase:/var/lib/sqlite
       - db-data:/var/lib/sqlite
     restart: always
     ports:
