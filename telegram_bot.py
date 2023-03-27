@@ -27,6 +27,7 @@ from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
 from ButtonClasses.button_clients import ButtonClients
 from ButtonClasses.button_update import ButtonUpdate
+from ButtonClasses.button_else_tickets import ButtonElseTickets
 from Report_client.formirovanie_otcheta_tele2 import create_report_tele2
 
 # создаем форматирование
@@ -329,7 +330,7 @@ def clients_message(message_clients):
         bot.send_message(message_clients.chat.id, 'Какую информацию хотите получить?', reply_markup=button_clients)
     else:
         bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
-# Обработчик вызова /sd_sb
+# Обработчик вызова /update
 @bot.message_handler(commands=['update'])
 def sd_sb_message(message_update):
     """Функция вызова кнопки /update"""
@@ -348,7 +349,8 @@ def inline_button_clients(call):
         main_menu = types.InlineKeyboardMarkup()
         button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
         button_SD_update = types.InlineKeyboardButton(text= 'Обновление версии', callback_data='button_SD_update')
-        main_menu.add(button_clients, button_SD_update, row_width=1)
+        button_else_tickets = types.InlineKeyboardButton(text= 'Текущие тикеты', callback_data='button_else_tickets')
+        main_menu.add(button_clients, button_SD_update, button_else_tickets, row_width=1)
         bot.edit_message_text('Главное меню:', call.message.chat.id, call.message.message_id, reply_markup=main_menu)
 # УРОВЕНЬ 2 "КЛИЕНТЫ". Добавляем кнопки [Список клиентов] / [Версии клиентов] / [Квартальные отчеты за период]
     elif call.data == "button_clients":
@@ -433,8 +435,7 @@ def inline_button_clients(call):
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии
-@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable",
-            "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
+@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable", "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
 def inline_button_SD_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
@@ -617,20 +618,35 @@ def send_text_version(result_client_version):
         pass
 
 
-# @bot.callback_query_handler(func=lambda call: True)
-# def ...():
-#     # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (G&P) ///////////////////////////////////////////////// в работе
-#     if call.data == "button_else_GP":    
-#         button_else_GP = ButtonUpdate.button_else_GP()
-#         bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_else_GP)
-#     # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (S&B) Добавляем кнопки [Получить статистику по тикетам] ///////////////////////////////////////////////// в работе
-#     elif call.data == "button_else_SB": 
-#         button_else_SB = ButtonUpdate.button_else_SB()
-#         bot.edit_message_text('Какое действие необходимо выполнить?', call.message.chat.id, call.message.message_id,reply_markup=button_else_SB)
-#     ### УРОВЕНЬ 4 "ПОЛУЧИТЬ СТАТИСТИКУ ПО ТИКЕТАМ" [ОСТАЛЬНЫЕ]  ///////////////////////////////////////////////// в работе
-#     elif call.data == "button_statistics_else_tickets_SB":
-#         button_statistics_else_tickets_SB = ButtonUpdate.button_statistics_else_tickets_SB()
-#         bot.edit_message_text('Кнопка на ремонте.', call.message.chat.id, call.message.message_id,reply_markup=button_statistics_else_tickets_SB)
+@bot.callback_query_handler(func=lambda call: call.data in ["button_else_tickets", "button_else_tickets_stat", "button_one_ticket_stat"])
+def inline_button_else_tickets(call):
+    """УРОВЕНЬ 2 "ОСТАЛЬНЫЕ ТИКЕТЫ"""
+    if call.data == "button_else_tickets":
+        button_else_tickets = ButtonElseTickets.button_else_tickets()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id, reply_markup=button_else_tickets)
+    ### УРОВЕНЬ 3. Статистика по остальным тикетам
+    elif call.data == "button_else_tickets_stat":
+        button_else_tickets_stat, all_ticket_count, new_ticket, without_support_answer, without_client_ansrew = ButtonElseTickets.button_else_tickets_stat()
+        bot.edit_message_text('Всего "в работе": ' + all_ticket_count + '. Из них:\n- Новые без исполнителя: ' + new_ticket + '\n- Без ответа от саппорта: ' + without_support_answer + '\n- Без ответа от клиента: ' + without_client_ansrew, call.message.chat.id, call.message.message_id, reply_markup=button_else_tickets_stat)
+    ### УРОВЕНЬ 3. Статистика по отдельному тикету
+    elif call.data == "button_one_ticket_stat":
+        button_one_ticket_stat = ButtonElseTickets.button_one_ticket_stat()
+        info_about_ticket = bot.edit_message_text('Напишите номер тикета. Например: 5886', call.message.chat.id, call.message.message_id, reply_markup=button_one_ticket_stat)
+        bot.register_next_step_handler(info_about_ticket, get_number_else_ticket)
+    elif call.data == "cancel_else_tickets":
+        user_states[call.message.chat.id] = "canceled"
+        # Возвращаемся на уровень выше
+        button_else_tickets = ButtonElseTickets.button_else_tickets()
+        bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_else_tickets)
+
+@bot.send_text_for_info_else_ticket(func=lambda get_number_else_ticket: True)
+def get_number_else_ticket(result_number_else_ticket):
+    user_state = user_states.get(result_number_else_ticket.chat.id)
+    if user_state == "waiting_for_client_name":
+        button_else_tickets = ButtonElseTickets.button_else_tickets()
+        bot.send_message(result_number_else_ticket.from_user.id, text="Скоро здесь будет инфо тиикета.", reply_markup=button_else_tickets).text.lower()
+    else:
+        pass
 
 
 def start_telegram_bot():

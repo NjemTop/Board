@@ -1,27 +1,25 @@
 from telebot import types
 
 class ButtonElseTickets():
-    def button_else_GP():
-        # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (G&P) 
-        button_else_GP = types.InlineKeyboardMarkup()
-        back_from_button_else_GP = types.InlineKeyboardButton(text='Назад', callback_data='button_SD_Gold_Platinum')
+    def get_info_else_tickets(call):
+        button_else_tickets = types.InlineKeyboardButton
+        button_else_tickets_stat = types.InlineKeyboardMarkup(text= 'Общая статистика', callback_data='button_else_tickets_stat')
+        button_one_ticket_stat = types.InlineKeyboardMarkup(text= 'Просмотр данных отдельного тикета', callback_data='button_one_ticket_stat')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_else_GP.add(back_from_button_else_GP, main_menu, row_width=2)
-        return button_else_GP
-    def button_else_SB():
-    # УРОВЕНЬ 3 "ОСТАЛЬНЫЕ ТИКЕТЫ" (S&B) Добавляем кнопки [Получить статистику по тикетам] 
-        button_else_SB = types.InlineKeyboardMarkup()
-        button_statistics_else_tickets_SB = types.InlineKeyboardButton(text= 'Получить статистику по тикетам', callback_data='button_statistics_else_tickets_SB')
-        button_else_SB.add(button_statistics_else_tickets_SB, row_width=1)
-        back_from_button_else_SB = types.InlineKeyboardButton(text= 'Назад', callback_data='button_SD_Silver_Bronze')
+        button_else_tickets.add(button_else_tickets_stat, button_one_ticket_stat, main_menu, row_width=1)
+        return button_else_tickets
+    def get_info_else_tickets_stat(call):    
+        button_else_tickets_stat = types.InlineKeyboardButton
+        back_from_button_else_tickets_stat = types.InlineKeyboardButton(text= 'Назад', callback_data='button_else_tickets')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_else_SB.add(back_from_button_else_SB, main_menu, row_width=2)
-        return button_else_SB
-    def button_statistics_else_tickets_SB():
-        button_statistics_else_tickets_SB = types.InlineKeyboardMarkup()
-        back_from_button_statistics_else_tickets_SB = types.InlineKeyboardButton(text='Назад', callback_data='button_else_SB')
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_statistics_else_tickets_SB.add(back_from_button_statistics_else_tickets_SB, main_menu, row_width=2)
-        return button_statistics_else_tickets_SB
-    
-    
+        button_else_tickets_stat.add(back_from_button_else_tickets_stat, main_menu, row_width=2)
+        all_ticket_count = '6'
+        new_ticket = '2'
+        without_support_answer = '3'
+        without_client_ansrew = '1'
+        return button_else_tickets_stat, all_ticket_count, new_ticket, without_support_answer, without_client_ansrew
+    def get_info_one_ticket_stat(call):    
+        button_one_ticket_stat = types.InlineKeyboardButton
+        button_one_ticket_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_else_tickets')
+        button_one_ticket_stat.add(button_one_ticket_cancel, row_width=1)
+        return button_one_ticket_stat
