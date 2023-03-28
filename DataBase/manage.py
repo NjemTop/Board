@@ -20,31 +20,24 @@ def migrate():
                 current_columns = get_model_columns(model)
                 expected_columns = {field.column_name: field for field in model._meta.sorted_fields}
 
-                # Создаем список переименованных столбцов
-                renamed_columns = []
+                # Если поля отсутствуют, добавляем их
+                new_columns = set(expected_columns.keys()) - set(current_columns.keys())
+                for column in new_columns:
+                    with conn:
+                        conn.execute_sql(f"ALTER TABLE {model._meta.table_name} ADD COLUMN {column} TEXT")
+
+                # Если поля неожиданно присутствуют, удаляем их
+                old_columns = set(current_columns.keys()) - set(expected_columns.keys())
+                for column in old_columns:
+                    with conn:
+                        conn.execute_sql(f"ALTER TABLE {model._meta.table_name} DROP COLUMN {column}")
+
+                # Переименовываем столбцы, если имена столбцов в базе данных и классе модели не совпадают
                 for column_name, field in expected_columns.items():
                     if column_name in current_columns and field.name != current_columns[column_name].name:
-                        renamed_columns.append((current_columns[column_name].name, field.name))
-
-                if renamed_columns:
-                    # Создаем новую таблицу с новыми именами столбцов
-                    temp_table_name = f"{model._meta.table_name}_temp"
-                    with conn:
-                        conn.create_tables([model], safe=False, table_name=temp_table_name)
-
-                    # Копируем данные из старой таблицы в новую
-                    old_columns = [old_name for old_name, _ in renamed_columns]
-                    new_columns = [new_name for _, new_name in renamed_columns]
-                    old_columns_str = ", ".join(old_columns)
-                    new_columns_str = ", ".join(new_columns)
-                    with conn:
-                        conn.execute_sql(f"INSERT INTO {temp_table_name} ({new_columns_str}) SELECT {old_columns_str} FROM {model._meta.table_name}")
-
-                    # Удаляем старую таблицу и переименовываем новую
-                    with conn:
-                        conn.execute_sql(f"DROP TABLE {model._meta.table_name}")
-                        conn.execute_sql(f"ALTER TABLE {temp_table_name} RENAME TO {model._meta.table_name}")
+                        with conn:
+                            conn.execute_sql(f"ALTER TABLE {model._meta.table_name} RENAME COLUMN {current_columns[column_name].name} TO {field.name}")
 
         print("Tables created successfully")
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as error_message:
+        print(f"Error: {error_message}")
