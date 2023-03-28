@@ -49,24 +49,22 @@ class Release_info(BaseModel):
 class ClientsInfo(BaseModel):
     """Класс для таблицы БД clients_info"""
     client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
-    contract_status = peewee.TextField(column_name='Статус_по_договору')
-    service_package = peewee.TextField(column_name='Пакет_услуг')
-    manager = peewee.TextField(column_name='Менеджер')
-    loyalty = peewee.TextField(column_name='Лояльность')
+    contract_status = peewee.TextField(column_name='Активность')
+    client_info = peewee.TextField(column_name='Карточка_клиента')
+    Service = peewee.TextField(column_name='Обслуживание')
+    technical_information = peewee.TextField(column_name='Техническая_информация')
+    integration = peewee.TextField(column_name='Интеграции')
     notes = peewee.TextField(column_name='Примечания')
-    server_version = peewee.TextField(column_name='Версия_сервера')
-    update_date = peewee.DateField(column_name='Дата_обновления')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
         'client_name',
         'contract_status',
-        'service_package',
-        'manager',
-        'loyalty',
-        'notes',
-        'server_version',
-        'update_date'
+        'client_info',
+        'Service',
+        'technical_information',
+        'integration',
+        'notes'
     ]
 
     def __init__(self, *args, **kwargs):
