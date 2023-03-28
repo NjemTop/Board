@@ -1,4 +1,4 @@
-from DataBase.model_class import Release_info, ClientsInfo
+from DataBase.model_class import Release_info, BMInfo_onClient
 import sqlite3
 
 # # Создаем таблицу, если она не существует
@@ -17,4 +17,4 @@ if __name__ == '__main__':
     conn = sqlite3.connect(f'file:{db_filename}?mode=rw', uri=True)
     
     # Переименовываем таблицу clients_info в BM_info_on_clients
-    ClientsInfo.rename_table('clients_info', 'BM_info_on_clients')
+    BMInfo_onClient.rename_table('clients_info', 'BM_info_on_clients')

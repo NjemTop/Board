@@ -6,7 +6,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import peewee
-from DataBase.model_class import Release_info, ClientsInfo, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from config import USERNAME, PASSWORD, require_basic_auth
@@ -479,7 +479,7 @@ def get_client_info_api():
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
                 # Получаем все записи из таблицы client_info
-                client_infos = list(ClientsInfo.select())
+                client_infos = list(BMInfo_onClient.select())
             # Преобразуем список записей в список словарей
             results = []
             for client_info in client_infos:
@@ -503,13 +503,13 @@ def get_client_info_api():
         
 def post_client_info_api():
         try:
-            # Получаем данные из запроса и создаем объекты ClientsInfo
+            # Получаем данные из запроса и создаем объекты BMInfo_onClient
             data = request.get_json()
-            client_infos = [ClientsInfo(**client_data) for client_data in data]
+            client_infos = [BMInfo_onClient(**client_data) for client_data in data]
 
             # Создаем таблицу, если она не существует
             with conn:
-                conn.create_tables([ClientsInfo])
+                conn.create_tables([BMInfo_onClient])
 
             # Сохраняем данные в базе данных
             with conn.atomic():
@@ -779,7 +779,7 @@ def get_app():
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
                 # Получаем все записи из таблицы client_info
-                client_infos = list(ClientsInfo.select())
+                client_infos = list(BMInfo_onClient.select())
             # Преобразуем список записей в список словарей
             results = []
             for client_info in client_infos:
@@ -806,13 +806,13 @@ def get_app():
     @require_basic_auth(USERNAME, PASSWORD)
     def post_client_info_api():
         try:
-            # Получаем данные из запроса и создаем объекты ClientsInfo
+            # Получаем данные из запроса и создаем объекты BMInfo_onClient
             data = request.get_json()
-            client_infos = [ClientsInfo(**client_data) for client_data in data]
+            client_infos = [BMInfo_onClient(**client_data) for client_data in data]
 
             # Создаем таблицу, если она не существует
             with conn:
-                conn.create_tables([ClientsInfo])
+                conn.create_tables([BMInfo_onClient])
 
             # Сохраняем данные в базе данных
             with conn.atomic():
