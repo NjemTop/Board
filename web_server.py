@@ -529,43 +529,61 @@ def get_app():
     
     @app.route('/data_clients/api/clients', methods=['GET'])
     def get_client_info_api():
-        # Используем контекстный менеджер для выполнения операций с БД
-        with conn:
-            # Получаем все записи из таблицы client_info
-            client_infos = list(ClientInfo.select())
-        # Преобразуем список записей в список словарей
-        results = []
-        for client_info in client_infos:
-            result = {}
-            for column_name in client_info.column_names:
-                result[column_name] = getattr(client_info, column_name)
-            results.append(result)
-        # Формируем JSON с отступами для улучшения читабельности
-        json_data = json.dumps(results, ensure_ascii=False, indent=4)
-        # Устанавливаем заголовок Access-Control-Allow-Origin
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправляем ответ JSON
-        return response
+        try:
+            # Используем контекстный менеджер для выполнения операций с БД
+            with conn:
+                # Получаем все записи из таблицы client_info
+                client_infos = list(ClientInfo.select())
+            # Преобразуем список записей в список словарей
+            results = []
+            for client_info in client_infos:
+                result = {}
+                for column_name in client_info.column_names:
+                    result[column_name] = getattr(client_info, column_name)
+                results.append(result)
+            # Формируем JSON с отступами для улучшения читабельности
+            json_data = json.dumps(results, ensure_ascii=False, indent=4)
+            # Устанавливаем заголовок Access-Control-Allow-Origin
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            # Отправляем ответ JSON
+            return response
+        except Exception as e:
+            error_message = {"error": str(e)}
+            json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
 
     @app.route('/data_clients/api/clients', methods=['POST'])
     @require_basic_auth(USERNAME, PASSWORD)
     def post_client_info_api():
-        # Получаем данные из запроса и создаем объекты ClientInfo
-        data = request.get_json()
-        client_infos = [ClientInfo(**client_data) for client_data in data]
-        # Подключение к базе данных SQLite
-        conn = BaseModel.database
-        # Создаем таблицу, если она не существует
-        with conn:
-            conn.create_tables([ClientInfo])
-        
-        # Сохраняем данные в базе данных
-        with conn.atomic():
-            for client_info in client_infos:
-                client_info.save()
-        
-        return 'Data successfully saved to the database!'
+        try:
+            # Получаем данные из запроса и создаем объекты ClientInfo
+            data = request.get_json()
+            client_infos = [ClientInfo(**client_data) for client_data in data]
+
+            # Создаем таблицу, если она не существует
+            with conn:
+                conn.create_tables([ClientInfo])
+
+            # Сохраняем данные в базе данных
+            with conn.atomic():
+                for client_info in client_infos:
+                    client_info.save()
+
+            return 'Data successfully saved to the database!'
+
+        except peewee.OperationalError as error_message:
+            # Обработка исключения при возникновении ошибки подключения к БД
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return "Ошибка с БД"
+        except Exception as error:
+            # Обработка остальных исключений
+            web_error_logger.error("Ошибка: %s", error)
+            print("Ошибка:", error)
+            return "Ошибка сервера"
 
     return app
 
