@@ -32,5 +32,3 @@ def migrate():
         print("Tables created successfully")
     except Exception as error_message:
             print("Error during table creation:", error_message)
-
-migrate()
