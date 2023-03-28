@@ -336,6 +336,199 @@ def handler_post_update_ticket():
             return Response(error, status=400)
         return Response(result, status=201)
 
+def handler_undersponed_ticket():
+        """Функция обработки вебхука от HappyFox, если тикет был отложен"""
+        message = ""
+        message = request.data.decode('utf-8')
+        try:
+            # находим JSON в сообщении
+            json_start = message.find('{')
+            if json_start != -1:
+                json_str = message[json_start:]
+                # парсим JSON
+                json_data = json.loads(json_str)
+                print(json_data)
+                web_info_logger.info('Направлена информация в группу о созданном тикете: %s', json_data)
+            else:
+                web_error_logger.error("JSON не найден в сообщении. %s")
+                return 'JSON не найден в сообщении.', 400
+        except ValueError as error_message:
+            web_error_logger.error("Не удалось распарсить JSON в запросе. %s", error_message)
+            return 'Не удалось распарсить JSON в запросе.', 500
+        
+        # Отправляем ответ о том, что всё принято и всё хорошо
+        return "OK", 201
+
+def handler_get_yandex_oauth_callback():
+        """Функция определения oauth яндекса"""
+        # Извлеките авторизационный код из URL
+        authorization_code = request.args.get('code')
+        if not authorization_code:
+            return Response('Ошибка: авторизационный код не найден', mimetype='text/plain')
+
+        # Запросите OAuth-токен, используя авторизационный код
+        token_request_data = {
+            "grant_type": "authorization_code",
+            "code": authorization_code,
+            "client_id": "8525a645d7744d008ea42465c080b2a7",
+            "client_secret": "1b9335d34574471b894d1c2576305a11",
+            "redirect_uri": "http://194.37.1.214:3030/yandex_oauth_callback"
+        }
+        token_response = requests.post('https://oauth.yandex.ru/token', data=token_request_data, timeout=30)
+
+        if token_response.status_code == 200:
+            token_data = token_response.json()
+            access_token = token_data['access_token']
+
+            # Отправляем в ответ браузера access_token, который нужно сохранить
+            return Response(f'OAuth-токен успешно получен: {access_token}', mimetype='text/plain')
+        # Если ошибка, отправим её
+        return Response('Ошибка: не удалось получить OAuth-токен', mimetype='text/plain', status=400)
+
+def api_data_release_versions():
+        """Функция получения номеров версий отправки рассылки через API"""
+        try:
+            # Определяем список для хранения версий рассылок
+            versions = []
+            # Используем контекстный менеджер для выполнения операций с БД и автоматического закрытия соединения
+            with conn:
+                # Делаем выборку из таблицы Release_info по уникальным значениям даты и номера релиза
+                for row in Release_info.select(Release_info.date, Release_info.release_number).distinct():
+                    # Добавляем в список версий новую версию рассылки
+                    versions.append({'Data': row.date, 'Number': row.release_number})
+        except peewee.OperationalError as error_message:
+            # Обработка исключения при возникновении ошибки подключения к БД
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return "Ошибка с БД"
+        # Формируем JSON с отступами для улучшения читабельности
+        json_data = json.dumps(versions, ensure_ascii=False, indent=4)
+        # Устанавливаем заголовок Access-Control-Allow-Origin
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON
+        return response
+
+def api_data_release_number(version):
+        """Функция просмотра контактов, кому ушла рассылка через API"""
+        # Подключение к базе данных SQLite
+        try:
+            with conn:
+                # Фильтрация данных по номеру релиза
+                query = Release_info.select().where(Release_info.release_number == version)
+                rows = list(query)
+        except peewee.OperationalError as error_message:
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return error_message
+        # Создаём пустой массив
+        data = []
+        # Преобразование полученных данных в список словарей
+        for row in rows:
+            copy_addresses = []
+            # Разбиваем строку со списком адресов электронной почты для копии на отдельные адреса
+            if row.copy is None:
+                copy_dict = [{'1': 'Копии отсутствуют'}]
+            else:
+                copy_addresses = row.copy.split(', ')
+                # Формируем словарь для копий, который содержит адреса электронной почты с ключами 1, 2, 3 и т.д.
+                copy_dict = [{f"{i+1}": copy_addresses[i]} for i in range(len(copy_addresses))]
+            contacts = {
+                'Main': row.main_contact,
+                'Copy': copy_dict
+            }
+            # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
+            data.append({
+                'Data': row.date,
+                'Number': row.release_number,
+                'Client': row.client_name,
+                'Contacts': contacts
+            })
+        # Форматирование JSON с отступами для улучшения читабельности
+        json_data = json.dumps(data, ensure_ascii=False, indent=4)
+        # Создание ответа с типом содержимого application/json и кодировкой UTF-8
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавление заголовка Access-Control-Allow-Origin для разрешения кросс-доменных запросов
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправка ответа JSON
+        return response
+
+def data_release_html():
+        release_number = request.args.get('release_number', 'all')
+        onn = sqlite3.connect(f'file:{db_filename}')
+        cur = onn.cursor()
+        if release_number == 'all':
+            cur.execute('SELECT * FROM info')
+        else:
+            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
+        rows = cur.fetchall()
+        onn.close()
+        data = []
+        for row in rows:
+            data.append({
+                'Дата_рассылки': row[0],
+                'Номер_релиза': row[1],
+                'Наименование_клиента': row[2],
+                'Основной_контакт': row[3],
+                'Копия': row[4]
+            })
+        return render_template('data_release.html', data=data)
+
+def get_client_info_api():
+        try:
+            # Используем контекстный менеджер для выполнения операций с БД
+            with conn:
+                # Получаем все записи из таблицы client_info
+                client_infos = list(ClientsInfo.select())
+            # Преобразуем список записей в список словарей
+            results = []
+            for client_info in client_infos:
+                result = {}
+                for column_name in client_info.column_names:
+                    result[column_name] = getattr(client_info, column_name)
+                results.append(result)
+            # Формируем JSON с отступами для улучшения читабельности
+            json_data = json.dumps(results, ensure_ascii=False, indent=4)
+            # Устанавливаем заголовок Access-Control-Allow-Origin
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            # Отправляем ответ JSON
+            return response
+        except Exception as error:
+            error_message = {"error": str(error)}
+            json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+        
+def post_client_info_api():
+        try:
+            # Получаем данные из запроса и создаем объекты ClientsInfo
+            data = request.get_json()
+            client_infos = [ClientsInfo(**client_data) for client_data in data]
+
+            # Создаем таблицу, если она не существует
+            with conn:
+                conn.create_tables([ClientsInfo])
+
+            # Сохраняем данные в базе данных
+            with conn.atomic():
+                for client_info in client_infos:
+                    client_info.save()
+
+            return 'Data successfully saved to the database!'
+
+        except peewee.OperationalError as error_message:
+            # Обработка исключения при возникновении ошибки подключения к БД
+            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+            print("Ошибка подключения к базе данных SQLite:", error_message)
+            return "Ошибка с БД"
+        except Exception as error:
+            # Обработка остальных исключений
+            web_error_logger.error("Ошибка: %s", error)
+            print("Ошибка:", error)
+            return "Ошибка сервера"
+        
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -512,7 +705,7 @@ def get_app():
     @app.route('/data_release/api/<string:version>', methods=['GET'])
     # Применение декоратора require_basic_auth для аутентификации пользователей
     @require_basic_auth(USERNAME, PASSWORD)
-    def api_data_release(version):
+    def api_data_release_number(version):
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
@@ -647,15 +840,31 @@ def create_app():
     app.config.from_object('config')
 
     # Регистрация обработчиков для URL 
-    app.add_url_rule('/', 'handle_get', handler_get, methods=['GET'])
+    app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
 
     # Регистрация обработчиков для URL /create_ticket
-    app.add_url_rule('/create_ticket', 'handle_get_create_ticket', handler_get_create_ticket, methods=['GET'])
-    app.add_url_rule('/create_ticket', 'create_ticket', handler_post_create_ticket, methods=['POST'])
+    app.add_url_rule('/create_ticket', 'handler_get_create_ticket', handler_get_create_ticket, methods=['GET'])
+    app.add_url_rule('/create_ticket', 'handler_post_create_ticket', handler_post_create_ticket, methods=['POST'])
 
     # Регистрация обработчиков для URL /update_ticket
-    app.add_url_rule('/update_ticket', 'handle_get_update_ticket', handler_get_update_ticket, methods=['GET'])
-    app.add_url_rule('/update_ticket', 'update_ticket', handler_post_update_ticket, methods=['POST'])
+    app.add_url_rule('/update_ticket', 'handler_get_update_ticket', handler_get_update_ticket, methods=['GET'])
+    app.add_url_rule('/update_ticket', 'handler_post_update_ticket', handler_post_update_ticket, methods=['POST'])
+
+    # 
+    app.add_url_rule('/undersponed_ticket', 'handler_undersponed_ticket', handler_undersponed_ticket, methods=['POST'])
+
+    # 
+    app.add_url_rule('/yandex_oauth_callback', 'handler_get_yandex_oauth_callback', handler_get_yandex_oauth_callback, methods=['GET'])
+
+    # 
+    app.add_url_rule('/data_release/api/versions', 'api_data_release_versions', api_data_release_versions, methods=['GET'])
+    # Регистрация обработчика для API с параметром version в URL
+    app.route('/data_release/api/<string:version>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(api_data_release_number))
+    app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
+
+    # 
+    app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_info_api))
+    app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(post_client_info_api))
 
     return app
 
