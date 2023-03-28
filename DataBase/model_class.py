@@ -11,6 +11,10 @@ conn = peewee.SqliteDatabase(f'file:{db_filename}')
 class BaseModel(peewee.Model):
     class Meta:
         database = conn  # соединение с базой
+        
+    @property
+    def columns(self):
+        return {field.column_name: field for field in self._meta.sorted_fields}
 
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):

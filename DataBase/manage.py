@@ -1,6 +1,9 @@
 from peewee import *
 from model_class import BaseModel, ClientsInfo, Release_info, conn
 
+def get_model_columns(model):
+    return {field.column_name: field for field in model._meta.sorted_fields}
+
 # Определяем команду для миграции базы данных
 def migrate():
     try:
@@ -10,11 +13,11 @@ def migrate():
             if not model.table_exists():
                 # Если таблицы нет, то создаем ее
                 with conn:
-                    conn.create_tables(model)
+                    conn.create_tables([model])
 
             else:
                 # Если таблица существует, проверяем ее поля (столбцы)
-                current_columns = set(model.columns.keys())
+                current_columns = set(get_model_columns(model).keys())
                 expected_columns = set([field.name for field in model._meta.fields])
 
                 # Если поля отсутствуют, добавляем их
