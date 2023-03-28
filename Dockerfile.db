@@ -15,7 +15,7 @@ COPY ./DataBase/model_class.py /app/model_class.py
 COPY ./DataBase/manage.py /app/manage.py
 
 # Выполняем миграцию БД
-RUN python /app/manage.py migrate
+RUN python /app/manage.py
 
 # Удаляем скопированные файлы
 RUN rm /app/model_class.py /app/manage.py
