@@ -475,31 +475,28 @@ def data_release_html():
         return render_template('data_release.html', data=data)
 
 def get_BM_Info_onClient_api():
-        try:
-            # Используем контекстный менеджер для выполнения операций с БД
-            with conn:
-                # Получаем все записи из таблицы client_info
-                client_infos = list(BMInfo_onClient.select())
-            # Преобразуем список записей в список словарей
-            results = []
-            for client_info in client_infos:
-                result = {}
-                for column_name in client_info.column_names:
-                    result[column_name] = getattr(client_info, column_name)
-                results.append(result)
-            # Формируем JSON с отступами для улучшения читабельности
-            json_data = json.dumps(results, ensure_ascii=False, indent=4)
-            # Устанавливаем заголовок Access-Control-Allow-Origin
-            response = Response(json_data, content_type='application/json; charset=utf-8')
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            # Отправляем ответ JSON
-            return response
-        except Exception as error:
-            error_message = {"error": str(error)}
-            json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
-            response = Response(json_data, content_type='application/json; charset=utf-8')
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response
+    try:
+        with conn:
+            client_infos = list(BMInfo_onClient.select())
+        
+        results = []
+        for client_info in client_infos:
+            result = {}
+            for column_name in client_info.column_names:
+                # Используйте новые названия столбцов
+                result[column_name] = getattr(client_info, column_name.lower())
+            results.append(result)
+        
+        json_data = json.dumps(results, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as error:
+        error_message = {"error": str(error)}
+        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
         
 def get_BM_Info_onClient_api_1():
     try:
