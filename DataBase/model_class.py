@@ -11,7 +11,7 @@ conn = peewee.SqliteDatabase(f'file:{db_filename}')
 class BaseModel(peewee.Model):
     class Meta:
         database = conn  # соединение с базой
-        
+
     @property
     def columns(self):
         return {field.column_name: field for field in self._meta.sorted_fields}
@@ -36,14 +36,14 @@ class Release_info(BaseModel):
 
 class ClientsInfo(BaseModel):
     """Класс для таблицы БД clients_info"""
-    client_name = peewee.TextField(column_name='Название клиента', primary_key=True)
-    contract_status = peewee.TextField(column_name='Статус по договору')
-    service_package = peewee.TextField(column_name='Пакет услуг')
+    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
+    contract_status = peewee.TextField(column_name='Статус_по_договору')
+    service_package = peewee.TextField(column_name='Пакет_услуг')
     manager = peewee.TextField(column_name='Менеджер')
     loyalty = peewee.TextField(column_name='Лояльность')
     notes = peewee.TextField(column_name='Примечания')
-    server_version = peewee.TextField(column_name='Версия сервера')
-    update_date = peewee.DateField(column_name='Дата обновления')
+    server_version = peewee.TextField(column_name='Версия_сервера')
+    update_date = peewee.DateField(column_name='Дата_обновления')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
