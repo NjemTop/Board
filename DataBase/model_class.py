@@ -48,20 +48,20 @@ class Release_info(BaseModel):
 
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
-    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
-    contract_status = peewee.BooleanField(column_name='Активность')
-    client_info = peewee.IntegerField(column_name='Карточка_клиента')
-    Service = peewee.IntegerField(column_name='Обслуживание')
-    technical_information = peewee.IntegerField(column_name='Техническая_информация')
-    integration = peewee.IntegerField(column_name='Интеграции')
-    notes = peewee.TextField(column_name='Примечания')
+    client_name = peewee.TextField(column_name='Client_name', primary_key=True)
+    contact_status = peewee.BooleanField(column_name='Contact_status')
+    client_info = peewee.IntegerField(column_name='Client_info')
+    service = peewee.IntegerField(column_name='Service')
+    technical_information = peewee.IntegerField(column_name='Technical_information')
+    integration = peewee.IntegerField(column_name='Integration')
+    notes = peewee.TextField(column_name='Notes')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
         'client_name',
-        'contract_status',
+        'contact_status',
         'client_info',
-        'Service',
+        'service',
         'technical_information',
         'integration',
         'notes'
@@ -82,7 +82,7 @@ class ClientsCard(BaseModel):
     connect_info = peewee.IntegerField(column_name='Информация_для_подключения')
     rdp = peewee.IntegerField(column_name='Удаленный_доступ')
     tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись')
-    bm_servers = peewee.IntegerField(column_name='Серверы ВМ')
+    bm_servers = peewee.IntegerField(column_name='Серверы_ВМ')
     
     # Список наименований столбцов
     COLUMN_NAMES = [
