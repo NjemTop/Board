@@ -7,39 +7,36 @@ def get_model_columns(model):
 # Определяем команду для миграции базы данных
 def migrate():
     try:
-        # Обход всех моделей
         for model in [ClientsInfo, Release_info]:
-            # Проверяем наличие таблицы в БД
             if not model.table_exists():
-                # Если таблицы нет, то создаем ее
                 with conn:
                     conn.create_tables([model])
-
             else:
-                # Если таблица существует, проверяем ее поля (столбцы)
-                current_columns = get_model_columns(model)
-                expected_columns = {field.column_name: field for field in model._meta.sorted_fields}
+                # Получаем столбцы таблицы и модели
+                table_columns = conn.get_columns(model._meta.table_name)
+                table_column_names = {col.name for col in table_columns}
+                model_column_names = set(model().columns.keys())
 
-                # Если поля отсутствуют, добавляем их
-                new_columns = set(expected_columns.keys()) - set(current_columns.keys())
-                for column in new_columns:
+                if table_column_names != model_column_names:
+                    # Создаем новую таблицу с обновленными столбцами
+                    new_table_name = model._meta.table_name + '_new'
+                    model.rename_table(new_table_name)
                     with conn:
-                        conn.execute_sql(f"ALTER TABLE {model._meta.table_name} ADD COLUMN {column} TEXT")
+                        conn.create_tables([model])
 
-                # Если поля неожиданно присутствуют, удаляем их
-                old_columns = set(current_columns.keys()) - set(expected_columns.keys())
-                for column in old_columns:
+                    # Копируем данные из старой таблицы в новую
+                    common_columns = table_column_names.intersection(model_column_names)
+                    common_columns_str = ', '.join(common_columns)
+                    query = f"INSERT INTO {model._meta.table_name} ({common_columns_str}) SELECT {common_columns_str} FROM {new_table_name};"
                     with conn:
-                        conn.execute_sql(f"ALTER TABLE {model._meta.table_name} DROP COLUMN {column}")
+                        conn.execute_sql(query)
 
-                # Переименовываем столбцы, если имена столбцов в базе данных и классе модели не совпадают
-                for column_name, field in expected_columns.items():
-                    if column_name in current_columns and field.name != current_columns[column_name].name:
-                        with conn:
-                            conn.execute_sql(f"ALTER TABLE {model._meta.table_name} RENAME COLUMN {current_columns[column_name].name} TO {field.name}")
+                    # Удаляем старую таблицу
+                    with conn:
+                        conn.execute_sql(f"DROP TABLE {new_table_name}")
 
-        print("Tables created successfully")
-    except Exception as error_message:
-        print(f"Error: {error_message}")
+        print("Tables migrated successfully")
+    except Exception as e:
+        print(f"Error: {e}")
 
 migrate()

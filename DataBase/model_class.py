@@ -16,10 +16,16 @@ class BaseModel(peewee.Model):
     def columns(self):
         return {field.column_name: field for field in self._meta.sorted_fields}
 
+    @classmethod
+    def rename_table(cls, new_name):
+        with cls._meta.database:
+            cls._meta.database.execute_sql(f"ALTER TABLE {cls._meta.table_name} RENAME TO {new_name}")
+            cls._meta.table_name = new_name
+
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):
     """Класс для таблицы БД release_info"""
-    date = peewee.DateField(column_name='Дата_рассылки')
+    date = peewee.DateField(column_name='Датарассылки')
     release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
     client_name = peewee.TextField(column_name='Наименование_клиента')
     main_contact = peewee.TextField(column_name='Основной_контакт')
@@ -28,11 +34,6 @@ class Release_info(BaseModel):
     class Meta:
         table_name = 'release_info'
 
-    @classmethod
-    def rename_table(cls, new_name):
-        with cls._meta.database:
-            cls._meta.database.execute_sql(f"ALTER TABLE {cls._meta.table_name} RENAME TO {new_name}")
-            cls._meta.table_name = new_name
 
 class ClientsInfo(BaseModel):
     """Класс для таблицы БД clients_info"""
