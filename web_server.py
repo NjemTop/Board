@@ -466,7 +466,8 @@ def get_app():
         try:
             with conn:
                 # Фильтрация данных по номеру релиза
-                rows = Info.select().where(Info.release_number == version).execute()
+                query = Info.select().where(Info.release_number == version)
+                rows = list(query)
         except peewee.OperationalError as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
             print("Ошибка подключения к базе данных SQLite:", error_message)
