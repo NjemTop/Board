@@ -10,9 +10,11 @@ RUN pip install datasette
 # Копируем файл базы данных в новый контейнер
 COPY ./DataBase/database.db /var/lib/sqlite/
 
-# Выполняем миграцию БД
+# Копируем файлы с классами и миграцией
 COPY ./DataBase/model_class.py /app/model_class.py
 COPY ./DataBase/manage.py /app/manage.py
+
+# Выполняем миграцию БД
 RUN python /app/manage.py migrate
 
 # Добавляем healthcheck
