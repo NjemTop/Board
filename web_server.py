@@ -478,7 +478,7 @@ def get_BM_Info_onClient_api():
     try:
         with conn:
             client_infos = list(BMInfo_onClient.select())
-        
+        web_info_logger.info(f"Found {len(client_infos)} clients in the database.")
         results = []
         for client_info in client_infos:
             result = {}
