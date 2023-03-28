@@ -511,9 +511,9 @@ def get_app():
         onn = sqlite3.connect(f'file:{db_filename}')
         cur = onn.cursor()
         if release_number == 'all':
-            cur.execute('SELECT * FROM release_info')
+            cur.execute('SELECT * FROM info')
         else:
-            cur.execute('SELECT * FROM release_info WHERE "Номер_релиза" = ?', (release_number,))
+            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
         rows = cur.fetchall()
         onn.close()
         data = []
