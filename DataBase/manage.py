@@ -18,7 +18,7 @@ def migrate():
             else:
                 # Если таблица существует, проверяем ее поля (столбцы)
                 current_columns = set(get_model_columns(model).keys())
-                expected_columns = set([field.name for field in model._meta.fields])
+                expected_columns = set([field.column_name for field in model._meta.sorted_fields])
 
                 # Если поля отсутствуют, добавляем их
                 new_columns = expected_columns - current_columns
