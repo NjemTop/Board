@@ -474,7 +474,7 @@ def data_release_html():
             })
         return render_template('data_release.html', data=data)
 
-def get_BM_Info_onClient_api():
+def get_BM_Info_onClient_api_1():
         try:
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
@@ -501,7 +501,7 @@ def get_BM_Info_onClient_api():
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         
-def get_BM_Info_onClient_api_1():
+def get_BM_Info_onClient_api():
     try:
         column_names = BMInfo_onClient.COLUMN_NAMES
 
@@ -532,13 +532,14 @@ def post_BM_Info_onClient_api():
         # Сохраняем данные в базе данных
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
-            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
-
-            if existing_client is None:
-                client_info.save()
+           # existing_client = BMInfo_onClient.get_or_none()
+            if data['Название_клиента'] in BMInfo_onClient.client_name:
+                print(f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем...")
             else:
-                print(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
-                return f"Клиент с именем {data['client_name']} уже существует. Пропускаем..."
+                #existing_client is None:
+                client_info.save()
+           # else:
+              #  print(f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем...")
 
         return 'Data successfully saved to the database!'
 
