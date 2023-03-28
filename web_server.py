@@ -11,7 +11,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import peewee
-from DataBase.model_class import Info
+from DataBase.model_class import BaseModel, Info, ClientInfo
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
@@ -438,7 +438,7 @@ def get_app():
             # Определяем список для хранения версий рассылок
             versions = []
             # Устанавливаем соединение с БД
-            conn = sqlite3.connect(f'file:{db_filename}')
+            conn = BaseModel.database
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
                 # Делаем выборку из таблицы Info по уникальным значениям даты и номера релиза
@@ -466,7 +466,7 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = sqlite3.connect(f'file:{db_filename}')
+            conn = BaseModel.database
             with conn:
                 # Фильтрация данных по номеру релиза
                 rows = Info.select().where(Info.release_number == version).execute()
@@ -530,11 +530,47 @@ def get_app():
         return render_template('data_release.html', data=data)
     
     @app.route('/data/api/client', methods=['GET'])
-    # Применение декоратора require_basic_auth для аутентификации пользователей
+    def get_client_info_api():
+        # Устанавливаем соединение с БД
+        conn = BaseModel.database
+        # Используем контекстный менеджер для выполнения операций с БД
+        with conn:
+            # Получаем все записи из таблицы client_info
+            client_infos = list(ClientInfo.select())
+        # Преобразуем список записей в список словарей
+        results = []
+        for client_info in client_infos:
+            result = {}
+            for column_name in client_info.column_names:
+                result[column_name] = getattr(client_info, column_name)
+            results.append(result)
+        # Формируем JSON с отступами для улучшения читабельности
+        json_data = json.dumps(results, ensure_ascii=False, indent=4)
+        # Устанавливаем заголовок Access-Control-Allow-Origin
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON
+        return response
+
+    @app.route('/data/api/client', methods=['POST'])
     @require_basic_auth(USERNAME, PASSWORD)
-    def data_release_api():
-        ...
+    def post_client_info_api():
+        # Получаем данные из запроса и создаем объекты ClientInfo
+        data = request.get_json()
+        client_infos = [ClientInfo(**client_data) for client_data in data]
+        # Подключение к базе данных SQLite
+        conn = BaseModel.database
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([ClientInfo])
         
+        # Сохраняем данные в базе данных
+        with conn.atomic():
+            for client_info in client_infos:
+                client_info.save()
+        
+        return 'Data successfully saved to the database!'
+
     return app
 
 def run_server():

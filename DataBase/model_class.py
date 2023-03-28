@@ -14,6 +14,7 @@ class BaseModel(peewee.Model):
 
 # Определяем модель для таблицы "info"
 class Info(BaseModel):
+    """Класс для таблицы БД info"""
     date = peewee.DateField(column_name='Дата_рассылки')
     release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
     client_name = peewee.TextField(column_name='Наименование_клиента')
@@ -23,5 +24,32 @@ class Info(BaseModel):
     class Meta:
         table_name = 'info'
 
-# Закрываем соединение с базой данных
-conn.close()
+class ClientInfo(BaseModel):
+    """Класс для таблицы БД client_info"""
+    client_name = peewee.TextField(column_name='Название клиента', primary_key=True)
+    contract_status = peewee.TextField(column_name='Статус по договору')
+    service_package = peewee.TextField(column_name='Пакет услуг')
+    manager = peewee.TextField(column_name='Менеджер')
+    loyalty = peewee.TextField(column_name='Лояльность')
+    notes = peewee.TextField(column_name='Примечания')
+    server_version = peewee.TextField(column_name='Версия сервера')
+    update_date = peewee.DateField(column_name='Дата обновления')
+
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'client_name',
+        'contract_status',
+        'service_package',
+        'manager',
+        'loyalty',
+        'notes',
+        'server_version',
+        'update_date'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = ClientInfo.COLUMN_NAMES
+    
+    class Meta:
+        table_name = 'client_info'
