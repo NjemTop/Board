@@ -863,9 +863,9 @@ def create_app():
     app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
 
     # 
-    #app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_info_api))
-    app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', get_client_info_api, methods=['GET'])
-    #app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_info_api))
+    app.route('/data_clients/api/clients', 'get_client_info_api', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_info_api))
+    #app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', get_client_info_api, methods=['GET'])
+    app.route('/data_clients/api/clients', 'post_client_info_api', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_info_api))
 
     return app
 
