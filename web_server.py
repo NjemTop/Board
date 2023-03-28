@@ -850,22 +850,20 @@ def create_app():
     app.add_url_rule('/update_ticket', 'handler_get_update_ticket', handler_get_update_ticket, methods=['GET'])
     app.add_url_rule('/update_ticket', 'handler_post_update_ticket', handler_post_update_ticket, methods=['POST'])
 
-    # 
+    # Регистрация обработчиков для URL /undersponed_ticket
     app.add_url_rule('/undersponed_ticket', 'handler_undersponed_ticket', handler_undersponed_ticket, methods=['POST'])
 
-    # 
+    # Регистрация обработчиков для URL с узнаванием OAuth яндекса (токена авторизации)
     app.add_url_rule('/yandex_oauth_callback', 'handler_get_yandex_oauth_callback', handler_get_yandex_oauth_callback, methods=['GET'])
 
-    # 
+    # Регистрация обработчиков для API со списком версий отправки релиза
     app.add_url_rule('/data_release/api/versions', 'api_data_release_versions', api_data_release_versions, methods=['GET'])
     # Регистрация обработчика для API с параметром version в URL
     app.route('/data_release/api/<string:version>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(api_data_release_number))
+    # Регистрация обработчиков для URL спика всех отправленных версиях
     app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
 
-    # 
-    #app.route('/data_clients/api/clients', 'get_client_info_api', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_info_api))
-    #app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', get_client_info_api, methods=['GET'])
-    #app.route('/data_clients/api/clients', 'post_client_info_api', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_info_api))
+    # Регистрация обработчика для API списка учёта версий клиентов
     app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_client_info_api), methods=['GET'])
     app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_client_info_api), methods=['POST'])
 
