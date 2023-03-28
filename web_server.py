@@ -474,7 +474,7 @@ def data_release_html():
             })
         return render_template('data_release.html', data=data)
 
-def get_client_info_api():
+def get_BM_Info_onClient_api():
         try:
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
@@ -501,7 +501,7 @@ def get_client_info_api():
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         
-def post_client_info_api():
+def post_BM_Info_onClient_api():
         try:
             # Получаем данные из запроса и создаем объекты BMInfo_onClient
             data = request.get_json()
@@ -864,8 +864,8 @@ def create_app():
     app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
 
     # Регистрация обработчика для API списка учёта версий клиентов
-    app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_client_info_api), methods=['GET'])
-    app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_client_info_api), methods=['POST'])
+    app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
+    app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
 
     return app
 
