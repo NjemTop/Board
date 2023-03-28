@@ -672,9 +672,9 @@ def get_app():
     return app
 
 def create_app():
-    """Функция создания приложения"""
+    """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    app.config.from_object('config')
+    #app.config.from_object('config')
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/create_ticket', 'handle_get', handler_get, methods=['GET'])
