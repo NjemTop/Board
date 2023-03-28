@@ -533,7 +533,6 @@ def post_BM_Info_onClient_api():
             web_info_logger.info("Info: %s", existing_client)
             if existing_client is None:
                 web_info_logger.info("Запись 2")
-                web_info_logger.info("INFO: %s", existing_client.__dict__)
                 client_info.save()
                 web_info_logger.info("Запись 3")
             else:
