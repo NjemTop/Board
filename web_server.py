@@ -674,10 +674,10 @@ def get_app():
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    #app.config.from_object('config')
+    # app.config.from_object('config')
 
     # Регистрация обработчиков для URL 
-    app.add_url_rule('/create_ticket', 'handle_get', handler_get, methods=['GET'])
+    app.add_url_rule('/', 'handle_get', handler_get, methods=['GET'])
 
     # Регистрация обработчиков для URL /create_ticket
     app.add_url_rule('/create_ticket', 'handle_get_create_ticket', handler_get_create_ticket, methods=['GET'])
