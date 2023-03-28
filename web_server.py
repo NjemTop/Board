@@ -531,7 +531,7 @@ def post_BM_Info_onClient_api():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             web_info_logger.info("Запись 1")
-            web_info_logger.info(existing_client)
+            web_info_logger.info("Info: %s", existing_client)
             if existing_client is None:
                 client_info.save()
                 web_info_logger.info("Запись 2")
