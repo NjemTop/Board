@@ -1,6 +1,6 @@
 import locale
 from datetime import datetime
-from DataBase.model_class import Info
+from DataBase.model_class import Release_info
 
 def upload_db_result(version_number, result):
     """Функция получения данных из рассылки (PS) и заполнения этих данных в БД"""
@@ -33,7 +33,7 @@ def upload_db_result(version_number, result):
                 copy_contact = None
 
             # Создаем новую запись и сохраняем ее в базе данных
-            new_info = Info.create(
+            new_info = Release_info.create(
                 date=today,
                 release_number=version_number,
                 client_name=client_name,

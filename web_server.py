@@ -11,7 +11,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import peewee
-from DataBase.model_class import Info, ClientsInfo, conn
+from DataBase.model_class import Release_info, ClientsInfo, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
@@ -439,8 +439,8 @@ def get_app():
             versions = []
             # Используем контекстный менеджер для выполнения операций с БД и автоматического закрытия соединения
             with conn:
-                # Делаем выборку из таблицы Info по уникальным значениям даты и номера релиза
-                for row in Info.select(Info.date, Info.release_number).distinct():
+                # Делаем выборку из таблицы Release_info по уникальным значениям даты и номера релиза
+                for row in Release_info.select(Release_info.date, Release_info.release_number).distinct():
                     # Добавляем в список версий новую версию рассылки
                     versions.append({'Data': row.date, 'Number': row.release_number})
         except peewee.OperationalError as error_message:
@@ -466,7 +466,7 @@ def get_app():
         try:
             with conn:
                 # Фильтрация данных по номеру релиза
-                query = Info.select().where(Info.release_number == version)
+                query = Release_info.select().where(Release_info.release_number == version)
                 rows = list(query)
         except peewee.OperationalError as error_message:
             web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
@@ -511,9 +511,9 @@ def get_app():
         onn = sqlite3.connect(f'file:{db_filename}')
         cur = onn.cursor()
         if release_number == 'all':
-            cur.execute('SELECT * FROM info')
+            cur.execute('SELECT * FROM Release_info')
         else:
-            cur.execute('SELECT * FROM info WHERE "Номер_релиза" = ?', (release_number,))
+            cur.execute('SELECT * FROM Release_info WHERE "Номер_релиза" = ?', (release_number,))
         rows = cur.fetchall()
         onn.close()
         data = []
