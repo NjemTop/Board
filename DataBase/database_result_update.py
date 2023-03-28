@@ -30,7 +30,7 @@ def upload_db_result(version_number, result):
             if len(l) == 3:
                 copy_contact = l[2].replace(',', ', ')
             else:
-                                copy_contact = None
+                copy_contact = None
 
             # Создаем новую запись и сохраняем ее в базе данных
             new_info = Info.create(
