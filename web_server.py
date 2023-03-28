@@ -527,6 +527,7 @@ def get_app():
             })
         return render_template('data_release.html', data=data)
     
+    # Обработка запросов и вывод информации из БД
     @app.route('/data_clients/api/clients', methods=['GET'])
     def get_client_info_api():
         try:
@@ -555,6 +556,7 @@ def get_app():
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
 
+    # Обработка информации, которую получили и записываем её в БД
     @app.route('/data_clients/api/clients', methods=['POST'])
     @require_basic_auth(USERNAME, PASSWORD)
     def post_client_info_api():
