@@ -284,7 +284,7 @@ def handle_unresponded_info_180(json_data):
         return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
     return None, None
 
-def handle_get():
+def handler_get():
         """Функция обработки вэбхуков из HappyFox"""
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
@@ -293,7 +293,7 @@ def handle_get():
         web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Site', mimetype='text/plain')
 
-def get_create_ticket():
+def handler_get_create_ticket():
         """Функция обработки GET запросов по URL"""
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
@@ -302,7 +302,7 @@ def get_create_ticket():
         web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Этот URL для получения вэбхуков(создание)', mimetype='text/plain')
 
-def post_create_ticket():
+def handler_post_create_ticket():
         """Функция обработки создания тикета из HappyFox"""
         message = request.data.decode('utf-8')
         # парсим JSON-строку
@@ -326,7 +326,7 @@ def post_create_ticket():
         # Отправляем ответ о том, что всё принято и всё хорошо
         return "OK", 201
 
-def get_update_ticket():
+def handler_get_update_ticket():
         """Функция обработки GET запросов по URL"""
         ip_address = f"Request from {request.remote_addr}: {request.url}"
         user_agent = request.headers.get('User-Agent')
@@ -335,7 +335,7 @@ def get_update_ticket():
         web_info_logger.info('Его данные подключения: %s', (user_who,))
         return Response('Этот URL для получение вэбхуков (обнова)', mimetype='text/plain')
 
-def post_update_ticket():
+def handler_post_update_ticket():
         """Функция обработки обновления тикета из HappyFox"""
         message = request.data.decode('utf-8')
         json_data, error = parse_json_message(message)
@@ -677,15 +677,15 @@ def create_app():
     app.config.from_object('config')
 
     # Регистрация обработчиков для URL 
-    app.add_url_rule('/create_ticket', 'handle_get', handle_get, methods=['GET'])
+    app.add_url_rule('/create_ticket', 'handle_get', handler_get, methods=['GET'])
 
     # Регистрация обработчиков для URL /create_ticket
-    app.add_url_rule('/create_ticket', 'handle_get_create_ticket', get_create_ticket, methods=['GET'])
-    app.add_url_rule('/create_ticket', 'create_ticket', post_create_ticket, methods=['POST'])
+    app.add_url_rule('/create_ticket', 'handle_get_create_ticket', handler_get_create_ticket, methods=['GET'])
+    app.add_url_rule('/create_ticket', 'create_ticket', handler_post_create_ticket, methods=['POST'])
 
     # Регистрация обработчиков для URL /update_ticket
-    app.add_url_rule('/update_ticket', 'handle_get_update_ticket', get_update_ticket, methods=['GET'])
-    app.add_url_rule('/update_ticket', 'update_ticket', post_update_ticket, methods=['POST'])
+    app.add_url_rule('/update_ticket', 'handle_get_update_ticket', handler_get_update_ticket, methods=['GET'])
+    app.add_url_rule('/update_ticket', 'update_ticket', handler_post_update_ticket, methods=['POST'])
 
     return app
 
