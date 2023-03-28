@@ -31,9 +31,21 @@ class Release_info(BaseModel):
     main_contact = peewee.TextField(column_name='Основной_контакт')
     copy = peewee.TextField(column_name='Копия')
 
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'date',
+        'release_number',
+        'client_name',
+        'main_contact',
+        'copy'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = Release_info.COLUMN_NAMES
+
     class Meta:
         table_name = 'release_info'
-
 
 class ClientsInfo(BaseModel):
     """Класс для таблицы БД clients_info"""
