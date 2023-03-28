@@ -23,7 +23,7 @@ class BaseModel(peewee.Model):
 
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):
-    """Класс для таблицы БД release_info"""
+    """Класс для таблицы БД информации о релизе"""
     date = peewee.DateField(column_name='Дата_рассылки')
     release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
     client_name = peewee.TextField(column_name='Наименование_клиента')
@@ -47,7 +47,7 @@ class Release_info(BaseModel):
         table_name = 'release_info'
 
 class BMInfo_onClient(BaseModel):
-    """Класс для таблицы БД clients_info"""
+    """Класс для таблицы БД учёта клиентов"""
     client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
     contract_status = peewee.BooleanField(column_name='Активность')
     client_info = peewee.IntegerField(column_name='Карточка_клиента')
@@ -73,3 +73,31 @@ class BMInfo_onClient(BaseModel):
     
     class Meta:
         table_name = 'BM_info_on_clients'
+
+class ClientsCard(BaseModel):
+    """Класс для таблицы БД карточек клиентов"""
+    clients_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
+    contacts = peewee.IntegerField(column_name='Контакты')
+    tech_notes = peewee.IntegerField(column_name='Технические_заметки')
+    connect_info = peewee.IntegerField(column_name='Информация_для_подключения')
+    rdp = peewee.IntegerField(column_name='Удаленный_доступ')
+    tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись')
+    bm_servers = peewee.IntegerField(column_name='Серверы ВМ')
+    
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'clients_id',
+        'contacts',
+        'tech_notes',
+        'connect_info',
+        'rdp',
+        'tech_account',
+        'bm_servers'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = ClientsCard.COLUMN_NAMES
+    
+    class Meta:
+        table_name = 'clients_card'
