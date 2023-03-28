@@ -3,19 +3,18 @@ FROM python:3.10-alpine
 # Устанавливаем SQLite
 RUN apk add --no-cache sqlite
 
-# Устанавливаем Datasette
-RUN pip install --upgrade pip
-RUN pip install datasette
-
-# Копируем файл базы данных в новый контейнер
-COPY ./DataBase/database.db /var/lib/sqlite/
-
 # Копируем файлы с классами и миграцией
 COPY ./DataBase/model_class.py /app/model_class.py
 COPY ./DataBase/manage.py /app/manage.py
 
+# Задаем рабочую директорию
+WORKDIR /app/
+
 # Выполняем миграцию БД
-RUN python /app/manage.py migrate
+RUN python manage.py migrate
+
+# Копируем файл базы данных в новый контейнер
+COPY ./DataBase/database.db /var/lib/sqlite/
 
 # Удаляем скопированные файлы
 RUN rm /app/model_class.py /app/manage.py
