@@ -527,7 +527,7 @@ def get_app():
             })
         return render_template('data_release.html', data=data)
     
-    @app.route('/data/api/client', methods=['GET'])
+    @app.route('/data_clients/api/clients', methods=['GET'])
     def get_client_info_api():
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
@@ -548,7 +548,7 @@ def get_app():
         # Отправляем ответ JSON
         return response
 
-    @app.route('/data/api/client', methods=['POST'])
+    @app.route('/data_clients/api/clients', methods=['POST'])
     @require_basic_auth(USERNAME, PASSWORD)
     def post_client_info_api():
         # Получаем данные из запроса и создаем объекты ClientInfo
