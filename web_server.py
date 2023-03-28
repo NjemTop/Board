@@ -527,13 +527,13 @@ def post_BM_Info_onClient_api():
             conn.create_tables([BMInfo_onClient])
 
         # Сохраняем данные в базе данных
-        with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             web_info_logger.info("Запись 1")
             web_info_logger.info("Info: %s", existing_client)
             if existing_client is None:
                 web_info_logger.info("Запись 2")
+                web_info_logger.info("Info: %s", existing_client.__dict__)
                 client_info.save()
                 web_info_logger.info("Запись 3")
             else:
