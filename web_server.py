@@ -11,7 +11,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import peewee
-from DataBase.model_class import BaseModel, Info, ClientInfo
+from DataBase.model_class import BaseModel, Info, ClientInfo, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
@@ -437,8 +437,6 @@ def get_app():
         try:
             # Определяем список для хранения версий рассылок
             versions = []
-            # Устанавливаем соединение с БД
-            conn = BaseModel.Meta.database
             # Используем контекстный менеджер для выполнения операций с БД и автоматического закрытия соединения
             with conn:
                 # Делаем выборку из таблицы Info по уникальным значениям даты и номера релиза
@@ -466,7 +464,6 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = BaseModel.Meta.database
             with conn:
                 # Фильтрация данных по номеру релиза
                 rows = Info.select().where(Info.release_number == version).execute()
@@ -531,8 +528,6 @@ def get_app():
     
     @app.route('/data/api/client', methods=['GET'])
     def get_client_info_api():
-        # Устанавливаем соединение с БД
-        conn = BaseModel.Meta.database
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
