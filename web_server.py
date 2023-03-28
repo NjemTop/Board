@@ -531,13 +531,8 @@ def post_BM_Info_onClient_api():
 
         # Сохраняем данные в базе данных
         with conn.atomic():
-            # Проверяем наличие существующего клиента с тем же именем
-           # existing_client = BMInfo_onClient.get_or_none()
-            if data['Название_клиента'] in BMInfo_onClient.client_name:
-                print(f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем...")
-            else:
-                #existing_client is None:
-                client_info.save()
+
+            client_info.save()
            # else:
               #  print(f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем...")
 
