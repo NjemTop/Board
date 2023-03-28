@@ -25,7 +25,7 @@ class BaseModel(peewee.Model):
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):
     """Класс для таблицы БД release_info"""
-    date = peewee.DateField(column_name='Датарассылки')
+    date = peewee.DateField(column_name='Дата_рассылки')
     release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
     client_name = peewee.TextField(column_name='Наименование_клиента')
     main_contact = peewee.TextField(column_name='Основной_контакт')
