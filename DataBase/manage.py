@@ -41,3 +41,5 @@ def migrate():
         print("Tables created successfully")
     except Exception as error_message:
         print(f"Error: {error_message}")
+
+migrate()
