@@ -10,7 +10,7 @@ def migrate():
             if not model.table_exists():
                 # Если таблицы нет, то создаем ее
                 with conn:
-                    conn.create_table(model)
+                    conn.create_tables(model)
 
             else:
                 # Если таблица существует, проверяем ее поля (столбцы)
@@ -32,3 +32,5 @@ def migrate():
         print("Tables created successfully")
     except Exception as error_message:
             print("Error during table creation:", error_message)
+
+migrate()
