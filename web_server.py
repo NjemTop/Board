@@ -533,7 +533,7 @@ def post_BM_Info_onClient_api():
         # Обработка остальных исключений
         web_error_logger.error("Ошибка: %s", error)
         print("Ошибка:", error)
-        return "Ошибка сервера"
+        return f"Ошибка сервера: {error}"
         
 def update_client_notes(client_name, new_notes):
     """Функция добавления примечания для клиента"""
