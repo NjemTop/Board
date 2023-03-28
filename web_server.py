@@ -474,7 +474,7 @@ def data_release_html():
             })
         return render_template('data_release.html', data=data)
 
-def get_BM_Info_onClient_api_1():
+def get_BM_Info_onClient_api():
         try:
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
@@ -501,7 +501,7 @@ def get_BM_Info_onClient_api_1():
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
         
-def get_BM_Info_onClient_api():
+def get_BM_Info_onClient_api_1():
     try:
         column_names = BMInfo_onClient.COLUMN_NAMES
 
