@@ -11,7 +11,7 @@ from flask import Response
 from flask import render_template
 import sqlite3
 import peewee
-from DataBase.model_class import BaseModel, Info, ClientInfo, conn
+from DataBase.model_class import Info, ClientsInfo, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 
@@ -534,7 +534,7 @@ def get_app():
             # Используем контекстный менеджер для выполнения операций с БД
             with conn:
                 # Получаем все записи из таблицы client_info
-                client_infos = list(ClientInfo.select())
+                client_infos = list(ClientsInfo.select())
             # Преобразуем список записей в список словарей
             results = []
             for client_info in client_infos:
@@ -561,13 +561,13 @@ def get_app():
     @require_basic_auth(USERNAME, PASSWORD)
     def post_client_info_api():
         try:
-            # Получаем данные из запроса и создаем объекты ClientInfo
+            # Получаем данные из запроса и создаем объекты ClientsInfo
             data = request.get_json()
-            client_infos = [ClientInfo(**client_data) for client_data in data]
+            client_infos = [ClientsInfo(**client_data) for client_data in data]
 
             # Создаем таблицу, если она не существует
             with conn:
-                conn.create_tables([ClientInfo])
+                conn.create_tables([ClientsInfo])
 
             # Сохраняем данные в базе данных
             with conn.atomic():

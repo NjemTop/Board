@@ -24,8 +24,8 @@ class Info(BaseModel):
     class Meta:
         table_name = 'info'
 
-class ClientInfo(BaseModel):
-    """Класс для таблицы БД client_info"""
+class ClientsInfo(BaseModel):
+    """Класс для таблицы БД clients_info"""
     client_name = peewee.TextField(column_name='Название клиента', primary_key=True)
     contract_status = peewee.TextField(column_name='Статус по договору')
     service_package = peewee.TextField(column_name='Пакет услуг')
@@ -49,7 +49,7 @@ class ClientInfo(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.column_names = ClientInfo.COLUMN_NAMES
+        self.column_names = ClientsInfo.COLUMN_NAMES
     
     class Meta:
-        table_name = 'client_info'
+        table_name = 'clients_info'
