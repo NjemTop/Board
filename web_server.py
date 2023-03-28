@@ -534,6 +534,7 @@ def post_BM_Info_onClient_api():
             if existing_client is None:
                 web_info_logger.info("Запись 2")
                 client_info.save()
+                conn.commit()
                 web_info_logger.info("Запись 3")
             else:
                 print(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
