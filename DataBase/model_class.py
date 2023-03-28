@@ -17,10 +17,9 @@ class BaseModel(peewee.Model):
         return {field.column_name: field for field in self._meta.sorted_fields}
 
     @classmethod
-    def rename_table(cls, new_name):
+    def rename_table(cls, old_name, new_name):
         with cls._meta.database:
-            cls._meta.database.execute_sql(f"ALTER TABLE {cls._meta.table_name} RENAME TO {new_name}")
-            cls._meta.table_name = new_name
+            cls._meta.database.execute_sql(f"ALTER TABLE {old_name} RENAME TO {new_name}")
 
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):
