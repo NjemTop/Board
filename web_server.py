@@ -284,6 +284,88 @@ def handle_unresponded_info_180(json_data):
         return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
     return None, None
 
+def handle_get():
+        """Функция обработки вэбхуков из HappyFox"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Site', mimetype='text/plain')
+
+def get_create_ticket():
+        """Функция обработки GET запросов по URL"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получения вэбхуков(создание)', mimetype='text/plain')
+
+def post_create_ticket():
+        """Функция обработки создания тикета из HappyFox"""
+        message = request.data.decode('utf-8')
+        # парсим JSON-строку
+        json_data, error = parse_json_message(message)
+        if error:
+            return error, 400
+        # находим значения для ключей
+        ticket_id = json_data.get("ticket_id")
+        subject = json_data.get("subject")
+        priority_name = json_data.get("priority_name")
+        agent_ticket_url = json_data.get("agent_ticket_url")
+        # отправляем сообщение в телеграм-бот
+        ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+        # открываем файл и загружаем данные
+        with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+            data = json.load(file)
+        # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+        alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
+        alert.send_telegram_message(alert_chat_id, ticket_message)
+        web_info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
+        # Отправляем ответ о том, что всё принято и всё хорошо
+        return "OK", 201
+
+def get_update_ticket():
+        """Функция обработки GET запросов по URL"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получение вэбхуков (обнова)', mimetype='text/plain')
+
+def post_update_ticket():
+        """Функция обработки обновления тикета из HappyFox"""
+        message = request.data.decode('utf-8')
+        json_data, error = parse_json_message(message)
+        if error:
+            return Response(error, status=400)
+        
+        if json_data.get("update") is None:
+            return Response(status=200)
+        
+        json_message_type = json_data["update"].get("message_type")
+        if json_message_type == "Client Reply":
+            result, error = handle_client_reply(json_data)
+        elif json_data["update"].get("assignee_change") is not None:
+            result, error = handle_assignee_change(json_data)
+        elif json_data["update"].get("by").get("type") == "smartrule":
+            if json_data["update"].get("by").get("name") == "Unresponded for 60 min":
+                result, error = handle_unresponded_info_60(json_data)
+            elif json_data["update"].get("by").get("name") == "Unresponded for 120 min":
+                result, error = handle_unresponded_info_120(json_data)
+            elif json_data["update"].get("by").get("name") == "Unresponded for 180 min":
+                result, error = handle_unresponded_info_180(json_data)
+            else:
+                return Response(status=200)
+        else:
+            return Response(status=200)
+        
+        if error:
+            return Response(error, status=400)
+        return Response(result, status=201)
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -589,11 +671,29 @@ def get_app():
 
     return app
 
+def create_app():
+    """Функция создания приложения"""
+    app = Flask(__name__)
+    app.config.from_object('config')
+
+    # Регистрация обработчиков для URL 
+    app.add_url_rule('/create_ticket', 'handle_get', handle_get, methods=['GET'])
+
+    # Регистрация обработчиков для URL /create_ticket
+    app.add_url_rule('/create_ticket', 'handle_get_create_ticket', get_create_ticket, methods=['GET'])
+    app.add_url_rule('/create_ticket', 'create_ticket', post_create_ticket, methods=['POST'])
+
+    # Регистрация обработчиков для URL /update_ticket
+    app.add_url_rule('/update_ticket', 'handle_get_update_ticket', get_update_ticket, methods=['GET'])
+    app.add_url_rule('/update_ticket', 'update_ticket', post_update_ticket, methods=['POST'])
+
+    return app
+
 if __name__ == '__main__':
     """Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты"""
     try:
         server_address = ('0.0.0.0', 3030)
-        app = get_app()
+        app = create_app()
         web_info_logger.info('Сервер запущен на порту %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)
     except Exception as error_message:
