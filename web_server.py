@@ -502,33 +502,77 @@ def get_BM_Info_onClient_api():
             return response
         
 def post_BM_Info_onClient_api():
-        try:
-            # Получаем данные из запроса и создаем объекты BMInfo_onClient
-            data = request.get_json()
-            client_infos = [BMInfo_onClient(**client_data) for client_data in data]
+    try:
+        # Получаем данные из запроса и создаем объект BMInfo_onClient
+        data = request.get_json()
+        client_info = BMInfo_onClient(**data)
 
-            # Создаем таблицу, если она не существует
-            with conn:
-                conn.create_tables([BMInfo_onClient])
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([BMInfo_onClient])
 
-            # Сохраняем данные в базе данных
-            with conn.atomic():
-                for client_info in client_infos:
-                    client_info.save()
+        # Сохраняем данные в базе данных
+        with conn.atomic():
+            client_info.save()
 
-            return 'Data successfully saved to the database!'
+        return 'Data successfully saved to the database!'
 
-        except peewee.OperationalError as error_message:
-            # Обработка исключения при возникновении ошибки подключения к БД
-            web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-            print("Ошибка подключения к базе данных SQLite:", error_message)
-            return "Ошибка с БД"
-        except Exception as error:
-            # Обработка остальных исключений
-            web_error_logger.error("Ошибка: %s", error)
-            print("Ошибка:", error)
-            return "Ошибка сервера"
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        return "Ошибка с БД"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка: %s", error)
+        print("Ошибка:", error)
+        return "Ошибка сервера"
         
+def update_client_notes(client_name, new_notes):
+    """Функция добавления примечания для клиента"""
+    try:
+        with conn.atomic():
+            # Находим клиента по имени и обновляем поле "Примечания"
+            query = BMInfo_onClient.update({BMInfo_onClient.Примечания: new_notes}).where(BMInfo_onClient.Название_клиента == client_name)
+            query.execute()
+
+        return 'Notes updated successfully!'
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        return "Ошибка с БД"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка: %s", error)
+        print("Ошибка:", error)
+        return "Ошибка сервера"
+
+def update_client_notes_api():
+    """Функция обработки PUT запросов (обновления) в БД для указанного клиента"""
+    try:
+        # Получаем данные из запроса
+        data = request.get_json()
+        client_name = data["Название_клиента"]
+        new_notes = data["Примечания"]
+
+        # Обновляем поле "Примечания" для указанного клиента
+        result = update_client_notes(client_name, new_notes)
+
+        return result
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        return "Ошибка с БД"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка: %s", error)
+        print("Ошибка:", error)
+        return "Ошибка сервера"
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -864,8 +908,9 @@ def create_app():
     app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
 
     # Регистрация обработчика для API списка учёта версий клиентов
-    app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
-    app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(update_client_notes_api), methods=['PUT'])
 
     return app
 
