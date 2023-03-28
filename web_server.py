@@ -549,8 +549,8 @@ def get_app():
             response.headers.add('Access-Control-Allow-Origin', '*')
             # Отправляем ответ JSON
             return response
-        except Exception as e:
-            error_message = {"error": str(e)}
+        except Exception as error:
+            error_message = {"error": str(error)}
             json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
             response = Response(json_data, content_type='application/json; charset=utf-8')
             response.headers.add('Access-Control-Allow-Origin', '*')
