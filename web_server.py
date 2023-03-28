@@ -867,7 +867,6 @@ def create_app():
     app.add_url_rule('/data_clients/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_client_info_api), methods=['GET'])
     app.add_url_rule('/data_clients/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_client_info_api), methods=['POST'])
 
-
     return app
 
 if __name__ == '__main__':
