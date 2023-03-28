@@ -438,8 +438,8 @@ def get_app():
             # Определяем список для хранения версий рассылок
             versions = []
             # Устанавливаем соединение с БД
-            conn = BaseModel.database
-            # Используем контекстный менеджер для выполнения операций с БД
+            conn = BaseModel.Meta.database
+            # Используем контекстный менеджер для выполнения операций с БД и автоматического закрытия соединения
             with conn:
                 # Делаем выборку из таблицы Info по уникальным значениям даты и номера релиза
                 for row in Info.select(Info.date, Info.release_number).distinct():
@@ -466,7 +466,7 @@ def get_app():
         """Функция просмотра контактов, кому ушла рассылка через API"""
         # Подключение к базе данных SQLite
         try:
-            conn = BaseModel.database
+            conn = BaseModel.Meta.database
             with conn:
                 # Фильтрация данных по номеру релиза
                 rows = Info.select().where(Info.release_number == version).execute()
@@ -532,7 +532,7 @@ def get_app():
     @app.route('/data/api/client', methods=['GET'])
     def get_client_info_api():
         # Устанавливаем соединение с БД
-        conn = BaseModel.database
+        conn = BaseModel.Meta.database
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
