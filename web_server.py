@@ -1,12 +1,7 @@
 ﻿import json
 import logging
 import requests
-from functools import wraps
-from werkzeug.security import check_password_hash
-from flask import Flask, request, jsonify
-import os
-from flask import abort
-from werkzeug.security import generate_password_hash
+from flask import Flask, request
 from flask import Response
 from flask import render_template
 import sqlite3
@@ -14,6 +9,7 @@ import peewee
 from DataBase.model_class import Release_info, ClientsInfo, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
+from config import USERNAME, PASSWORD, require_basic_auth
 
 logging.basicConfig(level=logging.DEBUG, filename='web_server.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,37 +33,11 @@ web_info_logger.addHandler(web_info_handler)
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
 
-USERNAME = 'Njem'
-PASSWORD = generate_password_hash('Rfnzkj123123')
-
 # Создаем объект класса Alert
 alert = Alert()
 
+# Путь к БД (старый, прямой формат)
 db_filename = '/var/lib/sqlite/database.db'
-
-# Создаем функцию-декоратор для аутентификации Basic Auth
-def require_basic_auth(username, password):
-    """Функция-декоратор принимает исходную функцию (представление) в качестве аргумента"""
-    def decorator(f):
-        # Используем wraps, чтобы сохранить метаданные исходной функции
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            # Получаем объект аутентификации из запроса
-            auth = request.authorization
-
-            # Проверяем, что аутентификация предоставлена и что имя пользователя и пароль верны
-            if auth and auth.username == username and check_password_hash(password, auth.password):
-                # Если аутентификация прошла успешно, выполняем исходную функцию
-                return f(*args, **kwargs)
-            else:
-                # Если аутентификация не удалась, возвращаем ошибку 401 и заголовок WWW-Authenticate
-                return Response('Authorization required', 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
-        
-        # Возвращаем функцию, обернутую декоратором
-        return decorated_function
-
-    # Возвращаем функцию-декоратор
-    return decorator
 
 def get_alert_chat_id(header_footer_elements, name):
     """Функция получения chat_id из конфигурационного файла"""
@@ -674,7 +644,7 @@ def get_app():
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    # app.config.from_object('config')
+    app.config.from_object('config')
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handle_get', handler_get, methods=['GET'])
