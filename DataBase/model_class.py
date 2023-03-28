@@ -49,11 +49,11 @@ class Release_info(BaseModel):
 class ClientsInfo(BaseModel):
     """Класс для таблицы БД clients_info"""
     client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
-    contract_status = peewee.TextField(column_name='Активность')
-    client_info = peewee.TextField(column_name='Карточка_клиента')
-    Service = peewee.TextField(column_name='Обслуживание')
-    technical_information = peewee.TextField(column_name='Техническая_информация')
-    integration = peewee.TextField(column_name='Интеграции')
+    contract_status = peewee.BooleanField(column_name='Активность')
+    client_info = peewee.IntegerField(column_name='Карточка_клиента')
+    Service = peewee.IntegerField(column_name='Обслуживание')
+    technical_information = peewee.IntegerField(column_name='Техническая_информация')
+    integration = peewee.IntegerField(column_name='Интеграции')
     notes = peewee.TextField(column_name='Примечания')
 
     # Список наименований столбцов
@@ -72,4 +72,4 @@ class ClientsInfo(BaseModel):
         self.column_names = ClientsInfo.COLUMN_NAMES
     
     class Meta:
-        table_name = 'clients_info'
+        table_name = 'BM_info_on_clients'
