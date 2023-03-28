@@ -589,7 +589,7 @@ def get_app():
 
     return app
 
-def run_server():
+if __name__ == '__main__':
     """Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты"""
     try:
         server_address = ('0.0.0.0', 3030)
@@ -599,5 +599,3 @@ def run_server():
     except Exception as error_message:
         web_error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", error_message)
         raise error_message
-
-run_server()
