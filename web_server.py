@@ -503,7 +503,7 @@ def get_BM_Info_onClient_api():
         
 def post_BM_Info_onClient_api():
     try:
-        # Получаем данные из запроса
+        # Получаем данные из запроса и создаем объект BMInfo_onClient
         data = request.get_json()
         client_info = BMInfo_onClient(**data)
 
@@ -514,12 +514,13 @@ def post_BM_Info_onClient_api():
         # Сохраняем данные в базе данных
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
-            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.Название_клиента == client_info.Название_клиента)
+            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.Название_клиента == data['Название_клиента'])
 
             if existing_client is None:
                 client_info.save()
             else:
-                print(f"Клиент с именем {client_info.Название_клиента} уже существует. Пропускаем...")
+                print(f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем...")
+                return f"Клиент с именем {data['Название_клиента']} уже существует. Пропускаем..."
 
         return 'Data successfully saved to the database!'
 
