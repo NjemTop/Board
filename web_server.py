@@ -498,59 +498,40 @@ def get_BM_Info_onClient_api():
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
         
-def get_BM_Info_onClient_api_1():
-    try:
-        column_names = BMInfo_onClient.COLUMN_NAMES
-
-        # Формируем JSON с отступами для улучшения читабельности
-        json_data = json.dumps(column_names, ensure_ascii=False, indent=4)
-        # Устанавливаем заголовок Access-Control-Allow-Origin
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправляем ответ JSON
-        return response
-    except Exception as error:
-        error_message = {"error": str(error)}
-        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-        
 def post_BM_Info_onClient_api():
+    """Функция добавления о клиентах в БД"""
     try:
         # Получаем данные из запроса и создаем объект BMInfo_onClient
         data = request.get_json()
-        client_info = BMInfo_onClient(**data)
 
         # Создаем таблицу, если она не существует
         with conn:
             conn.create_tables([BMInfo_onClient])
 
-        # Сохраняем данные в базе данных
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
-            web_info_logger.info("Запись 1")
-            web_info_logger.info("Info: %s", existing_client)
             if existing_client is None:
-                web_info_logger.info("Запись 2")
+                # Сохраняем данные в базе данных, используя insert и execute вместо save()
                 BMInfo_onClient.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
-                web_info_logger.info("Запись 3")
             else:
                 print(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
                 return f"Клиент с именем {data['client_name']} уже существует. Пропускаем..."
 
+        web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
         return 'Data successfully saved to the database!'
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        print("Ошибка подключения к базе данных SQLite:", error_message)
-        return "Ошибка с БД"
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
+        return f"Ошибка с БД: {error_message}"
     except Exception as error:
         # Обработка остальных исключений
-        web_error_logger.error("Ошибка: %s", error)
-        print("Ошибка:", error)
+        web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
         
 def update_client_notes(client_name, new_notes):
