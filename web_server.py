@@ -481,6 +481,8 @@ def get_BM_Info_onClient_api():
             for bm_info in BMInfo_onClient.select():
                 bm_info.client_name = bm_info.client_name.encode('latin-1').decode('utf-8')
                 bm_info.save()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
