@@ -484,7 +484,7 @@ def get_BM_Info_onClient_api():
             result = {}
             for column_name in client_info.column_names:
                 # Используйте новые названия столбцов
-                result[column_name] = getattr(client_info, column_name.lower())
+                result[column_name] = getattr(client_info, column_name)
             results.append(result)
         
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
