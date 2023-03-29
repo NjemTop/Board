@@ -569,12 +569,7 @@ def put_BM_Info_onClient_api():
     try:
         with conn:
             # Обновляем запись с указанным именем клиента
-            updated_rows = (
-                BMInfo_onClient
-                .update(updated_data)
-                .where(BMInfo_onClient.client_name == client_name)
-                .execute()
-            )
+            updated_rows = (BMInfo_onClient.update(updated_data).where(BMInfo_onClient.client_name == client_name).execute())
 
         if updated_rows > 0:
             return f'Обновлено {updated_rows} записей с именем клиента: {client_name}', 200
