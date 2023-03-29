@@ -689,7 +689,34 @@ def post_BM_Info_onClient_api():
 
 def put_client_card_api():
     """Функция изменений данных в БД со списком карточек клиентов"""
-    ...
+    data = request.get_json()
+
+    # Получаем ID клиента, которое нужно обновить
+    clients_id = data.get('clients_id', None)
+
+    if clients_id is None:
+        return 'Необходимо указать ID клиента для обновления', 400
+
+    # Получаем обновленные данные
+    updated_data = {key: value for key, value in data.items() if key != 'clients_id'}
+
+    if not updated_data:
+        return 'Необходимо предоставить данные для обновления', 400
+
+    try:
+        with conn:
+            # Обновляем запись с указанным ID клиента
+            updated_rows = (ClientsCard.update(updated_data).where(ClientsCard.clients_id == clients_id).execute())
+
+        if updated_rows > 0:
+            return f'Обновлено {updated_rows} записей с ID клиента: {clients_id}', 200
+        else:
+            return f'Клиент с ID {clients_id} не найден', 404
+
+    except peewee.OperationalError as error_message:
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
 def delete_client_card_api():
     """Функция удаления данных в БД со списком карточек клиентов"""
