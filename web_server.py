@@ -476,26 +476,39 @@ def data_release_html():
 
 def get_BM_Info_onClient_api():
     try:
+        # Используем контекстный менеджер для выполнения операций с БД
         with conn:
+            # Получаем все записи из таблицы client_info
             client_infos = list(BMInfo_onClient.select())
-        web_info_logger.info(f"Found {len(client_infos)} clients in the database.")
+        # Создаем список для хранения результатов
         results = []
         for client_info in client_infos:
+            # Создаем словарь для хранения данных одного клиента
             result = {}
             for column_name in client_info.column_names:
-                # Используйте новые названия столбцов
+                # Используем новые названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
+            # Добавляем словарь с данными клиента в список результатов
             results.append(result)
-        
+        # Преобразуем список результатов в строку JSON
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
         response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON
         return response
+    
     except Exception as error:
+        # Если возникла ошибка, формируем словарь с информацией об ошибке
         error_message = {"error": str(error)}
+        # Преобразуем словарь с информацией об ошибке в строку JSON
         json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
         response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON с информацией об ошибке
         return response
         
 def post_BM_Info_onClient_api():
@@ -511,7 +524,7 @@ def post_BM_Info_onClient_api():
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
-            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
+            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.Client_name == data['Client_name'])
             if existing_client is None:
                 # Сохраняем данные в базе данных, используя insert и execute вместо save()
                 BMInfo_onClient.insert(**data).execute()
