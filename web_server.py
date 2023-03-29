@@ -660,6 +660,11 @@ def get_client_by_id(id):
             
             if client is None:
                 # Если клиент с указанным ID не найден, возвращаем сообщение об ошибке
+                message = "Клиент с ID {} не найден".format(id)
+                json_data = json.dumps({"message": message}, ensure_ascii=False)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
                 return jsonify({"message": f"Клиент с ID {id} не найден"}), 404
 
             # Здесь продолжайте с преобразованием данных и формированием ответа
