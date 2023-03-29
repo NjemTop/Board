@@ -86,12 +86,12 @@ class BMInfo_onClient(BaseModel):
 class ClientsCard(BaseModel):
     """Класс для таблицы БД карточек клиентов"""
     clients_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
-    contacts = peewee.IntegerField(column_name='Контакты')
-    tech_notes = peewee.IntegerField(column_name='Технические_заметки')
-    connect_info = peewee.IntegerField(column_name='Информация_для_подключения')
-    rdp = peewee.IntegerField(column_name='Удаленный_доступ')
-    tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись')
-    bm_servers = peewee.IntegerField(column_name='Серверы_ВМ')
+    contacts = peewee.FloatField(column_name='Контакты')
+    tech_notes = peewee.FloatField(column_name='Технические_заметки')
+    connect_info = peewee.FloatField(column_name='Информация_для_подключения')
+    rdp = peewee.FloatField(column_name='Удаленный_доступ')
+    tech_account = peewee.FloatField(column_name='Технологическая_учетная_запись')
+    bm_servers = peewee.FloatField(column_name='Серверы_ВМ')
     
     # Список наименований столбцов
     COLUMN_NAMES = [
