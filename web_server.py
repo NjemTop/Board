@@ -651,29 +651,41 @@ def get_client_card_api():
         # Отправляем ответ JSON с информацией об ошибке
         return response
 
-def post_client_card_api():
-    """Функция записи данных в БД со списком карточек клиентов"""
-    data = request.get_json()
-
-    required_fields = ClientsCard.COLUMN_NAMES
-    missing_fields = [field for field in required_fields if field not in data]
-
-    if missing_fields:
-        return f"Отсутствуют обязательные поля: {', '.join(missing_fields)}", 400
-
+def post_BM_Info_onClient_api():
+    """Функция добавления о клиентах в БД"""
     try:
+        # Получаем данные из запроса и создаем объект BMInfo_onClient
+        data = json.loads(request.data.decode('utf-8'))
+        # Создаем таблицу, если она не существует
         with conn:
-            ClientsCard.insert(**data).execute()
-            conn.commit()
+            conn.create_tables([BMInfo_onClient])
 
-        return f"Карточка клиента с ID {data['clients_id']} успешно добавлена", 201
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
+            # Проверяем наличие существующего клиента с тем же именем
+            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
+            if existing_client is None:
+                # Сохраняем данные в базе данных, используя insert и execute
+                BMInfo_onClient.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
+            else:
+                raise ValueError(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
 
-    except peewee.IntegrityError:
-        return f"Карточка клиента с ID {data['clients_id']} уже существует", 400
-    except peewee.OperationalError as error_message:
-        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+        web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
+        return 'Data successfully saved to the database!'
+
     except Exception as error:
-        return f"Ошибка сервера: {error}", 500
+        # Если возникла ошибка, формируем словарь с информацией об ошибке
+        error_message = {"error": str(error)}
+        # Преобразуем словарь с информацией об ошибке в строку JSON
+        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON с информацией об ошибке
+        return response
 
 def put_client_card_api():
     """Функция изменений данных в БД со списком карточек клиентов"""
