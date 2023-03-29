@@ -490,6 +490,8 @@ def get_BM_Info_onClient_api():
             for column_name in client_info.column_names:
                 # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
+                if column_name == 'service':
+                    result['service'] = getattr(client_info, 'service')
                 #  Используйте русские названия столбцов
                 # result[RU_COLUMN_NAMES[column_name]] = getattr(client_info, column_name.lower())
             # Добавляем словарь с данными клиента в список результатов
