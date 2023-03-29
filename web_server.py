@@ -652,10 +652,10 @@ def get_client_card_api():
         return response
 
 def get_client_by_id(id):
-    """Функция возвращает данные клиента по указанному clients_id."""
+    """Функция возвращает данные клиента по указанному id."""
     try:
         with conn:
-            # Получаем данные клиента по clients_id
+            # Получаем данные клиента по id
             client = ClientsCard.get_or_none(ClientsCard.clients_id == id)
             
             if client is None:
