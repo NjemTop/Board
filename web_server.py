@@ -529,8 +529,23 @@ def post_BM_Info_onClient_api():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             if existing_client is None:
-                # Сохраняем данные в базе данных, используя insert и execute
-                BMInfo_onClient.insert(**data).execute()
+                client_name = data.get('client_name')
+                if not client_name:
+                    return 'Error: значение ключа "client_name" не указано!'
+
+                contact_status = data.get('contact_status')
+                if not contact_status:
+                    return 'Error: значение ключа "contact_status" не указано!'
+
+                notes = data.get('notes', None)
+                # Создаем запись в БД с автоматически сгенерированным id
+                new_client = BMInfo_onClient.create(
+                    client_name=client_name,
+                    contact_status=contact_status,
+                    notes=notes
+                )
+                # Получаем id созданной записи
+                client_id = new_client.id
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
@@ -722,6 +737,43 @@ def post_client_card_api():
                 return f"Клиент с ID {data['clients_id']} уже существует. Пропускаем..."
 
         web_info_logger.info("Добавлен клиент в БД: %s", data['clients_id'])
+        return 'Data successfully saved to the database!'
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
+        return f"Ошибка с БД: {error_message}"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}"
+
+def post_client_card_api_by_id(id):
+    """Функция добавления данных карточек клиентов в БД с указанным id клиента"""
+    try:
+        # Получаем данные из запроса и создаем объект ClientsCard
+        data = json.loads(request.data.decode('utf-8'))
+        # Добавляем переданный id клиента в данные
+        data['client_id'] = id
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([ClientsCard])
+
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
+            # Проверяем наличие существующего клиента с тем же ID
+            existing_client = ClientsCard.get_or_none(ClientsCard.client_id == id)
+            if existing_client is None:
+                # Сохраняем данные в базе данных, используя insert и execute
+                ClientsCard.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
+            else:
+                print(f"Карточка клиента с ID {id} уже существует. Пропускаем...")
+                return f"Карточка клиента с ID {id} уже существует. Пропускаем..."
+
+        web_info_logger.info("Добавлена карточка клиента с ID: %s", id)
         return 'Data successfully saved to the database!'
 
     except peewee.OperationalError as error_message:
@@ -1140,6 +1192,7 @@ def create_app():
     # Регистрация обработчика для API с параметром id в URL
     app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_by_id))
     app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
+    app.route('/clients_all_info/api/client_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_card_api_by_id))
     app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
     app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
 

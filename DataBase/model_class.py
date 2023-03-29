@@ -1,9 +1,15 @@
 import peewee
+import random
 
 # Путь к файлу базы данных
 db_filename = './DataBase/database.db'
 # Подключение к базе данных SQLite
 conn = peewee.SqliteDatabase(f'file:{db_filename}?encoding=utf-8')
+
+def generate_unique_id():
+    """Функция генерации случайного числа для БД"""
+    # Генерируем уникальный ID. В данном примере используется случайное число.
+    return random.randint(1, 10000)
 
 # Определяем базовую модель о которой будут наследоваться остальные
 class BaseModel(peewee.Model):
@@ -46,16 +52,18 @@ class Release_info(BaseModel):
 
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
-    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True, collation='NOCASE')
+    client_id = peewee.AutoField(column_name='ID', primary_key=True)
+    client_name = peewee.TextField(column_name='Название_клиента', collation='NOCASE')
     contact_status = peewee.BooleanField(column_name='Активность')
-    client_info = peewee.IntegerField(column_name='Карточка_клиента')
-    service = peewee.IntegerField(column_name='Обслуживание')
-    technical_information = peewee.IntegerField(column_name='Техническая_информация')
-    integration = peewee.IntegerField(column_name='Интеграции')
+    client_info = peewee.IntegerField(column_name='Карточка_клиента', default=generate_unique_id)
+    service = peewee.IntegerField(column_name='Обслуживание', default=generate_unique_id)
+    technical_information = peewee.IntegerField(column_name='Тех_информация', default=generate_unique_id)
+    integration = peewee.IntegerField(column_name='Интеграции', default=generate_unique_id)
     notes = peewee.TextField(column_name='Примечания')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
+        'client_id',
         'client_name',
         'contact_status',
         'client_info',
@@ -67,6 +75,7 @@ class BMInfo_onClient(BaseModel):
 
     # Русский список наименований столбцов
     RU_COLUMN_NAMES = {
+    'client_id': 'ID',
     'client_name': 'Название клиента',
     'contact_status': 'Активность',
     'client_info': 'Карточка клиента',
@@ -85,17 +94,17 @@ class BMInfo_onClient(BaseModel):
 
 class ClientsCard(BaseModel):
     """Класс для таблицы БД карточек клиентов"""
-    clients_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
-    contacts = peewee.FloatField(column_name='Контакты')
-    tech_notes = peewee.FloatField(column_name='Технические_заметки')
-    connect_info = peewee.FloatField(column_name='Информация_для_подключения')
-    rdp = peewee.FloatField(column_name='Удаленный_доступ')
-    tech_account = peewee.FloatField(column_name='Технологическая_учетная_запись')
-    bm_servers = peewee.FloatField(column_name='Серверы_ВМ')
+    client_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
+    contacts = peewee.IntegerField(column_name='Контакты', default=generate_unique_id)
+    tech_notes = peewee.IntegerField(column_name='Технические_заметки', default=generate_unique_id)
+    connect_info = peewee.IntegerField(column_name='Информация_для_подключения', default=generate_unique_id)
+    rdp = peewee.IntegerField(column_name='Удаленный_доступ', default=generate_unique_id)
+    tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись', default=generate_unique_id)
+    bm_servers = peewee.IntegerField(column_name='Серверы_ВМ', default=generate_unique_id)
     
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'clients_id',
+        'client_id',
         'contacts',
         'tech_notes',
         'connect_info',
