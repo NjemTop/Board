@@ -2,9 +2,10 @@
 import json
 import logging
 import requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask import Response
 from flask import render_template
+import traceback
 import sqlite3
 import peewee
 from DataBase.model_class import Release_info, BMInfo_onClient, conn
@@ -583,7 +584,7 @@ def put_BM_Info_onClient_api():
     except peewee.OperationalError as error_message:
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
     except Exception as error:
-        return f"Ошибка сервера: {error}", 500
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
 def delete_BM_Info_onClient_api():
     """Функция удаления клиента из БД (ключ для приёма - client_name)"""
