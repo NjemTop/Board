@@ -652,7 +652,7 @@ def get_client_card_api():
         return response
 
 def get_client_by_id(id):
-    """Функция возвращает данные клиента по указанному id."""
+    """Функция возвращает данные клиента по указанному id (Clients_id)."""
     try:
         with conn:
             # Получаем данные клиента по id
@@ -687,40 +687,40 @@ def get_client_by_id(id):
         print("Ошибка сервера:", error)
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
-def post_client_card_api():
-    """Функция добавления данных карточек клиентов в БД"""
+from flask import jsonify
+
+def get_client_by_id(id):
+    """Функция возвращает данные клиента по указанному id."""
     try:
-        # Получаем данные из запроса и создаем объект ClientsCard
-        data = json.loads(request.data.decode('utf-8'))
-        # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([ClientsCard])
+            # Получаем данные клиента по id
+            client = ClientsCard.get_or_none(ClientsCard.clients_id == id)
+            
+            if client is None:
+                # Если клиент с указанным ID не найден, возвращаем сообщение об ошибке
+                return jsonify({"message": f"Клиент с ID {id} не найден"}), 404
 
-        # Создаем транзакцию для сохранения данных в БД
-        with conn.atomic():
-            # Проверяем наличие существующего клиента с тем же ID
-            existing_client = ClientsCard.get_or_none(ClientsCard.clients_id == data['clients_id'])
-            if existing_client is None:
-                # Сохраняем данные в базе данных, используя insert и execute
-                ClientsCard.insert(**data).execute()
-                # Добавляем вызов commit() для сохранения изменений в БД
-                conn.commit()
-            else:
-                print(f"Клиент с ID {data['clients_id']} уже существует. Пропускаем...")
-                return f"Клиент с ID {data['clients_id']} уже существует. Пропускаем..."
+            # Здесь продолжайте с преобразованием данных и формированием ответа
+            client_data = {
+                'Clients_id': client.clients_id,
+                'Contacts': client.contacts,
+                'Tech_notes': client.tech_notes,
+                'Connect_info': client.connect_info,
+                'RDP': client.rdp,
+                'Tech_account': client.tech_account,
+                'BM_servers': client.bm_servers
+            }
 
-        web_info_logger.info("Добавлен клиент в БД: %s", data['clients_id'])
-        return 'Data successfully saved to the database!'
+            return jsonify(client_data)
 
     except peewee.OperationalError as error_message:
-        # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
-        return f"Ошибка с БД: {error_message}"
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        return error_message
     except Exception as error:
-        # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}"
+        print("Ошибка сервера:", error)
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
 def patch_client_card_api():
     """Функция изменений данных в БД со списком карточек клиентов"""
