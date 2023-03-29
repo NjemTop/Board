@@ -48,7 +48,7 @@ class Release_info(BaseModel):
 
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
-    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True, db_collation='NOCASE')
+    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True, collation='NOCASE')
     contact_status = peewee.BooleanField(column_name='Активность')
     client_info = peewee.IntegerField(column_name='Карточка_клиента')
     service = peewee.IntegerField(column_name='Обслуживание')

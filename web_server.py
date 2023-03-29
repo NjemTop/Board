@@ -518,9 +518,7 @@ def post_BM_Info_onClient_api():
     """Функция добавления о клиентах в БД"""
     try:
         # Получаем данные из запроса и создаем объект BMInfo_onClient
-        data = request.get_json()
-        # Пытаемся кодировать имя клиента
-        data['client_name'] = data['client_name'].encode('utf-8')
+        data = json.loads(request.data.decode('utf-8'))
         # Создаем таблицу, если она не существует
         with conn:
             conn.create_tables([BMInfo_onClient])
