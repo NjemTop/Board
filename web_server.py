@@ -529,7 +529,7 @@ def post_BM_Info_onClient_api():
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             if existing_client is None:
                 # Сохраняем данные в базе данных, используя insert и execute вместо save()
-                BMInfo_onClient.insert(**data).execute()
+                BMInfo_onClient.insert(client_name=data['client_name'].encode('utf-8')).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
@@ -548,7 +548,7 @@ def post_BM_Info_onClient_api():
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
-        
+
 def update_client_notes(client_name, new_notes):
     """Функция добавления примечания для клиента"""
     try:
