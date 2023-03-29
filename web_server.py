@@ -550,7 +550,7 @@ def post_BM_Info_onClient_api():
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
-def put_BM_Info_onClient_api():
+def patch_BM_Info_onClient_api():
     """Функция обновления данных в БД (обязательный ключ - client_name)"""
     data = request.get_json()
 
@@ -651,7 +651,7 @@ def get_client_card_api():
         # Отправляем ответ JSON с информацией об ошибке
         return response
 
-def post_BM_Info_onClient_api():
+def post_client_card_api():
     """Функция добавления о клиентах в БД"""
     try:
         # Получаем данные из запроса и создаем объект BMInfo_onClient
@@ -687,7 +687,7 @@ def post_BM_Info_onClient_api():
         # Отправляем ответ JSON с информацией об ошибке
         return response
 
-def put_client_card_api():
+def patch_client_card_api():
     """Функция изменений данных в БД со списком карточек клиентов"""
     data = request.get_json()
 
@@ -1059,14 +1059,14 @@ def create_app():
     # Регистрация обработчика для API списка учёта версий клиентов
     app.add_url_rule('/clients_all_info/api/clients', 'get_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients', 'post_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
+    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(patch_BM_Info_onClient_api), methods=['PATCH'])
     app.add_url_rule('/clients_all_info/api/clients', 'delete_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
 
     # Регистрация обработчика для API списка карточек клиента
     app.add_url_rule('/clients_all_info/api/clients_card', 'get_client_card_api', require_basic_auth(USERNAME, PASSWORD)(get_client_card_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(update_client_card_api), methods=['PUT'])
-    app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(put_client_card_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
 
     return app
 
