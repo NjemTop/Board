@@ -62,10 +62,21 @@ class BMInfo_onClient(BaseModel):
         'contact_status',
         'client_info',
         'client_info',
-        'Technical_information',
+        'technical_information',
         'integration',
         'notes'
     ]
+
+    # Русский список наименований столбцов
+    RU_COLUMN_NAMES = {
+    'client_name': 'Название клиента',
+    'contact_status': 'Активность',
+    'client_info': 'Карточка клиента',
+    'service': 'Обслуживание',
+    'technical_information': 'Техническая информация',
+    'integration': 'Интеграции',
+    'notes': 'Примечания'
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

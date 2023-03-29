@@ -486,7 +486,7 @@ def get_BM_Info_onClient_api():
             # Создаем словарь для хранения данных одного клиента
             result = {}
             for column_name in client_info.column_names:
-                # Используем новые названия столбцов для извлечения данных из объекта BMInfo_onClient
+                # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
             # Добавляем словарь с данными клиента в список результатов
             results.append(result)
