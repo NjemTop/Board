@@ -954,7 +954,7 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
-    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/clients/delete', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
 
     return app
 
