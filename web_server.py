@@ -570,7 +570,7 @@ def update_client_notes(client_name, new_notes):
         print("Ошибка:", error)
         return "Ошибка сервера"
 
-def update_client_notes_api():
+def put_BM_Info_onClient_api():
     """Функция обработки PUT запросов (обновления) в БД для указанного клиента"""
     try:
         # Получаем данные из запроса
@@ -593,6 +593,28 @@ def update_client_notes_api():
         web_error_logger.error("Ошибка: %s", error)
         print("Ошибка:", error)
         return "Ошибка сервера"
+
+def delete_BM_Info_onClient_api():
+    client_name = request.args.get('client_name', None)
+
+    if client_name is None:
+        return 'Необходимо указать имя клиента для удаления', 400
+
+    try:
+        with conn:
+            # Удаление записи с указанным именем клиента
+            query = BMInfo_onClient.delete().where(BMInfo_onClient.client_name == client_name)
+            deleted_rows = query.execute()
+
+        if deleted_rows > 0:
+            return f'Клиент с именем "{client_name}" успешно удален.', 200
+        else:
+            return f'Клиент с именем "{client_name}" не найден.', 404
+
+    except peewee.OperationalError as error_message:
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        return f"Ошибка сервера: {error}", 500
 
 def get_app():
     """Функция приложения ВЭБ-сервера"""
@@ -931,7 +953,8 @@ def create_app():
     # Регистрация обработчика для API списка учёта версий клиентов
     app.add_url_rule('/clients_all_info/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(update_client_notes_api), methods=['PUT'])
+    app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
+    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
 
     return app
 
