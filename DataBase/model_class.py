@@ -24,19 +24,19 @@ class BaseModel(peewee.Model):
 # Определяем модель для таблицы "release_info"
 class Release_info(BaseModel):
     """Класс для таблицы БД информации о релизе"""
-    date = peewee.DateField(column_name='Дата_рассылки')
-    release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
-    client_name = peewee.TextField(column_name='Наименование_клиента')
-    main_contact = peewee.TextField(column_name='Основной_контакт')
-    copy = peewee.TextField(column_name='Копия')
+    Date = peewee.DateField(column_name='Дата_рассылки')
+    Release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
+    Client_name = peewee.TextField(column_name='Наименование_клиента')
+    Main_contact = peewee.TextField(column_name='Основной_контакт')
+    Copy = peewee.TextField(column_name='Копия')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'date',
-        'release_number',
-        'client_name',
-        'main_contact',
-        'copy'
+        'Date',
+        'Release_number',
+        'Client_name',
+        'Main_contact',
+        'Copy'
     ]
 
     def __init__(self, *args, **kwargs):
@@ -48,23 +48,23 @@ class Release_info(BaseModel):
 
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
-    client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
-    contact_status = peewee.BooleanField(column_name='Активность')
-    client_info = peewee.IntegerField(column_name='Карточка_клиента')
+    Client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
+    Contact_status = peewee.BooleanField(column_name='Активность')
+    Client_info = peewee.IntegerField(column_name='Карточка_клиента')
     Service = peewee.IntegerField(column_name='Обслуживание')
-    technical_information = peewee.IntegerField(column_name='Техническая_информация')
-    integration = peewee.IntegerField(column_name='Интеграции')
-    notes = peewee.TextField(column_name='Примечания')
+    Rechnical_information = peewee.IntegerField(column_name='Техническая_информация')
+    Integration = peewee.IntegerField(column_name='Интеграции')
+    Notes = peewee.TextField(column_name='Примечания')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'client_name',
-        'contact_status',
+        'Client_name',
+        'Contact_status',
         'client_info',
-        'Service',
-        'technical_information',
-        'integration',
-        'notes'
+        'Client_info',
+        'Rechnical_information',
+        'Integration',
+        'Notes'
     ]
 
     def __init__(self, *args, **kwargs):
@@ -76,23 +76,23 @@ class BMInfo_onClient(BaseModel):
 
 class ClientsCard(BaseModel):
     """Класс для таблицы БД карточек клиентов"""
-    clients_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
-    contacts = peewee.IntegerField(column_name='Контакты')
-    tech_notes = peewee.IntegerField(column_name='Технические_заметки')
-    connect_info = peewee.IntegerField(column_name='Информация_для_подключения')
-    rdp = peewee.IntegerField(column_name='Удаленный_доступ')
-    tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись')
-    bm_servers = peewee.IntegerField(column_name='Серверы_ВМ')
+    Clients_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
+    Contacts = peewee.IntegerField(column_name='Контакты')
+    Tech_notes = peewee.IntegerField(column_name='Технические_заметки')
+    Connect_info = peewee.IntegerField(column_name='Информация_для_подключения')
+    Rdp = peewee.IntegerField(column_name='Удаленный_доступ')
+    Tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись')
+    Bm_servers = peewee.IntegerField(column_name='Серверы_ВМ')
     
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'clients_id',
-        'contacts',
-        'tech_notes',
-        'connect_info',
-        'rdp',
-        'tech_account',
-        'bm_servers'
+        'Clients_id',
+        'Contacts',
+        'Tech_notes',
+        'Connect_info',
+        'Rdp',
+        'Tech_account',
+        'Bm_servers'
     ]
 
     def __init__(self, *args, **kwargs):
