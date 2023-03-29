@@ -5,7 +5,7 @@ db_filename = './DataBase/database.db'
 # db_filename = './DataBase/database.db'
 
 # Подключение к базе данных SQLite
-conn = peewee.SqliteDatabase(f'file:{db_filename}')
+conn = peewee.SqliteDatabase(f'file:{db_filename}', charset='utf8')
 
 # Определяем базовую модель о которой будут наследоваться остальные
 class BaseModel(peewee.Model):
