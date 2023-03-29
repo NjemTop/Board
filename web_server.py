@@ -595,25 +595,33 @@ def put_BM_Info_onClient_api():
         return "Ошибка сервера"
 
 def delete_BM_Info_onClient_api():
-    client_name = request.args.get('client_name', None)
+    """Функция удаления клиента из БД"""
+    # Получение данных из запроса в формате JSON
+    data = request.get_json()
+    # Извлечение имени клиента из данных запроса, значение по умолчанию - None
+    client_name = data.get('client_name', None)
 
-    if client_name is None:
+    # Проверка наличия имени клиента в запросе
+    if not client_name:
         return 'Необходимо указать имя клиента для удаления', 400
 
     try:
+        # Открываем соединение с базой данных
         with conn:
             # Удаление записи с указанным именем клиента
-            query = BMInfo_onClient.delete().where(BMInfo_onClient.client_name == client_name)
-            deleted_rows = query.execute()
-
+            deleted_rows = BMInfo_onClient.delete().where(BMInfo_onClient.client_name == client_name).execute()
+        # Если удалена хотя бы одна запись, возвращаем количество удаленных записей и успешный статус
         if deleted_rows > 0:
-            return f'Клиент с именем "{client_name}" успешно удален.', 200
+            return f'Удалено {deleted_rows} записей с именем клиента: {client_name}', 200
         else:
-            return f'Клиент с именем "{client_name}" не найден.', 404
+            # Если запись с указанным именем клиента не найдена, возвращаем ошибку 404
+            return f'Клиент с именем {client_name} не найден', 404
 
     except peewee.OperationalError as error_message:
+        # Обработка ошибки подключения к базе данных SQLite
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
     except Exception as error:
+        # Обработка остальных ошибок сервера
         return f"Ошибка сервера: {error}", 500
 
 def get_app():
@@ -954,7 +962,7 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
-    app.add_url_rule('/clients_all_info/api/clients/delete', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
 
     return app
 
