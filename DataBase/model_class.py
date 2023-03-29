@@ -2,8 +2,6 @@ import peewee
 
 # Путь к файлу базы данных
 db_filename = './DataBase/database.db'
-# db_filename = './DataBase/database.db'
-
 # Подключение к базе данных SQLite
 conn = peewee.SqliteDatabase(f'file:{db_filename}?encoding=utf-8')
 
@@ -61,7 +59,7 @@ class BMInfo_onClient(BaseModel):
         'client_name',
         'contact_status',
         'client_info',
-        'client_info',
+        'service',
         'technical_information',
         'integration',
         'notes'
