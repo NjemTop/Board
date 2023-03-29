@@ -550,7 +550,7 @@ def post_BM_Info_onClient_api():
         return f"Ошибка сервера: {error}"
 
 def put_BM_Info_onClient_api():
-    """Функция обновления данных в БД (обязательный аргумент - client_name)"""
+    """Функция обновления данных в БД (обязательный ключ - client_name)"""
     data = request.get_json()
 
     # Получаем имя клиента, которое нужно обновить
@@ -586,7 +586,7 @@ def put_BM_Info_onClient_api():
         return f"Ошибка сервера: {error}", 500
 
 def delete_BM_Info_onClient_api():
-    """Функция удаления клиента из БД"""
+    """Функция удаления клиента из БД (ключ для приёма - client_name)"""
     # Получение данных из запроса в формате JSON
     data = request.get_json()
     # Извлечение имени клиента из данных запроса, значение по умолчанию - None
