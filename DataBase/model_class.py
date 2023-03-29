@@ -49,22 +49,22 @@ class Release_info(BaseModel):
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
     client_name = peewee.TextField(column_name='Название_клиента', primary_key=True)
-    Contact_status = peewee.BooleanField(column_name='Активность')
-    Client_info = peewee.IntegerField(column_name='Карточка_клиента')
-    Service = peewee.IntegerField(column_name='Обслуживание')
-    Technical_information = peewee.IntegerField(column_name='Техническая_информация')
-    Integration = peewee.IntegerField(column_name='Интеграции')
-    Notes = peewee.TextField(column_name='Примечания')
+    contact_status = peewee.BooleanField(column_name='Активность')
+    client_info = peewee.IntegerField(column_name='Карточка_клиента')
+    service = peewee.IntegerField(column_name='Обслуживание')
+    technical_information = peewee.IntegerField(column_name='Техническая_информация')
+    integration = peewee.IntegerField(column_name='Интеграции')
+    notes = peewee.TextField(column_name='Примечания')
 
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'Client_name',
-        'Contact_status',
+        'client_name',
+        'contact_status',
         'client_info',
-        'Client_info',
-        'Rechnical_information',
-        'Integration',
-        'Notes'
+        'client_info',
+        'rechnical_information',
+        'integration',
+        'notes'
     ]
 
     def __init__(self, *args, **kwargs):
