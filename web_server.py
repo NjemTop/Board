@@ -549,50 +549,41 @@ def post_BM_Info_onClient_api():
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
-def update_client_notes(client_name, new_notes):
-    """Функция добавления примечания для клиента"""
-    try:
-        with conn.atomic():
-            # Находим клиента по имени и обновляем поле "Примечания"
-            query = BMInfo_onClient.update({BMInfo_onClient.Примечания: new_notes}).where(BMInfo_onClient.Название_клиента == client_name)
-            query.execute()
-
-        return 'Notes updated successfully!'
-
-    except peewee.OperationalError as error_message:
-        # Обработка исключения при возникновении ошибки подключения к БД
-        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        print("Ошибка подключения к базе данных SQLite:", error_message)
-        return "Ошибка с БД"
-    except Exception as error:
-        # Обработка остальных исключений
-        web_error_logger.error("Ошибка: %s", error)
-        print("Ошибка:", error)
-        return "Ошибка сервера"
-
 def put_BM_Info_onClient_api():
-    """Функция обработки PUT запросов (обновления) в БД для указанного клиента"""
+    """Функция обновления данных в БД (обязательный аргумент - client_name)"""
+    data = request.get_json()
+
+    # Получаем имя клиента, которое нужно обновить
+    client_name = data.get('client_name', None)
+
+    if not client_name:
+        return 'Необходимо указать имя клиента для обновления', 400
+
+    # Получаем обновленные данные
+    updated_data = {key: value for key, value in data.items() if key != 'client_name'}
+
+    if not updated_data:
+        return 'Необходимо предоставить данные для обновления', 400
+
     try:
-        # Получаем данные из запроса
-        data = request.get_json()
-        client_name = data["Название_клиента"]
-        new_notes = data["Примечания"]
+        with conn:
+            # Обновляем запись с указанным именем клиента
+            updated_rows = (
+                BMInfo_onClient
+                .update(updated_data)
+                .where(BMInfo_onClient.client_name == client_name)
+                .execute()
+            )
 
-        # Обновляем поле "Примечания" для указанного клиента
-        result = update_client_notes(client_name, new_notes)
-
-        return result
+        if updated_rows > 0:
+            return f'Обновлено {updated_rows} записей с именем клиента: {client_name}', 200
+        else:
+            return f'Клиент с именем {client_name} не найден', 404
 
     except peewee.OperationalError as error_message:
-        # Обработка исключения при возникновении ошибки подключения к БД
-        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        print("Ошибка подключения к базе данных SQLite:", error_message)
-        return "Ошибка с БД"
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
     except Exception as error:
-        # Обработка остальных исключений
-        web_error_logger.error("Ошибка: %s", error)
-        print("Ошибка:", error)
-        return "Ошибка сервера"
+        return f"Ошибка сервера: {error}", 500
 
 def delete_BM_Info_onClient_api():
     """Функция удаления клиента из БД"""
