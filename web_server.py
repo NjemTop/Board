@@ -480,8 +480,7 @@ def get_BM_Info_onClient_api():
         with conn:
             for bm_info in BMInfo_onClient.select():
                 BMInfo_onClient.update(client_name=peewee.SQL('client_name.encode("latin-1").decode("utf-8")')).where(
-                    BMInfo_onClient.client_name.contains('????')
-                ).execute()
+                    BMInfo_onClient.client_name.contains('????')).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
         # Используем контекстный менеджер для выполнения операций с БД
