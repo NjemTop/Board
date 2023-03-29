@@ -479,8 +479,9 @@ def get_BM_Info_onClient_api():
         # Перекодирование данных в базе данных в формат utf-8
         with conn:
             for bm_info in BMInfo_onClient.select():
-                bm_info.client_name = bm_info.client_name.encode('latin-1').decode('utf-8')
-                bm_info.save()
+                BMInfo_onClient.update(client_name=peewee.SQL('client_name.encode("latin-1").decode("utf-8")')).where(
+                    BMInfo_onClient.client_name.contains('????')
+                ).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
         # Используем контекстный менеджер для выполнения операций с БД
