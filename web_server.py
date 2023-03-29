@@ -8,7 +8,7 @@ from flask import render_template
 import traceback
 import sqlite3
 import peewee
-from DataBase.model_class import Release_info, BMInfo_onClient, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from config import USERNAME, PASSWORD, require_basic_auth
@@ -611,6 +611,78 @@ def delete_BM_Info_onClient_api():
         # Обработка остальных ошибок сервера
         return f"Ошибка сервера: {error}", 500
 
+def get_client_card_api():
+    """Функция получения данных в БД со списком карточек клиентов"""
+    try:
+        # Используем контекстный менеджер для выполнения операций с БД
+        with conn:
+            # Получаем все записи из таблицы ClientsCard
+            client_cards = list(ClientsCard.select())
+        
+        # Создаем список для хранения результатов
+        results = []
+        for client_card in client_cards:
+            # Создаем словарь для хранения данных одной карточки клиента
+            result = {}
+            for column_name in client_card.column_names:
+                # Используем названия столбцов для извлечения данных из объекта ClientsCard
+                result[column_name] = getattr(client_card, column_name)
+            # Добавляем словарь с данными карточки клиента в список результатов
+            results.append(result)
+        
+        # Преобразуем список результатов в строку JSON
+        json_data = json.dumps(results, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON
+        return response
+
+    except Exception as error:
+        # Если возникла ошибка, формируем словарь с информацией об ошибке
+        error_message = {"error": str(error)}
+        # Преобразуем словарь с информацией об ошибке в строку JSON
+        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON с информацией об ошибке
+        return response
+
+def post_client_card_api():
+    """Функция записи данных в БД со списком карточек клиентов"""
+    data = request.get_json()
+
+    required_fields = ClientsCard.COLUMN_NAMES
+    missing_fields = [field for field in required_fields if field not in data]
+
+    if missing_fields:
+        return f"Отсутствуют обязательные поля: {', '.join(missing_fields)}", 400
+
+    try:
+        with conn:
+            ClientsCard.insert(**data).execute()
+            conn.commit()
+
+        return f"Карточка клиента с ID {data['clients_id']} успешно добавлена", 201
+
+    except peewee.IntegrityError:
+        return f"Карточка клиента с ID {data['clients_id']} уже существует", 400
+    except peewee.OperationalError as error_message:
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        return f"Ошибка сервера: {error}", 500
+
+def put_client_card_api():
+    """Функция изменений данных в БД со списком карточек клиентов"""
+    ...
+
+def delete_client_card_api():
+    """Функция удаления данных в БД со списком карточек клиентов"""
+    ...
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -946,10 +1018,16 @@ def create_app():
     app.add_url_rule('/data_release', 'data_release_html', data_release_html, methods=['GET'])
 
     # Регистрация обработчика для API списка учёта версий клиентов
-    app.add_url_rule('/clients_all_info/api/clients', 'get_client_info_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/clients', 'post_client_info_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients', 'update_client_notes_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
-    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/clients', 'get_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/clients', 'post_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(put_BM_Info_onClient_api), methods=['PUT'])
+    app.add_url_rule('/clients_all_info/api/clients', 'delete_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
+
+    # Регистрация обработчика для API списка карточек клиента
+    app.add_url_rule('/clients_all_info/api/clients_card', 'get_client_card_api', require_basic_auth(USERNAME, PASSWORD)(get_client_card_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(update_client_card_api), methods=['PUT'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(put_client_card_api), methods=['DELETE'])
 
     return app
 
