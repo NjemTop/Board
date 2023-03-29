@@ -518,7 +518,8 @@ def post_BM_Info_onClient_api():
     try:
         # Получаем данные из запроса и создаем объект BMInfo_onClient
         data = request.get_json()
-
+        # Пытаемся кодировать имя клиента
+        data['client_name'] = data['client_name'].encode('utf-8')
         # Создаем таблицу, если она не существует
         with conn:
             conn.create_tables([BMInfo_onClient])
@@ -528,7 +529,6 @@ def post_BM_Info_onClient_api():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             if existing_client is None:
-                data = {k: v.encode('utf-8') for k, v in request.get_json().items()}
                 # Сохраняем данные в базе данных, используя insert и execute
                 BMInfo_onClient.insert(**data).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
