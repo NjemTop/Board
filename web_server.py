@@ -1131,7 +1131,7 @@ def create_app():
     # Регистрация обработчика для API списка карточек клиента
     app.add_url_rule('/clients_all_info/api/clients_card', 'get_client_card_api', require_basic_auth(USERNAME, PASSWORD)(get_client_card_api), methods=['GET'])
     # Регистрация обработчика для API с параметром id в URL
-    app.route('/clients_all_info/api/client_card/<string:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_card_by_id))
+    app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_by_id))
     app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
     app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
