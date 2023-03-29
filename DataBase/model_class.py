@@ -62,7 +62,7 @@ class BMInfo_onClient(BaseModel):
         'contact_status',
         'client_info',
         'client_info',
-        'rechnical_information',
+        'Technical_information',
         'integration',
         'notes'
     ]
