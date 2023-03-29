@@ -478,11 +478,9 @@ def get_BM_Info_onClient_api():
     try:
         # Перекодирование данных в базе данных в формат utf-8
         with conn:
-            for bm_info in BMInfo_onClient.select():
-                BMInfo_onClient.update(client_name=peewee.SQL('client_name.encode("latin-1").decode("utf-8")')).where(
-                    BMInfo_onClient.client_name.contains('????')).execute()
-                # Добавляем вызов commit() для сохранения изменений в БД
-                conn.commit()
+            BMInfo_onClient.update(client_name=peewee.SQL('client_name.encode("latin-1").decode("utf-8")')).execute()
+            # Добавляем вызов commit() для сохранения изменений в БД
+            conn.commit()
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
@@ -519,7 +517,7 @@ def get_BM_Info_onClient_api():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправляем ответ JSON с информацией об ошибке
         return response
-        
+
 def post_BM_Info_onClient_api():
     """Функция добавления о клиентах в БД"""
     try:
