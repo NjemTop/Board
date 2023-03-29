@@ -52,7 +52,7 @@ class BMInfo_onClient(BaseModel):
     Contact_status = peewee.BooleanField(column_name='Активность')
     Client_info = peewee.IntegerField(column_name='Карточка_клиента')
     Service = peewee.IntegerField(column_name='Обслуживание')
-    Rechnical_information = peewee.IntegerField(column_name='Техническая_информация')
+    Technical_information = peewee.IntegerField(column_name='Техническая_информация')
     Integration = peewee.IntegerField(column_name='Интеграции')
     Notes = peewee.TextField(column_name='Примечания')
 
