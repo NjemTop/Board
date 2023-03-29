@@ -652,40 +652,39 @@ def get_client_card_api():
         return response
 
 def post_client_card_api():
-    """Функция добавления о клиентах в БД"""
+    """Функция добавления данных карточек клиентов в БД"""
     try:
-        # Получаем данные из запроса и создаем объект BMInfo_onClient
+        # Получаем данные из запроса и создаем объект ClientsCard
         data = json.loads(request.data.decode('utf-8'))
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient])
+            conn.create_tables([ClientsCard])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующего клиента с тем же именем
-            existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
+            # Проверяем наличие существующего клиента с тем же ID
+            existing_client = ClientsCard.get_or_none(ClientsCard.clients_id == data['clients_id'])
             if existing_client is None:
                 # Сохраняем данные в базе данных, используя insert и execute
-                BMInfo_onClient.insert(**data).execute()
+                ClientsCard.insert(**data).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
-                raise ValueError(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
+                print(f"Клиент с ID {data['clients_id']} уже существует. Пропускаем...")
+                return f"Клиент с ID {data['clients_id']} уже существует. Пропускаем..."
 
-        web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
+        web_info_logger.info("Добавлен клиент в БД: %s", data['clients_id'])
         return 'Data successfully saved to the database!'
 
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
+        return f"Ошибка с БД: {error_message}"
     except Exception as error:
-        # Если возникла ошибка, формируем словарь с информацией об ошибке
-        error_message = {"error": str(error)}
-        # Преобразуем словарь с информацией об ошибке в строку JSON
-        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
-        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        # Отправляем ответ JSON с информацией об ошибке
-        return response
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}"
 
 def patch_client_card_api():
     """Функция изменений данных в БД со списком карточек клиентов"""
@@ -720,7 +719,33 @@ def patch_client_card_api():
 
 def delete_client_card_api():
     """Функция удаления данных в БД со списком карточек клиентов"""
-    ...
+    # Получение данных из запроса в формате JSON
+    data = request.get_json()
+    # Извлечение ID клиента из данных запроса, значение по умолчанию - None
+    clients_id = data.get('clients_id', None)
+
+    # Проверка наличия ID клиента в запросе
+    if not clients_id:
+        return 'Необходимо указать ID клиента для удаления', 400
+
+    try:
+        # Открываем соединение с базой данных
+        with conn:
+            # Удаление записи с указанным ID клиента
+            deleted_rows = ClientsCard.delete().where(ClientsCard.clients_id == clients_id).execute()
+        # Если удалена хотя бы одна запись, возвращаем количество удаленных записей и успешный статус
+        if deleted_rows > 0:
+            return f'Удалено {deleted_rows} записей с ID клиента: {clients_id}', 200
+        else:
+            # Если запись с указанным ID клиента не найдена, возвращаем ошибку 404
+            return f'Клиент с ID {clients_id} не найден', 404
+
+    except peewee.OperationalError as error_message:
+        # Обработка ошибки подключения к базе данных SQLite
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        # Обработка остальных ошибок сервера
+        return f"Ошибка сервера: {error}", 500
 
 def get_app():
     """Функция приложения ВЭБ-сервера"""
