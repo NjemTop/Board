@@ -476,12 +476,12 @@ def data_release_html():
 
 def get_BM_Info_onClient_api():
     try:
-        # Используем контекстный менеджер для выполнения операций с БД
         # Перекодирование данных в базе данных в формат utf-8
         with conn:
             for bm_info in BMInfo_onClient.select():
                 bm_info.client_name = bm_info.client_name.encode('latin-1').decode('utf-8')
                 bm_info.save()
+        # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
             client_infos = list(BMInfo_onClient.select())
