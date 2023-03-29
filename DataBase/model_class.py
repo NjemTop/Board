@@ -1,7 +1,7 @@
 import peewee
 
 # Путь к файлу базы данных
-db_filename = 'DataBase/database.db'
+db_filename = './DataBase/database.db'
 # db_filename = './DataBase/database.db'
 
 # Подключение к базе данных SQLite
