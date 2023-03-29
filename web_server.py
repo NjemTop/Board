@@ -476,11 +476,6 @@ def data_release_html():
 
 def get_BM_Info_onClient_api():
     try:
-        # Перекодирование данных в базе данных в формат utf-8
-        with conn:
-            BMInfo_onClient.update(client_name=peewee.SQL('client_name.encode("latin-1").decode("utf-8")')).execute()
-            # Добавляем вызов commit() для сохранения изменений в БД
-            conn.commit()
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
             # Получаем все записи из таблицы client_info
