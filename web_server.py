@@ -651,46 +651,41 @@ def get_client_card_api():
         # Отправляем ответ JSON с информацией об ошибке
         return response
 
-def get_client_by_id(clients_id):
+def get_client_by_id(id):
     """Функция возвращает данные клиента по указанному clients_id."""
     try:
         with conn:
-            # Фильтрация данных по clients_id
-            query = ClientsCard.select().where(ClientsCard.clients_id == clients_id)
-            rows = list(query)
+            # Получаем данные клиента по clients_id
+            client = ClientsCard.get_or_none(ClientsCard.clients_id == id)
+            
+            if client is None:
+                # Если клиент с указанным ID не найден, возвращаем сообщение об ошибке
+                return jsonify({"message": f"Клиент с ID {id} не найден"}), 404
+
+            # Здесь продолжайте с преобразованием данных и формированием ответа
+            client_data = {
+                'Clients_id': client.clients_id,
+                'Contacts': client.contacts,
+                'Tech_notes': client.tech_notes,
+                'Connect_info': client.connect_info,
+                'RDP': client.rdp,
+                'Tech_account': client.tech_account,
+                'BM_servers': client.bm_servers
+            }
+
+            json_data = json.dumps(client_data, ensure_ascii=False, indent=4)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+
     except peewee.OperationalError as error_message:
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         print("Ошибка подключения к базе данных SQLite:", error_message)
         return error_message
-
-    # Создаём пустой массив
-    data = []
-
-    # Преобразование полученных данных в список словарей
-    for row in rows:
-        client_data = {
-            'Clients_id': row.clients_id,
-            'Contacts': row.contacts,
-            'Tech_notes': row.tech_notes,
-            'Connect_info': row.connect_info,
-            'RDP': row.rdp,
-            'Tech_account': row.tech_account,
-            'BM_servers': row.bm_servers
-        }
-        # Добавляем данные в созданный ранее массив (создаём структуру данных JSON)
-        data.append(client_data)
-
-    # Форматирование JSON с отступами для улучшения читабельности
-    json_data = json.dumps(data, ensure_ascii=False, indent=4)
-
-    # Создание ответа с типом содержимого application/json и кодировкой UTF-8
-    response = Response(json_data, content_type='application/json; charset=utf-8')
-
-    # Добавление заголовка Access-Control-Allow-Origin для разрешения кросс-доменных запросов
-    response.headers.add('Access-Control-Allow-Origin', '*')
-
-    # Отправка ответа JSON
-    return response
+    except Exception as error:
+        web_error_logger.error("Ошибка сервера: %s", error)
+        print("Ошибка сервера:", error)
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
 def post_client_card_api():
     """Функция добавления данных карточек клиентов в БД"""
