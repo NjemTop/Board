@@ -665,7 +665,6 @@ def get_client_by_id(id):
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
-                return jsonify({"message": f"Клиент с ID {id} не найден"}), 404
 
             # Здесь продолжайте с преобразованием данных и формированием ответа
             client_data = {
@@ -678,16 +677,27 @@ def get_client_by_id(id):
                 'BM_servers': client.bm_servers
             }
 
-            return jsonify(client_data)
+            json_data = json.dumps(client_data, ensure_ascii=False)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
 
     except peewee.OperationalError as error_message:
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         print("Ошибка подключения к базе данных SQLite:", error_message)
-        return error_message
+        message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
+        json_data = json.dumps({"message": message}, ensure_ascii=False)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     except Exception as error:
         web_error_logger.error("Ошибка сервера: %s", error)
         print("Ошибка сервера:", error)
-        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
+        message = "Ошибка сервера: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 def post_client_card_api():
     """Функция добавления данных карточек клиентов в БД"""
