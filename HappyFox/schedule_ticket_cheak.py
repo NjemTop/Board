@@ -19,12 +19,15 @@ check_info_handler.setLevel(logging.INFO)
 check_info_handler.setFormatter(formatter)
 check_info_logger.addHandler(check_info_handler)
 
-# Создадим объект класса HappyFoxConnector
-HappyFox = HappyFoxConnector()
+# Относительный путь к файлу конфигурации
+config_file_path = '../Main.config'
+
+# Создадим объект класса HappyFoxConnector с передачей пути к файлу конфигурации
+happyfox = HappyFoxConnector(config_file_path)
 
 # Создадим задачу на отправку алертов в чат
-schedule.every().day.at("10:25").do(HappyFoxConnector.get_tickets)
+schedule.every().day.at("10:25").do(happyfox.get_tickets)
 check_info_logger.info('Задача на отправку алертов по 3х дневным простоям создана')
 
 if __name__ == '__main__':
-    HappyFoxConnector.get_tickets()
+    happyfox.get_tickets()

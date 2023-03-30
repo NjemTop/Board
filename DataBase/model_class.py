@@ -52,10 +52,9 @@ class Release_info(BaseModel):
 
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учёта клиентов"""
-    client_id = peewee.AutoField(column_name='ID', primary_key=True)
     client_name = peewee.TextField(column_name='Название_клиента', collation='NOCASE')
     contact_status = peewee.BooleanField(column_name='Активность')
-    client_info = peewee.IntegerField(column_name='Карточка_клиента', default=generate_unique_id)
+    client_info = peewee.AutoField(column_name='Карточка_клиента', primary_key=True)
     service = peewee.IntegerField(column_name='Обслуживание', default=generate_unique_id)
     technical_information = peewee.IntegerField(column_name='Тех_информация', default=generate_unique_id)
     integration = peewee.IntegerField(column_name='Интеграции', default=generate_unique_id)
@@ -63,7 +62,6 @@ class BMInfo_onClient(BaseModel):
 
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'client_id',
         'client_name',
         'contact_status',
         'client_info',
