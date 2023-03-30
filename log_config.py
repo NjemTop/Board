@@ -10,15 +10,21 @@ def get_abs_log_path(log_filename):
     log_file_path = os.path.join(project_root, 'logs', log_filename)
     return log_file_path
 
-def setup_logger(name, log_file, level=logging.INFO, formatter=None):
-    if formatter is None:
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-
-    handler = logging.FileHandler(log_file)
-    handler.setFormatter(formatter)
-
-    logger = logging.getLogger(name)
+def setup_logger(logger_name, log_file, level=logging.INFO):
+    logger = logging.getLogger(logger_name)
     logger.setLevel(level)
-    logger.addHandler(handler)
+    
+    # Создаем папку logs, если её еще нет
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
+    # Создаем файл с логами, если еще не существует
+    if not os.path.exists(log_file):
+        with open(log_file, 'w') as f:
+            pass
+    
+    handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    
     return logger
