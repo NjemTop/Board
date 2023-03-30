@@ -2,6 +2,7 @@ import schedule
 import logging
 import datetime
 import time
+import os
 from HappyFox.happyfox_class import HappyFoxConnector
 
 # Создание объекта логгера для ошибок и критических событий
@@ -21,8 +22,12 @@ check_info_handler.setLevel(logging.INFO)
 check_info_handler.setFormatter(formatter)
 check_info_logger.addHandler(check_info_handler)
 
-# Относительный путь к файлу конфигурации
-config_file_path = '../Main.config'
+# Получаем абсолютный путь до файла schedule_ticket_check.py
+current_file_path = os.path.abspath(os.path.dirname(__file__))
+# Получаем абсолютный путь до корневой папки проекта
+project_root = os.path.dirname(current_file_path)
+# Формируем абсолютный путь до файла конфигурации
+config_file_path = os.path.join(project_root, 'Main.config')
 
 # Создадим объект класса HappyFoxConnector с передачей пути к файлу конфигурации
 happyfox = HappyFoxConnector(config_file_path)
