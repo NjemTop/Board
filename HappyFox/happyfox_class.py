@@ -30,6 +30,12 @@ class HappyFoxConnector:
         self.headers = {'Content-Type': 'application/json'}
 
     def get_filtered_tickets(self, start_date, end_date, contact_group_id):
+        """
+        Функция для получения списка тикетов, отфильтрованных по заданным параметрам:
+        start_date (str): начальная дата диапазона времени для фильтрации тикетов
+        end_date (str): конечная дата диапазона времени для фильтрации тикетов
+        contact_group_id (int): ID группы контактов для фильтрации тикетов
+        """
         url = f"{self.api_endpoint}/tickets/"
         page = 1
         all_tickets = []
@@ -41,18 +47,33 @@ class HappyFoxConnector:
                 'size': 50
             }
 
-            response = requests.get(url, params=params, auth=(self.api_key, self.api_secret), headers=self.headers)
-            if response.status_code == 200:
-                data = response.json()
-                tickets = data['data']
-                all_tickets.extend(ticket for ticket in tickets if any(contact_group['id'] == contact_group_id for contact_group in ticket['user']['contact_groups']))
-
-                if data['page_info']['count'] < 50:
-                    break
-                page += 1
-            else:
-                print('Error:', response.status_code)
+            try:
+                response = requests.get(url, params=params, auth=(self.api_key, self.api_secret), headers=self.headers, timeout=10)
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as error_message:
+                hf_class_error_logger.error(f"Error occurred: {error_message}")
                 break
+            except requests.exceptions.Timeout as error_message:
+                hf_class_error_logger.error(f"Timeout error: request timed out: {error_message}")
+                break
+            except requests.exceptions.RequestException as error_message:
+                hf_class_error_logger.error(f"Error occurred: {error_message}")
+                break
+
+            data = response.json()
+            tickets = data['data']
+
+            for ticket in tickets:
+                if 'user' in ticket and ticket['user'] is not None:
+                    user = ticket['user']
+                    if 'contact_groups' in user:
+                        contact_groups = user['contact_groups']
+                        if any(contact_group['id'] == contact_group_id for contact_group in contact_groups):
+                            all_tickets.append(ticket)
+
+            if data['page_info']['count'] < 50:
+                break
+            page += 1
 
         return all_tickets
     
