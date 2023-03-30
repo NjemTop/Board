@@ -1188,7 +1188,7 @@ if __name__ == '__main__':
     try:
         server_address = ('0.0.0.0', 3030)
         app = create_app()
-        web_info_logger.info('Сервер запущен на порту %s', server_address[1])
+        web_info_logger.info('Сервер запущен. Порт работы: %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)
     except Exception as error_message:
         web_error_logger.error("Ошибка при запуске ВЭБ-сервера: %s", error_message)
