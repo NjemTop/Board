@@ -12,25 +12,11 @@ from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, con
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from config import USERNAME, PASSWORD, require_basic_auth
+from logger.log_config import setup_logger, get_abs_log_path
 
-logging.basicConfig(level=logging.DEBUG, filename='web_server.log', filemode='w',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-# Создание объекта логгера для ошибок и критических событий
-web_error_logger = logging.getLogger('WebError')
-web_error_logger.setLevel(logging.ERROR)
-web_error_handler = logging.FileHandler('./logs/web-errors.log')
-web_error_handler.setLevel(logging.ERROR)
-web_error_handler.setFormatter(formatter)
-web_error_logger.addHandler(web_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-web_info_logger = logging.getLogger('WebInfo')
-web_info_logger.setLevel(logging.INFO)
-web_info_handler = logging.FileHandler('./logs/web-info.log')
-web_info_handler.setLevel(logging.INFO)
-web_info_handler.setFormatter(formatter)
-web_info_logger.addHandler(web_info_handler)
+# Указываем настройки логов для нашего файла с классами
+web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
+web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
@@ -1199,7 +1185,6 @@ def create_app():
     return app
 
 if __name__ == '__main__':
-    """Функция запуска ВЕБ-СЕРВЕРА для прослушивания вебхуков. Алерты"""
     try:
         server_address = ('0.0.0.0', 3030)
         app = create_app()

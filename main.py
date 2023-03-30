@@ -7,26 +7,11 @@ import requests
 import telegram
 from telegram_bot import start_telegram_bot
 from HappyFox.schedule_ticket_check import start_check_tickets
+from logger.log_config import setup_logger, get_abs_log_path
 
-# Настройка логирования
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-
-# Создание объекта логгера для ошибок и критических событий
-app_error_logger = logging.getLogger('AppError')
-app_error_logger.setLevel(logging.ERROR)
-app_error_handler = logging.FileHandler('./logs/app-error.log')
-app_error_handler.setLevel(logging.ERROR)
-app_error_handler.setFormatter(formatter)
-app_error_logger.addHandler(app_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-app_info_logger = logging.getLogger('AppInfo')
-app_info_logger.setLevel(logging.INFO)
-app_info_handler = logging.FileHandler('./logs/app-info.log')
-app_info_handler.setLevel(logging.INFO)
-app_info_handler.setFormatter(formatter)
-app_info_logger.addHandler(app_info_handler)
+# Указываем настройки логов для нашего файла с классами
+app_error_logger = setup_logger('AppError', get_abs_log_path('app-errors.log'), logging.ERROR)
+app_info_logger = setup_logger('AppInfo', get_abs_log_path('app-info.log'), logging.INFO)
 
 # Функция запуска задачи по проверке 3х дневных тикетов
 def start_check_tickets_old():
@@ -40,7 +25,7 @@ if __name__ == '__main__':
     try:
         p1 = threading.Thread(target=start_check_tickets)
         p1.start()
-        app_info_logger.info("Планировщик задач по проверке 3х дневных тикетов запущен")
+        app_info_logger.info("Планировщик задач по проверку 3х дневных тикетов запущен")
     except Exception as error_message:
         app_error_logger.error("Error in Schedule_ticket_check: %s", error_message)
     
