@@ -31,15 +31,13 @@ happyfox = HappyFoxConnector(config_file_path)
 schedule.every().day.at("10:28").do(happyfox.get_tickets)
 check_info_logger.info('Задача на отправку алертов по 3х дневным простоям создана')
 
-while True:
-    # Получаем текущую дату и время
-    now = datetime.datetime.now()
-    # Проверяем, является ли текущий день недели будним днём (пн-пт)
-    if now.weekday() < 5:
-        # Запускаем отложенные задачи
-        schedule.run_pending()
-    # Ждём 1 секунду перед проверкой снова
-    time.sleep(1)
-
-if __name__ == '__main__':
-    happyfox.get_tickets()
+def start_check_tickets():
+    while True:
+        # Получаем текущую дату и время
+        now = datetime.datetime.now()
+        # Проверяем, является ли текущий день недели будним днём (пн-пт)
+        if now.weekday() < 5:
+            # Запускаем отложенные задачи
+            schedule.run_pending()
+        # Ждём 1 секунду перед проверкой снова
+        time.sleep(1)

@@ -6,6 +6,7 @@ import logging
 import requests
 import telegram
 from telegram_bot import start_telegram_bot
+from HappyFox.schedule_ticket_check import start_check_tickets
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
@@ -28,14 +29,21 @@ app_info_handler.setFormatter(formatter)
 app_info_logger.addHandler(app_info_handler)
 
 # Функция запуска задачи по проверке 3х дневных тикетов
-def start_check_tickets():
+def start_check_tickets_old():
     """Функция запуска задачи по проверке 3х дневных тикетов"""
     script_path = os.path.abspath(os.path.dirname(__file__))
     subprocess.Popen(['python3.10', os.path.join(script_path, 'check_tickets.py')])
 
 # запуск двух функций (запуск скрипта телебота)
 if __name__ == '__main__':
-    start_check_tickets()
+    start_check_tickets_old()
+    try:
+        p1 = threading.Thread(target=start_check_tickets)
+        p1.start()
+        app_info_logger.info("Планировщик задач по проверке 3х дневных тикетов запущен")
+    except Exception as error_message:
+        app_error_logger.error("Error in Schedule_ticket_check: %s", error_message)
+    
     try:
         p2 = threading.Thread(target=start_telegram_bot)
         p2.start()
