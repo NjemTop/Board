@@ -1,9 +1,9 @@
 import requests
 import json
 import logging
-from System_func.send_telegram_message import Alert
-from ticket_utils import TicketUtils
 from datetime import timedelta
+from System_func.send_telegram_message import Alert
+from HappyFox.ticket_utils import TicketUtils
 
 # Создание объекта логгера для ошибок и критических событий
 hf_class_error_logger = logging.getLogger('HF_class_Error')
