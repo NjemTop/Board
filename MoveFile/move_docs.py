@@ -2,26 +2,15 @@ import requests
 import urllib.parse
 import xml.etree.ElementTree as ET
 import logging
+from logger.log_config import setup_logger, get_abs_log_path
+
+# Указываем настройки логов для нашего файла с классами
+bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
+bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 # Настройка логирования
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-
-# Создание объекта логгера для ошибок и критических событий
-YandexDocsMove_error_logger = logging.getLogger('YandexDocsMoveError')
-YandexDocsMove_error_logger.setLevel(logging.ERROR)
-YandexDocsMove_error_handler = logging.FileHandler('./logs/yandex_docs_move-error.log')
-YandexDocsMove_error_handler.setLevel(logging.ERROR)
-YandexDocsMove_error_handler.setFormatter(formatter)
-YandexDocsMove_error_logger.addHandler(YandexDocsMove_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-YandexDocsMove_info_logger = logging.getLogger('YandexDocsMoveInfo')
-YandexDocsMove_info_logger.setLevel(logging.INFO)
-YandexDocsMove_info_handler = logging.FileHandler('./logs/yandex_docs_move-info.log')
-YandexDocsMove_info_handler.setLevel(logging.INFO)
-YandexDocsMove_info_handler.setFormatter(formatter)
-YandexDocsMove_info_logger.addHandler(YandexDocsMove_info_handler)
 
 class WebDavClient:
     def __init__(self, url, username, password):
@@ -63,11 +52,11 @@ class WebDavClient:
             response = requests.request("PROPFIND", self.url, headers=headers, data=body, auth=(self.username, self.password), timeout=30)
         except requests.exceptions.RequestException as error:
             print(f"Ошибка при выполнении запроса: {error}")
-            YandexDocsMove_error_logger.error("Ошибка при выполнении запроса: %s", error)
+            bot_error_logger.error("Ошибка при выполнении запроса: %s", error)
             raise Exception(f"Ошибка при выполнении запроса: {error}")
 
         if response.status_code != 207:
-            YandexDocsMove_error_logger.error("Ошибка при выполнении PROPFIND-запроса. Код статуса: %s, Текст ошибки: %s", response.status_code, response.text)
+            bot_error_logger.error("Ошибка при выполнении PROPFIND-запроса. Код статуса: %s, Текст ошибки: %s", response.status_code, response.text)
             raise Exception(f"Ошибка при выполнении PROPFIND-запроса. Код статуса: {response.status_code}, Текст ошибки: {response.text}")
 
         xml_data = ET.fromstring(response.content)
@@ -119,19 +108,19 @@ class NextcloudMover:
                 response = requests.request("MOVE", item_src_url, headers=headers, auth=(self.username, self.password), timeout=30)
             except requests.exceptions.RequestException as error:
                 print(f"Ошибка при выполнении запроса: {error}")
-                YandexDocsMove_error_logger.error("Ошибка при выполнении запроса: %s", error)
+                bot_error_logger.error("Ошибка при выполнении запроса: %s", error)
                 raise Exception(f"Ошибка при выполнении запроса: {error}")
         
             if response.status_code == 201:
                 print(f"Элемент {src_dir}/{item_name} успешно перемещен в {dest_dir}/{item_name} на Nextcloud.")
-                YandexDocsMove_info_logger.info('Элемент %s/%s успешно перемещен в %s/%s на Nextcloud.', src_dir, item_name, dest_dir, item_name)
+                bot_info_logger.info('Элемент %s/%s успешно перемещен в %s/%s на Nextcloud.', src_dir, item_name, dest_dir, item_name)
             elif response.status_code == 404:
                 print(f"Элемент {src_dir}/{item_name} не найден на Nextcloud.")
-                YandexDocsMove_error_logger.error("Элемент %s/%s не найден на Nextcloud.", src_dir, item_name)
+                bot_error_logger.error("Элемент %s/%s не найден на Nextcloud.", src_dir, item_name)
             elif response.status_code == 412:
                 print(f"Элемент {dest_dir}/{item_name} уже существует на Nextcloud.")
             else:
                 print(f"Ошибка при перемещении элемента {src_dir}/{item_name} на Nextcloud. Код статуса: {response.status_code}")
-                YandexDocsMove_error_logger.error("Ошибка при перемещении элемента %s/%s на Nextcloud. Код статуса: %s", src_dir, item_name, response.status_code)
+                bot_error_logger.error("Ошибка при перемещении элемента %s/%s на Nextcloud. Код статуса: %s", src_dir, item_name, response.status_code)
                 print(f"Содержимое ответа сервера: {response.text}")
-                YandexDocsMove_error_logger.error("Содержимое ответа сервера: %s", response.text)
+                bot_error_logger.error("Содержимое ответа сервера: %s", response.text)

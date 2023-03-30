@@ -6,26 +6,11 @@ import logging
 from urllib.parse import quote
 from MoveFile.move_docs import NextcloudMover
 from YandexDocsMove import create_nextcloud_folder, upload_to_nextcloud
+from logger.log_config import setup_logger, get_abs_log_path
 
-# Настройка логирования
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-
-# Создание объекта логгера для ошибок и критических событий
-distr_move_error_logger = logging.getLogger('DistrMoveError')
-distr_move_error_logger.setLevel(logging.ERROR)
-distr_move_error_handler = logging.FileHandler('./logs/distr_move-error.log')
-distr_move_error_handler.setLevel(logging.ERROR)
-distr_move_error_handler.setFormatter(formatter)
-distr_move_error_logger.addHandler(distr_move_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-distr_move_info_logger = logging.getLogger('DistrMoveInfo')
-distr_move_info_logger.setLevel(logging.INFO)
-distr_move_info_handler = logging.FileHandler('./logs/distr_move-info.log')
-distr_move_info_handler.setLevel(logging.INFO)
-distr_move_info_handler.setFormatter(formatter)
-distr_move_info_logger.addHandler(distr_move_info_handler)
+# Указываем настройки логов для нашего файла с классами
+bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
+bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
@@ -58,13 +43,13 @@ def move_distr_file(version):
                 break
     except FileNotFoundError:
         print(f"Не удалось найти папку {distributive_folder}. Проверьте доступность файловой шары.")
-        distr_move_error_logger.error("Не удалось найти папку %s. Проверьте доступность файловой шары.", distributive_folder)
+        bot_error_logger.error("Не удалось найти папку %s. Проверьте доступность файловой шары.", distributive_folder)
     except OSError as error:
         print(f"Произошла ошибка при чтении папки {distributive_folder}: {error}")
-        distr_move_error_logger.error("Произошла ошибка при чтении папки %s. Ошибка: %s", distributive_folder, error)
+        bot_error_logger.error("Произошла ошибка при чтении папки %s. Ошибка: %s", distributive_folder, error)
     except Exception as error:
         print(f"Произошла ошибка при поиске файла дистрибутива с расширением .exe: {error}")
-        distr_move_error_logger.error("Произошла ошибка при поиске файла дистрибутива с расширением .exe: %s", error)
+        bot_error_logger.error("Произошла ошибка при поиске файла дистрибутива с расширением .exe: %s", error)
     if executable_file is not None:
         # Формируем пути к файлу на файловой шаре и на NextCloud
         local_file_path = os.path.join(distributive_folder, executable_file)
@@ -80,7 +65,7 @@ def move_distr_file(version):
         upload_to_nextcloud(local_file_path, remote_file_path, NEXTCLOUD_URL, NEXTCLOUD_USERNAME, NEXTCLOUD_PASSWORD)
     else:
         print("Не удалось найти файл дистрибутива с расширением .exe")
-        distr_move_error_logger.error("Не удалось найти файл дистрибутива с расширением .exe")
+        bot_error_logger.error("Не удалось найти файл дистрибутива с расширением .exe")
 
 def move_distr_and_manage_share(version):
     try:
@@ -88,7 +73,7 @@ def move_distr_and_manage_share(version):
         move_distr_file(version)
     except Exception as error:
         print(f"Произошла ошибка при перемещении дистрибутива: {error}")
-        distr_move_error_logger.error("Произошла ошибка при перемещении дистрибутива: %s", error)
+        bot_error_logger.error("Произошла ошибка при перемещении дистрибутива: %s", error)
     finally:
         print("Перемещение успешно произведенно")
-        distr_move_info_logger.info('Перемещение успешно произведенно')
+        bot_info_logger.info('Перемещение успешно произведенно')

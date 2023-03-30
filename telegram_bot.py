@@ -29,26 +29,11 @@ from ButtonClasses.button_clients import ButtonClients
 from ButtonClasses.button_update import ButtonUpdate
 from ButtonClasses.button_else_tickets import ButtonElseTickets
 from Report_client.formirovanie_otcheta_tele2 import create_report_tele2
+from logger.log_config import setup_logger, get_abs_log_path
 
-# создаем форматирование
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-# создаем логгер
-error_logger = logging.getLogger('TeleBot')
-error_logger.setLevel(logging.ERROR)
-# создаем обработчик, который будет записывать ошибки в файл bot-error.log
-error_handler = logging.FileHandler('./logs/bot-error.log')
-error_handler.setLevel(logging.ERROR)
-error_handler.setFormatter(formatter)
-# добавляем обработчик в логгер
-error_logger.addHandler(error_handler)
-
-# Создание объекта логгера для информационных сообщений
-info_logger = logging.getLogger('info_logger')
-info_logger.setLevel(logging.INFO)
-info_handler = logging.FileHandler('./logs/bot-info.log')
-info_handler.setLevel(logging.INFO)
-info_handler.setFormatter(formatter)
-info_logger.addHandler(info_handler)
+# Указываем настройки логов для нашего файла с классами
+bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
+bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 # Проверяем систему, где запускается скрипт
 if platform.system() == 'Windows':
@@ -105,13 +90,13 @@ def check_user_in_file(chat_id):
                 chat_id_elem = header_footer.find('chat_id')
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     return True
-                info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                bot_info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
                 return False
     except FileNotFoundError as error_message:
-        error_logger.error("Файл data.xml не найден: %s", error_message)
+        bot_error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
     except ET.ParseError as error_message:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
+        bot_error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return False
 
@@ -129,13 +114,13 @@ def get_name_by_chat_id(chat_id):
                     if name_elem is not None:
                         return name_elem.text
                 else:
-                    info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                    bot_info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
                     return None
     except FileNotFoundError as error_message:
-        error_logger.error("Файл data.xml не найден: %s", error_message)
+        bot_error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
     except ET.ParseError as error_message:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
+        bot_error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return None
 
@@ -151,13 +136,13 @@ def get_header_footer_id(chat_id):
                 if chat_id_elem is not None and chat_id_elem.text == str(chat_id):
                     support_response_id = header_footer.get('id')
                     return support_response_id
-                info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
+                bot_info_logger.info("Учётной записи нет в базе с ID: %s", chat_id)
                 return None
     except FileNotFoundError as error_message:
-        error_logger.error("Файл data.xml не найден: %s", error_message)
+        bot_error_logger.error("Файл data.xml не найден: %s", error_message)
         print("Файл data.xml не найден")
     except ET.ParseError as error_message:
-        error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
+        bot_error_logger.error("Произошла ошибка при чтении файла data.xml: %s", error_message)
         print("Ошибка чтения файла data.xml")
     return None
 
@@ -193,14 +178,14 @@ def get_user_info_happyfox(database_email_access_info):
                 find_role = res_i.get('role') 
                 find_role_id = find_role.get('id')
                 return find_id_HF, email_access_id, find_name, find_role_id
-        info_logger.info("Почты в системе HappyFox - нет: %s", database_email_access_info)
+        bot_info_logger.info("Почты в системе HappyFox - нет: %s", database_email_access_info)
         print("Почты в системе HappyFox - нет")
         return None
     except requests.exceptions.Timeout as error_message:
-        error_logger.error("Timeout error: %s", error_message)
+        bot_error_logger.error("Timeout error: %s", error_message)
         print("Timeout error:", error_message)
     except requests.exceptions.RequestException as error_message:
-        error_logger.error("Request error: %s", error_message)
+        bot_error_logger.error("Request error: %s", error_message)
         print("Request error:", error_message)
         return None
     return None
@@ -232,7 +217,7 @@ def send_email(dest_email, email_text):
             # Отправляем сообщение
             server.sendmail(EMAIL_FROM, dest_email, msg_pass.as_string())
     except smtplib.SMTPConnectError as error_message:
-        error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
+        bot_error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
         print("Произошла ошибка отправки пароля на почту:", error_message)
 
 ## Если пользователя нет в списке, просим его указать почту, куда будет выслан сгенерированный пароль
@@ -243,7 +228,7 @@ def send_verification_code(email_access, user_id):
         if ('@boardmaps.ru' in email_access.text and email_access.chat.id == user_id):
             ## Генерируем рандомный пароль для доступа к боту
             access_password = generate_random_password()
-            info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
+            bot_info_logger.info('Сгенерирован временный пароль: %s, для почты: %s', access_password, email_access.text)
             # Формируем текст письма, включая сгенерированный пароль
             email_text = None
             email_text = f'''\
@@ -261,7 +246,7 @@ def send_verification_code(email_access, user_id):
             '''
             # Отправляем сообщение пользователю
             send_email(email_access.text, email_text)
-            info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", (email_access.chat.id), (email_access.text))
+            bot_info_logger.info("Пользователю с 'chat id': %s, отправлен пароль на почту: %s, ", (email_access.chat.id), (email_access.text))
 
             ## Бот выдает сообщение с просьбой ввести пароль + вносим почту пользователя в БД
             password_message = bot.send_message(email_access.chat.id, "Пожалуйста, введите пароль, отправленный на указанную почту.")
@@ -269,9 +254,9 @@ def send_verification_code(email_access, user_id):
             
         else:
             bot.send_message(email_access.chat.id, 'К сожалению, не могу предоставить доступ.')
-            error_logger.error("Несовпадение chat id: %s сообщением от %s", email_access.chat.id, email_access.message.chat.id)
+            bot_error_logger.error("Несовпадение chat id: %s сообщением от %s", email_access.chat.id, email_access.message.chat.id)
     except ValueError as error_message:
-        error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
+        bot_error_logger.error("Произошла ошибка отправки пароля на почту: %s", error_message)
         print("Произошла ошибка отправки пароля на почту:", error_message)
 
 def generate_random_password(length=6):
@@ -302,7 +287,7 @@ def check_pass_answer(password_message, access_password, email_access):
             # Создаем XML файл и записываем данные
             create_xml(email_access_id, find_id_HF, find_name, find_role, find_role_id, password_message.chat.id)
 
-            info_logger.info("Сотрудник: %s, прошёл регистрацию в боте", find_name)
+            bot_info_logger.info("Сотрудник: %s, прошёл регистрацию в боте", find_name)
             ## Показываем пользователю главное меню
             main_menu = types.InlineKeyboardMarkup()
             button_clients = types.InlineKeyboardButton(text= 'Клиенты', callback_data='button_clients')
@@ -318,9 +303,9 @@ def check_pass_answer(password_message, access_password, email_access):
             bot.send_message(password_message.chat.id, 'Неправильный пароль. Введите пароль ещё раз.')
             ## Зарегистрировать следующий шаг обработчика сообщений
             bot.register_next_step_handler(password_message, check_pass_answer, access_password)
-            info_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
+            bot_info_logger.info("Введён неправильный пароль сотрудником:%s", password_message.chat.id)
     except Exception as error_message:
-        error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", error_message)
+        bot_error_logger.error("Произошла ошибка проверки пароля и записи УЗ в data.xml: %s", error_message)
         print("Произошла ошибка проверки пароля и записи УЗ в data.xml:", error_message)
 
 # Обработчик вызова /clients
@@ -417,9 +402,9 @@ def inline_button_clients(call):
         #         chat_id = root.find('chat_id').text
         #         if str(call.message.chat.id) == chat_id:
         #             name = root.find('header_footer/name').text
-        #             info_logger.info("Пользователь: %s сформировал отчет.", name)
+        #             bot_info_logger.info("Пользователь: %s сформировал отчет.", name)
         # except subprocess.CalledProcessError as error_message:
-        #     error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
+        #     bot_error_logger.error("Ошибка при запуске скрипта %s: %s", setup_script, error_message)
         #     bot.send_message(call.message.chat.id, text='Произошла ошибка при формировании отчета.')
         # else:
         #     if platform.system() == 'Windows':
@@ -462,16 +447,16 @@ def inline_button_SD_update(call):
             # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
             updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
             # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
-            info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
-            info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             move_distr_and_manage_share(version_release)
-            info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             release_result = subprocess.run(["pwsh", "-File", setup_script, str(version_release), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
             upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
+            bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
         # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
         with open(f'/app/logs/report_send({version_release}).log', 'a+', encoding='utf-8-sig') as file_send:
@@ -482,18 +467,18 @@ def inline_button_SD_update(call):
         button_choise_yes = types.InlineKeyboardMarkup()
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes.add(main_menu, row_width=2)
-        info_logger.info("Рассылка клиентам успешно отправлена.")
+        bot_info_logger.info("Рассылка клиентам успешно отправлена.")
         bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes)   
         try:
             os.remove(f'/app/logs/report_send({version_release}).log')
         except FileNotFoundError as error_message:
-            error_logger.error('Файл не найден: %s', error_message)
+            bot_error_logger.error('Файл не найден: %s', error_message)
             print('Файл не найден: %s', error_message)
         except PermissionError as error_message:
-            error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
+            bot_error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
             print('Недостаточно прав для удаления файла: %s', error_message)
         except OSError as error_message:
-            error_logger.error('Ошибка при удалении файла: %s', error_message)
+            bot_error_logger.error('Ошибка при удалении файла: %s', error_message)
             print('Ошибка при удалении файла: %s', error_message)
     elif call.data == "cancel_SD_update":
         user_states[call.message.chat.id] = "canceled"
@@ -534,9 +519,9 @@ def inline_button_SD_update(call):
         try:
             result = subprocess.run(["pwsh", "-File", setup_script,str(version_stat) ],stdout=sys.stdout, check=True)
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            info_logger.info("Запуск скрипта по формированию статистики, пользователем: %s", name_who_run_script)
+            bot_info_logger.info("Запуск скрипта по формированию статистики, пользователем: %s", name_who_run_script)
         except subprocess.CalledProcessError as error_message:
-            error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
+            bot_error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
         bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
 @bot.chosen_inline_handler(func=lambda result_update_version: True)
@@ -656,18 +641,18 @@ def start_telegram_bot():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
         print("Starting Telegram bot...")
-        info_logger.info("Starting Telegram bot...")
+        bot_info_logger.info("Starting Telegram bot...")
         # запуск бота
         bot.infinity_polling()
     except requests.exceptions.ConnectionError as error_message:
         print(f"Error in Telegram bot: {error_message}")
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        bot_error_logger.error("Error in Telegram bot: %s", error_message)
     except telegram.error.TelegramError as error_message:
         print(f"Error in Telegram bot: {error_message}")
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        bot_error_logger.error("Error in Telegram bot: %s", error_message)
     except telebot.apihelper.ApiTelegramException as error_message:
         print(f"Error in Telegram bot: {error_message}")
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        bot_error_logger.error("Error in Telegram bot: %s", error_message)
     except Exception as error_message:
         print(f"Error in Telegram bot: {error_message}")
-        error_logger.error("Error in Telegram bot: %s", error_message)
+        bot_error_logger.error("Error in Telegram bot: %s", error_message)
