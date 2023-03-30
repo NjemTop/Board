@@ -4,31 +4,26 @@ import logging
 from datetime import timedelta
 from System_func.send_telegram_message import Alert
 from HappyFox.ticket_utils import TicketUtils
+from log_config import setup_logger, get_abs_log_path
 
-# Создание объекта логгера для ошибок и критических событий
-hf_class_error_logger = logging.getLogger('HF_class_Error')
-hf_class_error_logger.setLevel(logging.ERROR)
-hf_class_error_handler = logging.FileHandler('../logs/hf_class-errors.log')
-hf_class_error_handler.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-hf_class_error_handler.setFormatter(formatter)
-hf_class_error_logger.addHandler(hf_class_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-hf_class_info_logger = logging.getLogger('HF_class_Info')
-hf_class_info_logger.setLevel(logging.INFO)
-hf_class_info_handler = logging.FileHandler('../logs/hf_class-info.log')
-hf_class_info_handler.setLevel(logging.INFO)
-hf_class_info_handler.setFormatter(formatter)
-hf_class_info_logger.addHandler(hf_class_info_handler)
+# Указываем настройки логов для нашего файла с классами
+hf_class_error_logger = setup_logger('HF_class_Error', get_abs_log_path('hf_class-errors.log'), logging.ERROR)
+hf_class_info_logger = setup_logger('HF_class_Info', get_abs_log_path('hf_class-info.log'), logging.INFO)
 
 # Создаем объект класса Alert
 alert = Alert()
 
 class HappyFoxConnector:
     def __init__(self, config_file):
-        with open(config_file, 'r', encoding='utf-8-sig') as f:
-            data_config = json.load(f)
+        try:
+            with open(config_file, 'r', encoding='utf-8-sig') as f:
+                data_config = json.load(f)
+        except FileNotFoundError as error_message:
+            hf_class_error_logger.error(f"Config file not found: {config_file}. Error: {error_message}")
+            raise
+        except json.JSONDecodeError as error_message:
+            hf_class_error_logger.error(f"Error decoding JSON from config file: {config_file}. Error: {error_message}")
+            raise
         self.api_endpoint = data_config['HAPPYFOX_SETTINGS']['API_ENDPOINT']
         self.api_key = data_config['HAPPYFOX_SETTINGS']['API_KEY']
         self.api_secret = data_config['HAPPYFOX_SETTINGS']['API_SECRET']
@@ -71,7 +66,11 @@ class HappyFoxConnector:
         url = self.api_endpoint + '/tickets/?size=1&page=1'
         try:
             response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as error_message:
+                hf_class_error_logger.error("Error occurred: %s", error_message)
+                return
         except requests.exceptions.Timeout as error_message:
             hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
         except requests.exceptions.RequestException as error_message:
@@ -88,7 +87,11 @@ class HappyFoxConnector:
                 # проверка на доступность сервера, если сервер недоступен, выводит ошибку
                 try:
                     response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
-                    response.raise_for_status()
+                    try:
+                        response.raise_for_status()
+                    except requests.exceptions.HTTPError as error_message:
+                        hf_class_error_logger.error("Error occurred: %s", error_message)
+                        return
                 except requests.exceptions.Timeout as error_message:
                     hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
                 except requests.exceptions.RequestException as error_message:
