@@ -8,7 +8,7 @@ from datetime import timedelta
 # Создание объекта логгера для ошибок и критических событий
 hf_class_error_logger = logging.getLogger('HF_class_Error')
 hf_class_error_logger.setLevel(logging.ERROR)
-hf_class_error_handler = logging.FileHandler('./logs/hf_class-errors.log')
+hf_class_error_handler = logging.FileHandler('../logs/hf_class-errors.log')
 hf_class_error_handler.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
 hf_class_error_handler.setFormatter(formatter)
@@ -17,7 +17,7 @@ hf_class_error_logger.addHandler(hf_class_error_handler)
 # Создание объекта логгера для информационных сообщений
 hf_class_info_logger = logging.getLogger('HF_class_Info')
 hf_class_info_logger.setLevel(logging.INFO)
-hf_class_info_handler = logging.FileHandler('./logs/hf_class-info.log')
+hf_class_info_handler = logging.FileHandler('../logs/hf_class-info.log')
 hf_class_info_handler.setLevel(logging.INFO)
 hf_class_info_handler.setFormatter(formatter)
 hf_class_info_logger.addHandler(hf_class_info_handler)
@@ -62,6 +62,8 @@ class HappyFoxConnector:
         return all_tickets
     
     def get_tickets(self):
+        """Функция проверки тикетов, у которых нет ответа"""
+        hf_class_info_logger.info('Задача запущена')
         params = {
             'category': '1',
             'status': '_pending',
