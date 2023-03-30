@@ -32,14 +32,14 @@ alert = Alert()
 ### Авторизация в HappyFox
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
-# открываем файл и загружаем данные
+# Открываем файл и загружаем данные
 with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
     data_config = json.load(f)
-# извлекаем значения API_KEY и API_SECRET
+# Извлекаем значения базового ENDPOINT, API_KEY и API_SECRET
 API_ENDPOINT = data_config['HAPPYFOX_SETTINGS']['API_ENDPOINT']
 API_KEY = data_config['HAPPYFOX_SETTINGS']['API_KEY']
 API_SECRET = data_config['HAPPYFOX_SETTINGS']['API_SECRET']
-# сохраняем значения в переменную auth
+# Задаем заголовок
 HEADERS = {'Content-Type': 'application/json'}
 
 def get_time_diff(date_str):
