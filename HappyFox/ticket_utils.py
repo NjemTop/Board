@@ -1,7 +1,7 @@
 import datetime
 import logging
 import xml.etree.ElementTree as ET
-from log_config import setup_logger, get_abs_log_path
+from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
 check_error_logger = setup_logger('Check_Ticket_Error', get_abs_log_path('check_ticket-errors.log'), logging.ERROR)

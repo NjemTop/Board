@@ -8,7 +8,7 @@ from formirovanie_otcheta_tele2 import list_of_rows
 # Прописываем id клиента для ссылки на отчет
 client_report_id = 12
 ## Создаем файл и делаем русскую локализацию для даты
-docx = DocxTemplate("Temp_report_REC.docx")
+docx = DocxTemplate("./templates/Temp_report_REC.docx")
 locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 ## Авторизация в HappyFox и нахождение кол-ва страниц по url первой страницы
 auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
@@ -25,7 +25,7 @@ today = datetime.now().date().strftime('%d %B %Y')
 # end_date
 
 # Номера тикетов для вывода в файл
-all_tickets_id_list = list_of_rows(client_report_id, pages_len)
+all_tickets_id_list = list_of_rows(client_report_id, pages_len, auth, headers, param)
 
 ## перебираем тикеты и вытягиваем инфу по ним
 def info_from_ticket_id(ticket_id):
@@ -111,4 +111,4 @@ for ticket_id in all_tickets_id_list:
 context = {'today' : today, 'table_rows': table_rows}
 docx.render(context)
 # сохраняем файл
-docx.save("./Temp_report_REC_final.docx")
+docx.save("./Report_client/Temp_report_REC_final.docx")

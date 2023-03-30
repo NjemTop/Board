@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta
 from System_func.send_telegram_message import Alert
 from HappyFox.ticket_utils import TicketUtils
-from log_config import setup_logger, get_abs_log_path
+from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
 hf_class_error_logger = setup_logger('HF_class_Error', get_abs_log_path('hf_class-errors.log'), logging.ERROR)
@@ -74,7 +74,7 @@ class HappyFoxConnector:
             if data['page_info']['count'] < 50:
                 break
             page += 1
-
+        hf_class_info_logger.info('Вывод тикеты отправлены')
         return all_tickets
     
     def get_tickets(self):
