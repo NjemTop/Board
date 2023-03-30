@@ -1,0 +1,126 @@
+import requests
+import json
+import logging
+from System_func.send_telegram_message import Alert
+from ticket_utils import TicketUtils
+from datetime import timedelta
+
+# Создание объекта логгера для ошибок и критических событий
+hf_class_error_logger = logging.getLogger('HF_class_Error')
+hf_class_error_logger.setLevel(logging.ERROR)
+hf_class_error_handler = logging.FileHandler('./logs/hf_class-errors.log')
+hf_class_error_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
+hf_class_error_handler.setFormatter(formatter)
+hf_class_error_logger.addHandler(hf_class_error_handler)
+
+# Создание объекта логгера для информационных сообщений
+hf_class_info_logger = logging.getLogger('HF_class_Info')
+hf_class_info_logger.setLevel(logging.INFO)
+hf_class_info_handler = logging.FileHandler('./logs/hf_class-info.log')
+hf_class_info_handler.setLevel(logging.INFO)
+hf_class_info_handler.setFormatter(formatter)
+hf_class_info_logger.addHandler(hf_class_info_handler)
+
+# Создаем объект класса Alert
+alert = Alert()
+
+class HappyFoxConnector:
+    def __init__(self, config_file):
+        with open(config_file, 'r', encoding='utf-8-sig') as f:
+            data_config = json.load(f)
+        self.api_endpoint = data_config['HAPPYFOX_SETTINGS']['API_ENDPOINT']
+        self.api_key = data_config['HAPPYFOX_SETTINGS']['API_KEY']
+        self.api_secret = data_config['HAPPYFOX_SETTINGS']['API_SECRET']
+        self.headers = {'Content-Type': 'application/json'}
+
+    def get_filtered_tickets(self, start_date, end_date, contact_group_id):
+        url = f"{self.api_endpoint}/tickets/"
+        page = 1
+        all_tickets = []
+
+        while True:
+            params = {
+                'q': f'last-modified-on-or-after:"{start_date}" last-modified-on-or-before:"{end_date}"',
+                'page': page,
+                'size': 50
+            }
+
+            response = requests.get(url, params=params, auth=(self.api_key, self.api_secret), headers=self.headers)
+            if response.status_code == 200:
+                data = response.json()
+                tickets = data['data']
+                all_tickets.extend(ticket for ticket in tickets if any(contact_group['id'] == contact_group_id for contact_group in ticket['user']['contact_groups']))
+
+                if data['page_info']['count'] < 50:
+                    break
+                page += 1
+            else:
+                print('Error:', response.status_code)
+                break
+
+        return all_tickets
+    
+    def get_tickets(self):
+        params = {
+            'category': '1',
+            'status': '_pending',
+        }
+        url = self.api_endpoint + '/tickets/?size=1&page=1'
+        try:
+            response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.Timeout as error_message:
+            hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
+        except requests.exceptions.RequestException as error_message:
+            hf_class_error_logger.error("Error occurred: %s", error_message)
+            
+        data_res = response.json()
+        page_info = data_res.get('page_info')
+        last_index = page_info.get('last_index')
+        if last_index == 0:
+            print('No tickets')
+        else:
+            for page in range(last_index):
+                url = self.api_endpoint + f'/tickets/?size=1&page={page + 1}'
+                # проверка на доступность сервера, если сервер недоступен, выводит ошибку
+                try:
+                    response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
+                    response.raise_for_status()
+                except requests.exceptions.Timeout as error_message:
+                    hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
+                except requests.exceptions.RequestException as error_message:
+                    hf_class_error_logger.error("Error occurred: %s", error_message)
+                data = response.json()
+                for ticket_data in data.get('data'):
+                    self.process_ticket(ticket_data)
+                    
+    def process_ticket(self, ticket_data):
+        """Функция по формированию данных из тикета"""
+        status = ticket_data.get('status').get('behavior')
+        # Узнаём в работе ли ещё тикет
+        if status == "pending":
+            ticket_id = ticket_data.get('id')
+            priority_info = ticket_data.get('priority')
+            priority_name = priority_info.get('name')
+            user_info = ticket_data.get('user')
+            contact_info = user_info.get('contact_groups')
+            assigned_to = ticket_data.get('assigned_to')
+            # Проверяем, что значение для поля last_staff_reply_at существует
+            if ticket_data.get('last_staff_reply_at'):
+                reple_client_time = ticket_data.get('last_staff_reply_at')
+                time_difference = TicketUtils.get_time_diff(reple_client_time)
+                # Проверяем, что в тикете нет ответа более 3х дней
+                if time_difference >= timedelta(days=3):
+                    name_info = TicketUtils.get_contact_name(contact_info)
+                    assigned_name = TicketUtils.get_assigned_name(assigned_to)
+                    # print(f"Время последнего ответа клиента в тикете {time_difference}")
+
+                    ticket_message = (f'Ожидание ответа клиента более 3-х дней.\nНомер тикета:: {ticket_id}\nПриоритет: {priority_name}\nНазвание клиента: {name_info}\nНазначен: {assigned_name}')
+
+                    # Получаем chat_id для отправки сообщения
+                    alert_chat_id = TicketUtils.get_alert_chat_id(assigned_name)
+                    
+                    # Отправляем сообщение в телеграм-бот
+                    alert.send_telegram_message(alert_chat_id, ticket_message)
+                    hf_class_info_logger.info('Сотруднику: %s в чат отправлена информация о 3х дневном неотвеченном тикете: %s', assigned_name, ticket_id)
