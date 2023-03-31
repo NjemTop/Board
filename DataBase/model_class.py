@@ -162,6 +162,7 @@ class СonnectInfoCard(BaseModel):
         self.column_names = СonnectInfoCard.COLUMN_NAMES
     class Meta:
         table_name = 'connect_info_id'
+        
 class BMServersCard(BaseModel):
     bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ', primary_key=True)
     bm_servers_circuit = peewee.TextField(column_name='Контур')
