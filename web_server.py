@@ -721,17 +721,17 @@ def post_client_card_api():
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же ID
-            existing_client = ClientsCard.get_or_none(ClientsCard.clients_id == data['clients_id'])
+            existing_client = ClientsCard.get_or_none(ClientsCard.client_id == data['client_id'])
             if existing_client is None:
                 # Сохраняем данные в базе данных, используя insert и execute
                 ClientsCard.insert(**data).execute()
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
-                print(f"Клиент с ID {data['clients_id']} уже существует. Пропускаем...")
-                return f"Клиент с ID {data['clients_id']} уже существует. Пропускаем..."
+                print(f"Клиент с ID {data['client_id']} уже существует. Пропускаем...")
+                return f"Клиент с ID {data['client_id']} уже существует. Пропускаем..."
 
-        web_info_logger.info("Добавлен клиент в БД: %s", data['clients_id'])
+        web_info_logger.info("Добавлен клиент в БД: %s", data['client_id'])
         return 'Data successfully saved to the database!'
 
     except peewee.OperationalError as error_message:
