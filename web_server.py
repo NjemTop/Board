@@ -522,7 +522,7 @@ def post_BM_Info_onClient_api():
                     return 'Error: значение ключа "client_name" не указано!'
 
                 contact_status = data.get('contact_status')
-                if not contact_status:
+                if contact_status is None:
                     return 'Error: значение ключа "contact_status" не указано!'
 
                 notes = data.get('notes')
