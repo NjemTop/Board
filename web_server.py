@@ -548,7 +548,7 @@ def post_BM_Info_onClient_api():
                 return f"Клиент с именем {data['client_name']} уже существует. Пропускаем...", 409
 
         web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
-        return 'Данные успешно записаны в БД!', 201
+        return 'Клиент успешно записаны в БД!', 201
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
@@ -728,11 +728,11 @@ def post_client_card_api():
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
-                print(f"Клиент с ID {data['client_id']} уже существует. Пропускаем...")
-                return f"Клиент с ID {data['client_id']} уже существует. Пропускаем..."
+                print(f"Контакт с ID {data['client_id']} уже существует. Пропускаем...")
+                return f"Контакт с ID {data['client_id']} уже существует. Пропускаем...", 409
 
-        web_info_logger.info("Добавлен клиент в БД: %s", data['client_id'])
-        return 'Data successfully saved to the database!'
+        web_info_logger.info("Добавлен контакт в БД: %s", data['client_id'])
+        return 'Контакт успешно записаны в БД!', 201
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
@@ -919,10 +919,10 @@ def post_contact_api_by_id(id):
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
-                return f"Контакт с email {data['contact_email']} уже существует. Пропускаем..."
+                return f"Контакт с email {data['contact_email']} уже существует. Пропускаем...", 409
 
         web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
-        return 'Contact data successfully saved to the database!'
+        return 'Contact data successfully saved to the database!', 201
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
