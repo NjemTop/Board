@@ -667,11 +667,11 @@ def get_client_by_id(id):
         with conn:
             # Получаем данные клиента по id
             client = ClientsCard.get_or_none(ClientsCard.client_id == id)
-            
+
             if client is None:
                 # Если клиент с указанным ID не найден, возвращаем сообщение об ошибке
                 message = "Клиент с ID {} не найден".format(id)
-                json_data = json.dumps({"message": message}, ensure_ascii=False)
+                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
@@ -687,7 +687,7 @@ def get_client_by_id(id):
                 'bm_servers': client.bm_servers
             }
 
-            json_data = json.dumps(client_data, ensure_ascii=False)
+            json_data = json.dumps(client_data, ensure_ascii=False, indent=4)
             response = Response(json_data, content_type='application/json; charset=utf-8')
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
@@ -696,7 +696,7 @@ def get_client_by_id(id):
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         print("Ошибка подключения к базе данных SQLite:", error_message)
         message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
-        json_data = json.dumps({"message": message}, ensure_ascii=False)
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
@@ -704,7 +704,7 @@ def get_client_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         print("Ошибка сервера:", error)
         message = "Ошибка сервера: {}".format(error)
-        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
