@@ -118,21 +118,17 @@ class ClientsCard(BaseModel):
     class Meta:
         table_name = 'clients_card'
 
-
-
-
-
 ######ID_Технические_заметки и ID_Технологическая_учетная_запись - это просто текст. Нужен разве класс и столбцы?
 ######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
 class ContactsCard(BaseModel):
-    contact_id = peewee.FloatField(column_name='ID_Контакт', primary_key=True)
+    client_id = peewee.FloatField(column_name='ID_Клиента', primary_key=True)
     contact_name = peewee.TextField(column_name='ФИО')
-    contact_position = peewee.TextField(column_name='Должность')
+    contact_position = peewee.TextField(column_name='Должность', null=True)
     contact_email = peewee.TextField(column_name='Email')
-    contact_notes = peewee.TextField(column_name='Примечания')
+    contact_notes = peewee.TextField(column_name='Примечания', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'contact_id',
+        'client_id',
         'contact_name',
         'contact_position',
         'contact_email',
@@ -141,8 +137,10 @@ class ContactsCard(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.column_names = ContactsCard.COLUMN_NAMES
+
     class Meta:
         table_name = 'contact_id'
+
 class СonnectInfoCard(BaseModel):
     connect_info_id = peewee.FloatField(column_name='ID_Информация_для_подключения', primary_key=True)
     contact_info_name = peewee.TextField(column_name='ФИО')

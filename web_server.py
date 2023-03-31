@@ -10,7 +10,7 @@ import sqlite3
 import peewee
 import os
 from pathlib import Path
-from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
@@ -842,6 +842,91 @@ def delete_client_card_api():
         # Обработка остальных ошибок сервера
         return f"Ошибка сервера: {error}", 500
 
+def get_contact_by_client_id(id):
+    """Функция возвращает информацию о контактах для клиента с указанным client_id."""
+    try:
+        with conn:
+            # Получаем контакты клиента по client_id
+            contacts = ContactsCard.select().where(ContactsCard.client_id == id)
+
+            if not contacts.exists():
+                # Если контакты для клиента с указанным ID не найдены, возвращаем сообщение об ошибке
+                message = "Контакты для клиента с ID {} не найдены".format(id)
+                json_data = json.dumps({"message": message}, ensure_ascii=False)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
+            # Здесь продолжайте с преобразованием данных и формированием ответа
+            contacts_data = [
+                {
+                    'client_id': contact.client_id,
+                    'contact_name': contact.contact_name,
+                    'contact_position': contact.contact_position,
+                    'contact_email': contact.contact_email,
+                    'contact_notes': contact.contact_notes
+                } for contact in contacts
+            ]
+
+            json_data = json.dumps(contacts_data, ensure_ascii=False)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+
+    except peewee.OperationalError as error_message:
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
+        json_data = json.dumps({"message": message}, ensure_ascii=False)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as error:
+        web_error_logger.error("Ошибка сервера: %s", error)
+        print("Ошибка сервера:", error)
+        message = "Ошибка сервера: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+def post_contact_api_by_id(id):
+    """Функция добавления контактов в БД с указанным id клиента."""
+    try:
+        # Получаем данные из запроса
+        data = json.loads(request.data.decode('utf-8'))
+        
+        # Проверяем обязательные поля
+        if 'contact_name' not in data or 'contact_email' not in data:
+            return 'Ошибка: "contact_name" и "contact_email" являются обязательными полями.', 400
+
+        # Добавляем переданный id клиента в данные
+        data['client_id'] = id
+
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([ContactsCard])
+
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
+            # Сохраняем данные в базе данных, используя insert и execute
+            ContactsCard.insert(**data).execute()
+            # Добавляем вызов commit() для сохранения изменений в БД
+            conn.commit()
+
+        web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
+        return 'Contact data successfully saved to the database!'
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
+        return f"Ошибка с БД: {error_message}"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}"
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1180,7 +1265,7 @@ def create_app():
     # Регистрация обработчика для API списка учёта версий клиентов
     app.add_url_rule('/clients_all_info/api/clients', 'get_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(get_BM_Info_onClient_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/clients', 'post_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(post_BM_Info_onClient_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients', 'put_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(patch_BM_Info_onClient_api), methods=['PATCH'])
+    app.add_url_rule('/clients_all_info/api/clients', 'patch_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(patch_BM_Info_onClient_api), methods=['PATCH'])
     app.add_url_rule('/clients_all_info/api/clients', 'delete_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(delete_BM_Info_onClient_api), methods=['DELETE'])
 
     # Регистрация обработчика для API списка карточек клиента
@@ -1189,8 +1274,14 @@ def create_app():
     app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_by_id))
     app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
     app.route('/clients_all_info/api/client_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_card_api_by_id))
-    app.add_url_rule('/clients_all_info/api/clients_card', 'update_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
-    app.add_url_rule('/clients_all_info/api/clients_card', 'put_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'patch_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
+    app.add_url_rule('/clients_all_info/api/clients_card', 'delete_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
+
+    # Регистрация обработчика для API списка контакта клиента
+    #app.add_url_rule('/clients_all_info/api/contacts', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
+    #app.add_url_rule('/clients_all_info/api/contacts', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
+    app.route('/clients_all_info/api/client_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
 
     return app
 
