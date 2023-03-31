@@ -525,7 +525,9 @@ def post_BM_Info_onClient_api():
                 if not contact_status:
                     return 'Error: значение ключа "contact_status" не указано!'
 
-                notes = data.get('notes', None)
+                notes = data.get('notes')
+                if notes is not None and not isinstance(notes, str):
+                    return 'Error: значение ключа "notes" должно быть строкой!'
                 # Создаем запись в БД с автоматически сгенерированным id
                 new_client = BMInfo_onClient.create(
                     client_name=client_name,
