@@ -8,6 +8,7 @@ from flask import render_template
 import traceback
 import sqlite3
 import peewee
+import os
 from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
@@ -1141,7 +1142,8 @@ def get_app():
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    app.config.from_object('./Web_Server/web_config')
+    config_path = os.path.join(os.getcwd(), 'Web_Server', 'web_config')
+    app.config.from_object(config_path)
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
