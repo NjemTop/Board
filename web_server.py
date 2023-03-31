@@ -852,7 +852,7 @@ def get_contact_by_client_id(id):
             if not contacts.exists():
                 # Если контакты для клиента с указанным ID не найдены, возвращаем сообщение об ошибке
                 message = "Контакты для клиента с ID {} не найдены".format(id)
-                json_data = json.dumps({"message": message}, ensure_ascii=False)
+                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
@@ -864,11 +864,12 @@ def get_contact_by_client_id(id):
                     'contact_name': contact.contact_name,
                     'contact_position': contact.contact_position,
                     'contact_email': contact.contact_email,
+                    'notification_update': contact.notification_update,
                     'contact_notes': contact.contact_notes
                 } for contact in contacts
             ]
 
-            json_data = json.dumps(contacts_data, ensure_ascii=False)
+            json_data = json.dumps(contacts_data, ensure_ascii=False, indent=4)
             response = Response(json_data, content_type='application/json; charset=utf-8')
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
@@ -877,7 +878,7 @@ def get_contact_by_client_id(id):
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         print("Ошибка подключения к базе данных SQLite:", error_message)
         message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
-        json_data = json.dumps({"message": message}, ensure_ascii=False)
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
@@ -885,7 +886,7 @@ def get_contact_by_client_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         print("Ошибка сервера:", error)
         message = "Ошибка сервера: {}".format(error)
-        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
