@@ -1147,8 +1147,6 @@ def create_app():
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
 
-    app.wsgi_app = LoggingMiddleware(app.wsgi_app)
-
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
 
