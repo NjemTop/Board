@@ -25,9 +25,9 @@ from writexml import create_xml
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
-from ButtonClasses.button_clients import ButtonClients
-from ButtonClasses.button_update import ButtonUpdate
-from ButtonClasses.button_else_tickets import ButtonElseTickets
+from Telegram_Bot.ButtonClasses.button_clients import ButtonClients
+from Telegram_Bot.ButtonClasses.button_update import ButtonUpdate
+from Telegram_Bot.ButtonClasses.button_else_tickets import ButtonElseTickets
 from Report_client.formirovanie_otcheta_tele2 import create_report_tele2
 from logger.log_config import setup_logger, get_abs_log_path
 

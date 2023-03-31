@@ -11,7 +11,7 @@ import peewee
 from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
-from web_config import USERNAME, PASSWORD, require_basic_auth
+from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
@@ -1141,7 +1141,7 @@ def get_app():
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    app.config.from_object('web-config')
+    app.config.from_object('./Web_Server/web-config')
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
