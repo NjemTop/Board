@@ -58,7 +58,7 @@ class BMInfo_onClient(BaseModel):
     service = peewee.IntegerField(column_name='Обслуживание', default=generate_unique_id)
     technical_information = peewee.IntegerField(column_name='Тех_информация', default=generate_unique_id)
     integration = peewee.IntegerField(column_name='Интеграции', default=generate_unique_id)
-    notes = peewee.TextField(column_name='Примечания')
+    notes = peewee.CharField(column_name='Примечания', null=True)
 
     # Список наименований столбцов
     COLUMN_NAMES = [
