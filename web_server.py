@@ -909,10 +909,16 @@ def post_contact_api_by_id(id):
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Сохраняем данные в базе данных, используя insert и execute
-            ContactsCard.insert(**data).execute()
-            # Добавляем вызов commit() для сохранения изменений в БД
-            conn.commit()
+            # Проверяем наличие существующего контакта с тем же email
+            existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == data['contact_email'])
+
+            if existing_contact is None:
+                # Сохраняем данные в базе данных, используя insert и execute
+                ContactsCard.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
+            else:
+                return f"Контакт с email {data['contact_email']} уже существует. Пропускаем..."
 
         web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
         return 'Contact data successfully saved to the database!'
