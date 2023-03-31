@@ -3,6 +3,10 @@ from werkzeug.security import check_password_hash
 from functools import wraps
 from flask import request, Response
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+
+# Логин и пароль для доступа к API
 USERNAME = 'Njem'
 PASSWORD = generate_password_hash('Rfnzkj123123')
 

@@ -1141,7 +1141,7 @@ def get_app():
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    app.config.from_object('/Web_Server/web_config')
+    app.config.from_object('./Web_Server/web_config')
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
