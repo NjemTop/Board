@@ -5,7 +5,6 @@ import requests
 from flask import Flask, request, jsonify
 from flask import Response
 from flask import render_template
-from Web_Server.log_consel import LoggingMiddleware
 import traceback
 import sqlite3
 import peewee
