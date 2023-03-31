@@ -54,7 +54,7 @@ def post_BM_Info_onClient_api():
                 return f"Клиент с именем {data['client_name']} уже существует. Пропускаем...", 409
 
         web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
-        return 'Data successfully saved to the database!', 201
+        return 'Данные успешно записаны в БД!', 201
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
