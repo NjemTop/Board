@@ -127,6 +127,7 @@ class ContactsCard(BaseModel):
     contact_name = peewee.TextField(column_name='ФИО')
     contact_position = peewee.TextField(column_name='Должность', null=True)
     contact_email = peewee.TextField(column_name='Email')
+    notification_update = peewee.TextField(column_name='Рассылка(обновление)', null=True)
     contact_notes = peewee.TextField(column_name='Примечания', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [
