@@ -148,7 +148,7 @@ class ContactsCard(BaseModel):
 class СonnectInfoCard(BaseModel):
     connect_info_id = peewee.IntegerField(column_name='ID_Информация_для_подключения', primary_key=True)
     contact_info_name = peewee.TextField(column_name='ФИО')
-    contact_info_account = peewee.TextField(column_name='Учетная запись')
+    contact_info_account = peewee.TextField(column_name='Учетная_запись')
     contact_info_password = peewee.TextField(column_name='Пароль')
     # Список наименований столбцов
     COLUMN_NAMES = [
@@ -167,9 +167,9 @@ class BMServersCard(BaseModel):
     bm_servers_circuit = peewee.TextField(column_name='Контур')
     bm_servers_servers_name = peewee.TextField(column_name='Имя_сервера')
     bm_servers_servers_adress = peewee.TextField(column_name='Адрес_сервера')
-    bm_servers_operation_system = peewee.TextField(column_name='Операционная система')
+    bm_servers_operation_system = peewee.TextField(column_name='Операционная_система')
     bm_servers_url = peewee.TextField(column_name='URL')
-    bm_servers_software = peewee.TextField(column_name='Программное обеспечение')
+    bm_servers_software = peewee.TextField(column_name='Программное_обеспечение')
     bm_servers_role = peewee.TextField(column_name='Роль')
     # Список наименований столбцов
     COLUMN_NAMES = [
