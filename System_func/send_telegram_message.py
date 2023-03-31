@@ -1,25 +1,11 @@
 import requests
 import json
 import logging
+from logger.log_config import setup_logger, get_abs_log_path
 
-logging.basicConfig(level=logging.DEBUG, filename='web_server.log', filemode='w',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M')
-# Создание объекта логгера для ошибок и критических событий
-web_error_logger = logging.getLogger('WebError')
-web_error_logger.setLevel(logging.ERROR)
-web_error_handler = logging.FileHandler('./logs/web-errors.log')
-web_error_handler.setLevel(logging.ERROR)
-web_error_handler.setFormatter(formatter)
-web_error_logger.addHandler(web_error_handler)
-
-# Создание объекта логгера для информационных сообщений
-web_info_logger = logging.getLogger('WebInfo')
-web_info_logger.setLevel(logging.INFO)
-web_info_handler = logging.FileHandler('./logs/web-info.log')
-web_info_handler.setLevel(logging.INFO)
-web_info_handler.setFormatter(formatter)
-web_info_logger.addHandler(web_info_handler)
+# Указываем настройки логов для нашего файла с классами
+bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
+bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
