@@ -5,7 +5,7 @@ import requests
 from flask import Flask, request, jsonify
 from flask import Response
 from flask import render_template
-from flask_accesslog import FlaskAccessLogger
+from Web_Server.log_consel import LoggingMiddleware
 import traceback
 import sqlite3
 import peewee
@@ -1147,17 +1147,7 @@ def create_app():
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
 
-    # создание экземпляра логгера FlaskAccessLogger
-    access_logger = FlaskAccessLogger(app)
-
-    # настройка форматирования логгера
-    access_logger.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-
-    # установка уровня логирования
-    access_logger.setLevel(logging.DEBUG)
-
-    # добавление логгера в приложение Flask
-    app.logger.addHandler(access_logger)
+    app.wsgi_app = LoggingMiddleware(app.wsgi_app)
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
