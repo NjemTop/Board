@@ -121,7 +121,7 @@ class ClientsCard(BaseModel):
 ######ID_Технические_заметки и ID_Технологическая_учетная_запись - это просто текст. Нужен разве класс и столбцы?
 ######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
 class ContactsCard(BaseModel):
-    client_id = peewee.FloatField(column_name='ID_Клиента', primary_key=True)
+    client_id = peewee.IntegerField(column_name='ID_Клиента', primary_key=True)
     contact_name = peewee.TextField(column_name='ФИО')
     contact_position = peewee.TextField(column_name='Должность', null=True)
     contact_email = peewee.TextField(column_name='Email')
@@ -142,7 +142,7 @@ class ContactsCard(BaseModel):
         table_name = 'contact_id'
 
 class СonnectInfoCard(BaseModel):
-    connect_info_id = peewee.FloatField(column_name='ID_Информация_для_подключения', primary_key=True)
+    connect_info_id = peewee.IntegerField(column_name='ID_Информация_для_подключения', primary_key=True)
     contact_info_name = peewee.TextField(column_name='ФИО')
     contact_info_account = peewee.TextField(column_name='Учетная запись')
     contact_info_password = peewee.TextField(column_name='Пароль')
@@ -159,7 +159,7 @@ class СonnectInfoCard(BaseModel):
     class Meta:
         table_name = 'connect_info_id'
 class BMServersCard(BaseModel):
-    bm_servers_id = peewee.FloatField(column_name='ID_Серверы_ВМ', primary_key=True)
+    bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ', primary_key=True)
     bm_servers_circuit = peewee.TextField(column_name='Контур')
     bm_servers_servers_name = peewee.TextField(column_name='Имя_сервера')
     bm_servers_servers_adress = peewee.TextField(column_name='Адрес_сервера')
