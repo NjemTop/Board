@@ -5,7 +5,7 @@ import requests
 from flask import Flask, request, jsonify
 from flask import Response
 from flask import render_template
-from flask_logging import FlaskLogging
+from flask_accesslog import FlaskAccessLogger
 import traceback
 import sqlite3
 import peewee
@@ -1147,32 +1147,18 @@ def create_app():
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
 
-    # Конфигурация логирования
-    log_config = {
-        'loggers': {
-            'werkzeug': {
-                'level': logging.DEBUG, # Уровень логирования запросов
-                'handlers': ['console'], # Вывод логов на консоль
-                'propagate': False
-            }
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'default',
-                'stream': 'ext://sys.stdout'
-            }
-        },
-        'formatters': {
-            'default': {
-                'format': '%(asctime)s %(levelname)s: %(message)s'
-            }
-        },
-        'disable_existing_loggers': False
-    }
-    flask_logging = FlaskLogging(app)
-    flask_logging.dictConfig(log_config)
-    
+    # создание экземпляра логгера FlaskAccessLogger
+    access_logger = FlaskAccessLogger(app)
+
+    # настройка форматирования логгера
+    access_logger.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+
+    # установка уровня логирования
+    access_logger.setLevel(logging.DEBUG)
+
+    # добавление логгера в приложение Flask
+    app.logger.addHandler(access_logger)
+
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', handler_get, methods=['GET'])
 
