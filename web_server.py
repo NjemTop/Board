@@ -749,7 +749,7 @@ def post_client_card_api_by_id(id):
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же ID
-            existing_client = ClientsCard.get_or_none(ClientsCard.client_info == id)
+            existing_client = ClientsCard.get_or_none(ClientsCard.client_id == id)
             if existing_client is None:
                 # Сохраняем данные в базе данных, используя insert и execute
                 ClientsCard.insert(**data).execute()

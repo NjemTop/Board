@@ -21,8 +21,8 @@ config_file_path = os.path.join(project_root, 'Main.config')
 happyfox = HappyFoxConnector(config_file_path)
 
 # Создадим задачу на отправку алертов в чат
-schedule.every().day.at("10:28").do(happyfox.get_tickets)
-check_info_logger.info('Задача на отправку алертов по 3х дневным простоям создана на 10:28')
+schedule.every().day.at("10:25").do(happyfox.get_tickets)
+check_info_logger.info('Задача на отправку алертов по 3х дневным простоям создана на 10:25')
 
 def start_check_tickets():
     while True:
