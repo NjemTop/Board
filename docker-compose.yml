@@ -13,7 +13,7 @@ services:
     restart: always
     environment:
       - TZ=Europe/Moscow
-    command: gunicorn --bind 0.0.0.0:3030 "web_server:create_app()" --access-logfile -
+    command: gunicorn --bind 0.0.0.0:3030 "web_server:create_app()" --access-logfile - --access-logformat '%(h)s - %(u)s [%(t)s] "%(r)s" %(s)s %(b)s "-" "%(a)s"'
     networks:
       network_for_bot:
         ipv4_address: 172.28.1.10
