@@ -662,11 +662,11 @@ def get_client_card_api():
         return response
 
 def get_client_by_id(id):
-    """Функция возвращает данные клиента по указанному id (Clients_id)."""
+    """Функция возвращает данные клиента по указанному id (client_id)."""
     try:
         with conn:
             # Получаем данные клиента по id
-            client = ClientsCard.get_or_none(ClientsCard.clients_id == id)
+            client = ClientsCard.get_or_none(ClientsCard.client_id == id)
             
             if client is None:
                 # Если клиент с указанным ID не найден, возвращаем сообщение об ошибке
@@ -678,13 +678,13 @@ def get_client_by_id(id):
 
             # Здесь продолжайте с преобразованием данных и формированием ответа
             client_data = {
-                'Clients_id': client.clients_id,
-                'Contacts': client.contacts,
-                'Tech_notes': client.tech_notes,
-                'Connect_info': client.connect_info,
-                'RDP': client.rdp,
-                'Tech_account': client.tech_account,
-                'BM_servers': client.bm_servers
+                'client_id': client.client_id,
+                'contacts': client.contacts,
+                'tech_notes': client.tech_notes,
+                'connect_info': client.connect_info,
+                'rdp': client.rdp,
+                'tech_account': client.tech_account,
+                'bm_servers': client.bm_servers
             }
 
             json_data = json.dumps(client_data, ensure_ascii=False)
