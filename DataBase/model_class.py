@@ -29,7 +29,7 @@ class BaseModel(peewee.Model):
 class Release_info(BaseModel):
     """Класс для таблицы БД информации о релизе"""
     date = peewee.DateField(column_name='Дата_рассылки')
-    release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
+    release_number = peewee.BooleanField(column_name='Номер_релиза', primary_key=True)
     client_name = peewee.TextField(column_name='Наименование_клиента')
     main_contact = peewee.TextField(column_name='Основной_контакт')
     copy = peewee.TextField(column_name='Копия')
