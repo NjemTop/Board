@@ -135,6 +135,7 @@ class ContactsCard(BaseModel):
         'contact_name',
         'contact_position',
         'contact_email',
+        'notification_update',
         'contact_notes'
     ]
     def __init__(self, *args, **kwargs):
