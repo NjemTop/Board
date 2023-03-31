@@ -11,7 +11,7 @@ import peewee
 from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
-from config import USERNAME, PASSWORD, require_basic_auth
+from web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
