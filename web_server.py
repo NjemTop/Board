@@ -1038,8 +1038,12 @@ def post_connect_info_api():
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующей записи с тем же client_id
-            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.client_id == data['client_id'])
+            # Проверяем наличие существующей записи с тем же contact_info_name, contact_info_account и client_id
+            existing_info = СonnectInfoCard.get_or_none(
+                (СonnectInfoCard.contact_info_name == data['contact_info_name']) &
+                (СonnectInfoCard.contact_info_account == data['contact_info_account']) &
+                (СonnectInfoCard.client_id == data['client_id'])
+            )
 
             if existing_info is None:
                 # Сохраняем данные в базе данных, используя insert и execute
@@ -1048,7 +1052,11 @@ def post_connect_info_api():
                 conn.commit()
             else:
                 # Обновляем существующую запись с данными из запроса
-                СonnectInfoCard.update(**data).where(СonnectInfoCard.client_id == data['client_id']).execute()
+                СonnectInfoCard.update(**data).where(
+                    (СonnectInfoCard.contact_info_name == data['contact_info_name']) &
+                    (СonnectInfoCard.contact_info_account == data['contact_info_account']) &
+                    (СonnectInfoCard.client_id == data['client_id'])
+                ).execute()
                 # Сохраняем изменения в БД
                 conn.commit()
 
@@ -1058,12 +1066,11 @@ def post_connect_info_api():
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
-        return f"Ошибка с БД: {error_message}"
+        return f"Ошибка с БД: {error_message}", 500
     except Exception as error:
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}"
+        return f"Ошибка сервера: {error}", 500
 
 def get_app():
     """Функция приложения ВЭБ-сервера"""
