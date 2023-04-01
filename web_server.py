@@ -935,11 +935,11 @@ def post_contact_api_by_id(id):
         return f"Ошибка сервера: {error}"
 
 def get_connect_info_by_id(id):
-    """Функция возвращает информацию о подключении по указанному connect_info_id."""
+    """Функция возвращает информацию о подключении по указанному client_id."""
     try:
         with conn:
-            # Получаем информацию о подключении по connect_info_id
-            connect_infos = СonnectInfoCard.select().where(СonnectInfoCard.connect_info_id == id)
+            # Получаем информацию о подключении по client_id
+            connect_infos = СonnectInfoCard.select().where(СonnectInfoCard.client_id == id)
 
             if not connect_infos.exists():
                 # Если информация о подключении с указанным ID не найдена, возвращаем сообщение об ошибке
@@ -953,7 +953,7 @@ def get_connect_info_by_id(id):
             connect_infos_data = [
                 {
                     'id': info.id,
-                    'connect_info_id': info.connect_info_id,
+                    'client_id': info.client_id,
                     'contact_info_name': info.contact_info_name,
                     'contact_info_account': info.contact_info_account,
                     'contact_info_password': info.contact_info_password
@@ -998,8 +998,8 @@ def post_connect_info_api():
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующей записи с тем же connect_info_id
-            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.connect_info_id == data['connect_info_id'])
+            # Проверяем наличие существующей записи с тем же client_id
+            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.client_id == data['client_id'])
 
             if existing_info is None:
                 # Сохраняем данные в базе данных, используя insert и execute
@@ -1008,11 +1008,11 @@ def post_connect_info_api():
                 conn.commit()
             else:
                 # Обновляем существующую запись с данными из запроса
-                СonnectInfoCard.update(**data).where(СonnectInfoCard.connect_info_id == data['connect_info_id']).execute()
+                СonnectInfoCard.update(**data).where(СonnectInfoCard.client_id == data['client_id']).execute()
                 # Сохраняем изменения в БД
                 conn.commit()
 
-        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['connect_info_id'])
+        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['client_id'])
         return 'Connect info data successfully saved to the database!', 201
 
     except peewee.OperationalError as error_message:
@@ -1383,7 +1383,7 @@ def create_app():
     
     # Регистрация обработчика для API информации по подключению к клиенту
     #app.add_url_rule('/clients_all_info/api/connect_info', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
-    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
+    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
     app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
     #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
