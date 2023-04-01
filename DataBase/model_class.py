@@ -9,7 +9,7 @@ conn = peewee.SqliteDatabase(f'file:{db_filename}?encoding=utf-8')
 def generate_unique_id():
     """Функция генерации случайного числа для БД"""
     # Генерируем уникальный ID. В данном примере используется случайное число.
-    return random.randint(1, 1000000000)
+    return random.randint(1, 10000)
 
 # Определяем базовую модель о которой будут наследоваться остальные
 class BaseModel(peewee.Model):
