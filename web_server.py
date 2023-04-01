@@ -1376,16 +1376,16 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/clients_card', 'delete_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
 
     # Регистрация обработчика для API списка контакта клиента
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    #app.add_url_rule('/clients_all_info/api/contacts', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
+    #app.add_url_rule('/clients_all_info/api/contacts', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     # Регистрация обработчика для API информации по подключению к клиенту
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
-    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
+    #app.add_url_rule('/clients_all_info/api/connect_info', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
     app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
-    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
+    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     return app
 
