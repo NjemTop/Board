@@ -934,6 +934,49 @@ def post_contact_api_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
+def get_connect_info_api(id):
+    try:
+        with conn:
+            # Получаем данные из таблицы СonnectInfoCard, связанные с клиентом по ID
+            contacts = СonnectInfoCard.select().where(СonnectInfoCard.client_id == id)
+
+            if not contacts.exists():
+                # Если контакты для клиента с указанным ID не найдены, возвращаем сообщение об ошибке
+                message = "Учетные записи контактов для клиента с ID {} не найдены".format(id)
+                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
+            # Преобразуем данные в словарь для формирования JSON-ответа
+            contacts_data = [
+                {
+                    'contact_info_name': contact.contact_info_name,
+                    'contact_info_account': contact.contact_info_account,
+                    'contact_info_password': contact.contact_info_password
+                } for contact in contacts
+            ]
+
+            json_data = json.dumps(contacts_data, ensure_ascii=False, indent=4)
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+
+    except peewee.OperationalError as error_message:
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as error:
+        web_error_logger.error("Ошибка сервера: %s", error)
+        message = "Ошибка сервера: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
 def post_connect_info_api():
     """Функция добавления информации о подключении в БД."""
     try:
@@ -1334,10 +1377,10 @@ def create_app():
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     # Регистрация обработчика для API информации по подключению к клиенту
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
-    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
+    #app.add_url_rule('/clients_all_info/api/connect_info', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_api))
     app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
-    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
+    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     return app
 
