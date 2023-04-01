@@ -146,12 +146,14 @@ class ContactsCard(BaseModel):
         table_name = 'contact_id'
 
 class СonnectInfoCard(BaseModel):
-    connect_info_id = peewee.IntegerField(column_name='ID_Информация_для_подключения', primary_key=True)
+    id = peewee.AutoField(column_name='ID', primary_key=True)
+    connect_info_id = peewee.IntegerField(column_name='ID_Информация_для_подключения')
     contact_info_name = peewee.TextField(column_name='ФИО')
     contact_info_account = peewee.TextField(column_name='Учетная_запись')
     contact_info_password = peewee.TextField(column_name='Пароль')
     # Список наименований столбцов
     COLUMN_NAMES = [
+        'id',
         'connect_info',
         'contact_info_name',
         'contact_info_account',
@@ -162,7 +164,7 @@ class СonnectInfoCard(BaseModel):
         self.column_names = СonnectInfoCard.COLUMN_NAMES
     class Meta:
         table_name = 'connect_info_id'
-        
+
 class BMServersCard(BaseModel):
     bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ', primary_key=True)
     bm_servers_circuit = peewee.TextField(column_name='Контур')

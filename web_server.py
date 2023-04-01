@@ -10,7 +10,7 @@ import sqlite3
 import peewee
 import os
 from pathlib import Path
-from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
@@ -934,6 +934,49 @@ def post_contact_api_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
+def post_connect_info_api():
+    """Функция добавления информации о подключении в БД."""
+    try:
+        # Получаем данные из запроса
+        data = json.loads(request.data.decode('utf-8'))
+
+        # Проверяем обязательные поля
+        if 'contact_info_name' not in data or 'contact_info_account' not in data or 'contact_info_password' not in data:
+            return 'Ошибка: "contact_info_name", "contact_info_account" и "contact_info_password" являются обязательными полями.', 400
+
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([СonnectInfoCard])
+
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
+            # Проверяем наличие существующей записи с тем же connect_info_id
+            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.connect_info_id == data['connect_info_id'])
+
+            if existing_info is None:
+                # Сохраняем данные в базе данных, используя insert и execute
+                СonnectInfoCard.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
+            else:
+                # Обновляем существующую запись с данными из запроса
+                СonnectInfoCard.update(**data).where(СonnectInfoCard.connect_info_id == data['connect_info_id']).execute()
+                # Сохраняем изменения в БД
+                conn.commit()
+
+        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['connect_info_id'])
+        return 'Connect info data successfully saved to the database!', 201
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
+        return f"Ошибка с БД: {error_message}"
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}"
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1289,7 +1332,13 @@ def create_app():
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
     #app.add_url_rule('/clients_all_info/api/contacts_card', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
-
+    
+    # Регистрация обработчика для API информации по подключению к клиенту
+    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
+    app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
+    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
+    
     return app
 
 if __name__ == '__main__':
