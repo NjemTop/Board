@@ -934,54 +934,6 @@ def post_contact_api_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
-def get_connect_info_by_id(id):
-    """Функция возвращает информацию о подключении по указанному client_id."""
-    try:
-        with conn:
-            # Получаем информацию о подключении по client_id
-            connect_infos = СonnectInfoCard.select().where(СonnectInfoCard.client_id == id)
-
-            if not connect_infos.exists():
-                # Если информация о подключении с указанным ID не найдена, возвращаем сообщение об ошибке
-                message = "Информация о подключении с ID {} не найдена".format(id)
-                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
-                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
-                response.headers.add('Access-Control-Allow-Origin', '*')
-                return response
-
-            # Здесь продолжайте с преобразованием данных и формированием ответа
-            connect_infos_data = [
-                {
-                    'id': info.id,
-                    'client_id': info.client_id,
-                    'contact_info_name': info.contact_info_name,
-                    'contact_info_account': info.contact_info_account,
-                    'contact_info_password': info.contact_info_password
-                } for info in connect_infos
-            ]
-
-            json_data = json.dumps(connect_infos_data, ensure_ascii=False, indent=4)
-            response = Response(json_data, content_type='application/json; charset=utf-8')
-            response.headers.add('Access-Control-Allow-Origin', '*')
-            return response
-
-    except peewee.OperationalError as error_message:
-        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        print("Ошибка подключения к базе данных SQLite:", error_message)
-        message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
-        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
-        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception as error:
-        web_error_logger.error("Ошибка сервера: %s", error)
-        print("Ошибка сервера:", error)
-        message = "Ошибка сервера: {}".format(error)
-        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
-        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-
 def post_connect_info_api():
     """Функция добавления информации о подключении в БД."""
     try:
@@ -998,8 +950,8 @@ def post_connect_info_api():
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующей записи с тем же client_id
-            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.client_id == data['client_id'])
+            # Проверяем наличие существующей записи с тем же connect_info_id
+            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.connect_info_id == data['connect_info_id'])
 
             if existing_info is None:
                 # Сохраняем данные в базе данных, используя insert и execute
@@ -1008,11 +960,11 @@ def post_connect_info_api():
                 conn.commit()
             else:
                 # Обновляем существующую запись с данными из запроса
-                СonnectInfoCard.update(**data).where(СonnectInfoCard.client_id == data['client_id']).execute()
+                СonnectInfoCard.update(**data).where(СonnectInfoCard.connect_info_id == data['connect_info_id']).execute()
                 # Сохраняем изменения в БД
                 conn.commit()
 
-        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['client_id'])
+        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['connect_info_id'])
         return 'Connect info data successfully saved to the database!', 201
 
     except peewee.OperationalError as error_message:
@@ -1376,16 +1328,16 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/clients_card', 'delete_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
 
     # Регистрация обработчика для API списка контакта клиента
-    #app.add_url_rule('/clients_all_info/api/contacts', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
-    #app.add_url_rule('/clients_all_info/api/contacts', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
+    #app.add_url_rule('/clients_all_info/api/contacts_card', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     # Регистрация обработчика для API информации по подключению к клиенту
-    #app.add_url_rule('/clients_all_info/api/connect_info', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
-    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
+    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
+    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_contact_by_client_id))
     app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
-    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
+    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     return app
 
