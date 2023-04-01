@@ -950,8 +950,8 @@ def post_connect_info_api():
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующей записи с тем же connect_info_id
-            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.connect_info_id == data['connect_info_id'])
+            # Проверяем наличие существующей записи с тем же client_id
+            existing_info = СonnectInfoCard.get_or_none(СonnectInfoCard.client_id == data['client_id'])
 
             if existing_info is None:
                 # Сохраняем данные в базе данных, используя insert и execute
@@ -960,11 +960,11 @@ def post_connect_info_api():
                 conn.commit()
             else:
                 # Обновляем существующую запись с данными из запроса
-                СonnectInfoCard.update(**data).where(СonnectInfoCard.connect_info_id == data['connect_info_id']).execute()
+                СonnectInfoCard.update(**data).where(СonnectInfoCard.client_id == data['client_id']).execute()
                 # Сохраняем изменения в БД
                 conn.commit()
 
-        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['connect_info_id'])
+        web_info_logger.info("Добавлена/обновлена информация о подключении с ID: %s", data['client_id'])
         return 'Connect info data successfully saved to the database!', 201
 
     except peewee.OperationalError as error_message:

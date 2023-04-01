@@ -55,10 +55,10 @@ class BMInfo_onClient(BaseModel):
     client_name = peewee.TextField(column_name='Название_клиента', collation='NOCASE')
     contact_status = peewee.BooleanField(column_name='Активность')
     client_info = peewee.AutoField(column_name='Карточка_клиента', primary_key=True)
-    service = peewee.AutoField(column_name='Обслуживание')
-    technical_information = peewee.AutoField(column_name='Тех_информация')
-    integration = peewee.AutoField(column_name='Интеграции')
-    documents = peewee.AutoField(column_name='Документы')
+    service = peewee.IntegerField(column_name='Обслуживание', default=generate_unique_id)
+    technical_information = peewee.IntegerField(column_name='Тех_информация', default=generate_unique_id)
+    integration = peewee.IntegerField(column_name='Интеграции', default=generate_unique_id)
+    documents = peewee.IntegerField(column_name='Документы', default=generate_unique_id)
     notes = peewee.CharField(column_name='Примечания', null=True)
 
     # Список наименований столбцов
@@ -95,12 +95,12 @@ class BMInfo_onClient(BaseModel):
 class ClientsCard(BaseModel):
     """Класс для таблицы БД карточек клиентов"""
     client_id = peewee.IntegerField(column_name='Клиент_ID', primary_key=True)
-    contacts = peewee.AutoField(column_name='Контакты')
-    tech_notes = peewee.AutoField(column_name='Технические_заметки')
-    connect_info = peewee.AutoField(column_name='Информация_для_подключения')
-    rdp = peewee.AutoField(column_name='Удаленный_доступ')
-    tech_account = peewee.AutoField(column_name='Технологическая_учетная_запись')
-    bm_servers = peewee.AutoField(column_name='Серверы_ВМ')
+    contacts = peewee.IntegerField(column_name='Контакты', default=generate_unique_id)
+    tech_notes = peewee.IntegerField(column_name='Технические_заметки', default=generate_unique_id)
+    connect_info = peewee.IntegerField(column_name='Информация_для_подключения', default=generate_unique_id)
+    rdp = peewee.IntegerField(column_name='Удаленный_доступ', default=generate_unique_id)
+    tech_account = peewee.IntegerField(column_name='Технологическая_учетная_запись', default=generate_unique_id)
+    bm_servers = peewee.IntegerField(column_name='Серверы_ВМ', default=generate_unique_id)
     
     # Список наименований столбцов
     COLUMN_NAMES = [
