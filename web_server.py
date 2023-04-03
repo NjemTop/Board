@@ -783,13 +783,13 @@ def patch_client_card_api():
     data = request.get_json()
 
     # Получаем ID клиента, которое нужно обновить
-    clients_id = data.get('clients_id', None)
+    client_id = data.get('client_id', None)
 
-    if clients_id is None:
+    if client_id is None:
         return 'Необходимо указать ID клиента для обновления', 400
 
     # Получаем обновленные данные
-    updated_data = {key: value for key, value in data.items() if key != 'clients_id'}
+    updated_data = {key: value for key, value in data.items() if key != 'client_id'}
 
     if not updated_data:
         return 'Необходимо предоставить данные для обновления', 400
@@ -797,12 +797,12 @@ def patch_client_card_api():
     try:
         with conn:
             # Обновляем запись с указанным ID клиента
-            updated_rows = (ClientsCard.update(updated_data).where(ClientsCard.clients_id == clients_id).execute())
+            updated_rows = (BMInfo_onClient.update(updated_data).where(BMInfo_onClient.client_info == client_id).execute())
 
         if updated_rows > 0:
-            return f'Обновлено {updated_rows} записей с ID клиента: {clients_id}', 200
+            return f'Обновлено {updated_rows} записей с ID клиента: {client_id}', 200
         else:
-            return f'Клиент с ID {clients_id} не найден', 404
+            return f'Клиент с ID {client_id} не найден', 404
 
     except peewee.OperationalError as error_message:
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
@@ -1442,7 +1442,7 @@ def create_app():
     app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_client_by_id))
     app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(post_client_card_api), methods=['POST'])
     app.route('/clients_all_info/api/client_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_client_card_api_by_id))
-    app.add_url_rule('/clients_all_info/api/clients_card', 'patch_client_card_api', require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api), methods=['PATCH'])
+    app.route('/clients_all_info/api/client_card/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(patch_client_card_api))
     app.add_url_rule('/clients_all_info/api/clients_card', 'delete_client_card_api', require_basic_auth(USERNAME, PASSWORD)(delete_client_card_api), methods=['DELETE'])
 
     # Регистрация обработчика для API списка контакта клиента
