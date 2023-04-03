@@ -778,15 +778,9 @@ def post_client_card_api_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}"
 
-def patch_client_card_api():
+def patch_client_card_api(id):
     """Функция изменений данных в БД со списком карточек клиентов"""
     data = request.get_json()
-
-    # Получаем ID клиента, которое нужно обновить
-    client_id = data.get('client_id', None)
-
-    if client_id is None:
-        return 'Необходимо указать ID клиента для обновления', 400
 
     # Получаем обновленные данные
     updated_data = {key: value for key, value in data.items() if key != 'client_id'}
@@ -797,12 +791,12 @@ def patch_client_card_api():
     try:
         with conn:
             # Обновляем запись с указанным ID клиента
-            updated_rows = (BMInfo_onClient.update(updated_data).where(BMInfo_onClient.client_info == client_id).execute())
+            updated_rows = (BMInfo_onClient.update(updated_data).where(BMInfo_onClient.client_info == id).execute())
 
         if updated_rows > 0:
-            return f'Обновлено {updated_rows} записей с ID клиента: {client_id}', 200
+            return f'Обновлено {updated_rows} записей с ID клиента: {id}', 200
         else:
-            return f'Клиент с ID {client_id} не найден', 404
+            return f'Клиент с ID {id} не найден', 404
 
     except peewee.OperationalError as error_message:
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
