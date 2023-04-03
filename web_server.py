@@ -1106,6 +1106,31 @@ def delete_connect_info_api(id):
     except Exception as error:
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
+def patch_connect_info_api(id):
+    """Функция обновления информации о подключении к клиенту по ID"""
+    data = request.get_json()
+
+    # Получаем обновленные данные
+    updated_data = {key: value for key, value in data.items() if key in СonnectInfoCard.COLUMN_NAMES and key != 'id'}
+
+    if not updated_data:
+        return 'Необходимо предоставить данные для обновления', 400
+
+    try:
+        with conn:
+            # Обновляем запись с указанным ID
+            updated_rows = СonnectInfoCard.update(updated_data).where(СonnectInfoCard.id == id).execute()
+
+        if updated_rows > 0:
+            return f'Обновлено {updated_rows} записей с ID: {id}', 200
+        else:
+            return f'Запись с ID {id} не найдена', 404
+
+    except peewee.OperationalError as error_message:
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1466,9 +1491,8 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/connect_info', 'get_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(get_connect_info_api), methods=['GET'])
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(get_connect_info_by_id))
     app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(post_connect_info_api), methods=['POST'])
-    #app.add_url_rule('/clients_all_info/api/connect_info', 'delete_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(delete_connect_info_api), methods=['DELETE'])
+    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(patch_connect_info_api))
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(delete_connect_info_api))
-    #app.route('/clients_all_info/api/connect_info/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(post_contact_api_by_id))
     
     return app
 
