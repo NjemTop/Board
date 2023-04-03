@@ -48,6 +48,6 @@ def migrate():
     except Exception as e:
         print(f"Error: {e}")
 
-print("Starting migration...")
+print("Starting migration...", flush=True)
 migrate()
-print("Migration completed.")
+print("Migration completed.", flush=True)

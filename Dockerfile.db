@@ -12,11 +12,11 @@ RUN pip install peewee
 COPY ./DataBase/database.db /var/lib/sqlite/
 
 # Копируем файлы с классами и миграцией
-COPY ./DataBase/model_class.py /app/model_class.py
-COPY ./DataBase/manage.py /app/manage.py
+COPY ./DataBase/model_class.py /var/lib/sqlite/model_class.py
+COPY ./DataBase/manage.py /var/lib/sqlite/manage.py
 
 # Выполняем миграцию БД
-RUN python -u /app/manage.py migrate
+RUN python -u /var/lib/sqlite/manage.py migrate
 
 # Удаляем скопированные файлы
 #RUN rm /app/model_class.py /app/manage.py
