@@ -24,8 +24,8 @@ RUN python -u /app/manage.py migrate
 # Добавляем сообщение о завершении миграции
 RUN echo "Migration completed."
 
-# Удаляем скопированные файлы
-RUN rm /app/model_class.py /app/manage.py
+# # Удаляем скопированные файлы
+# RUN rm /app/model_class.py /app/manage.py
 
 # Добавляем healthcheck
 HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
