@@ -197,4 +197,3 @@ class BMServersCard(BaseModel):
     
     class Meta:
         table_name = 'bm_servers_card'
-
