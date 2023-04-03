@@ -514,33 +514,25 @@ def post_BM_Info_onClient_api():
         data = json.loads(request.data.decode('utf-8'))
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient])
+            conn.create_tables([BMInfo_onClient, ClientsCard])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Проверяем наличие существующего клиента с тем же именем
             existing_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_name == data['client_name'])
             if existing_client is None:
-                # Вытащим информацию о названии клиента и проверим заполнин ли он
-                client_name = data.get('client_name')
-                if not client_name:
-                    return 'Error: значение ключа "client_name" не указано!', 400
-                # Вытащим информацию о статусе клиента и проверим заполнин ли он
-                contact_status = data.get('contact_status')
-                if contact_status is None:
-                    return 'Error: значение ключа "contact_status" не указано!', 400
-                # Вытащим информацию о заметках клиента и проверим в каком он формате
-                notes = data.get('notes')
-                if notes is not None and not isinstance(notes, str):
-                    return 'Error: значение ключа "notes" должно быть строкой!', 400
-                # Создаем запись в БД с автоматически сгенерированным id
+                # Создаем запись в таблице BMInfo_onClient
                 new_client = BMInfo_onClient.create(
-                    client_name=client_name,
-                    contact_status=contact_status,
-                    notes=notes
+                    client_name=data['client_name'],
+                    contact_status=data['contact_status'],
+                    notes=data.get('notes')
                 )
                 # Получаем id созданной записи
                 client_id = new_client.id
+
+                # Создаем запись в таблице ClientsCard с полученным client_id
+                new_client_card = ClientsCard.create(client_id=client_id)
+
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
@@ -559,7 +551,7 @@ def post_BM_Info_onClient_api():
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
-    
+
 def patch_BM_Info_onClient_api():
     """Функция обновления данных в БД (обязательный ключ - client_name)"""
     data = request.get_json()
