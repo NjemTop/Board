@@ -839,29 +839,36 @@ def get_contact_by_client_id(id):
     try:
         with conn:
             # Получаем контакты клиента по client_id
-            contacts = ContactsCard.select().where(ContactsCard.client_id == id)
+            client = ClientsCard.get_or_none(ClientsCard.client_id == id)
 
-            if not contacts.exists():
-                # Если контакты для клиента с указанным ID не найдены, возвращаем сообщение об ошибке
-                message = "Контакты для клиента с ID {} не найдены".format(id)
+            if client is None:
+                message = "Клиент с ID {} не найден".format(id)
+                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+            
+            contact_id = client.contacts
+            contact = ContactsCard.get_or_none(ContactsCard.contact_id == contact_id)
+
+            if contact is None:
+                message = "Контакт с ID {} не найден".format(contact_id)
                 json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            # Здесь продолжайте с преобразованием данных и формированием ответа
-            contacts_data = [
-                {
-                    'client_id': contact.client_id,
-                    'contact_name': contact.contact_name,
-                    'contact_position': contact.contact_position,
-                    'contact_email': contact.contact_email,
-                    'notification_update': contact.notification_update,
-                    'contact_notes': contact.contact_notes
-                } for contact in contacts
-            ]
+            contact_data = {
+                'contact_id': contact.contact_id,
+                'client_id': id,
+                'contact_name': contact.contact_name,
+                'contact_position': contact.contact_position,
+                'contact_email': contact.contact_email,
+                'notification_update': contact.notification_update,
+                'contact_notes': contact.contact_notes
+            }
 
-            json_data = json.dumps(contacts_data, ensure_ascii=False, indent=4)
+            json_data = json.dumps(contact_data, ensure_ascii=False, indent=4)
             response = Response(json_data, content_type='application/json; charset=utf-8')
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
@@ -893,12 +900,17 @@ def post_contact_api_by_id(id):
         if 'contact_name' not in data or 'contact_email' not in data:
             return 'Ошибка: "contact_name" и "contact_email" являются обязательными полями.', 400
 
-        # Добавляем переданный id клиента в данные
-        data['client_id'] = id
-
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([ContactsCard])
+            conn.create_tables([ContactsCard, ClientsCard])
+
+        # Получаем значение contacts для указанного client_id из таблицы ClientsCard
+        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
+        if client is None:
+            return f"Ошибка: клиент с ID {id} не найден.", 404
+
+        # Добавляем значение contacts в данные
+        data['contact_id'] = client.contacts
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():

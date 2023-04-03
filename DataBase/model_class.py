@@ -129,7 +129,7 @@ class ClientsCard(BaseModel):
 ######ID_Технические_заметки и ID_Технологическая_учетная_запись - это просто текст. Нужен разве класс и столбцы?
 ######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
 class ContactsCard(BaseModel):
-    client_id = peewee.IntegerField(column_name='ID_Клиента', primary_key=True)
+    contact_id = peewee.TextField(column_name='ID_Контакта', primary_key=True)
     contact_name = peewee.TextField(column_name='ФИО')
     contact_position = peewee.TextField(column_name='Должность', null=True)
     contact_email = peewee.TextField(column_name='Email')
@@ -137,7 +137,7 @@ class ContactsCard(BaseModel):
     contact_notes = peewee.TextField(column_name='Примечания', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [
-        'client_id',
+        'contact_id',
         'contact_name',
         'contact_position',
         'contact_email',
