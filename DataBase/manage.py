@@ -48,4 +48,6 @@ def migrate():
     except Exception as e:
         print(f"Error: {e}")
 
+print("Starting migration...")
 migrate()
+print("Migration completed.")
