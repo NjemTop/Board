@@ -852,12 +852,12 @@ def get_contact_by_client_id(id):
             contact = ContactsCard.get_or_none(ContactsCard.contact_id == contact_id)
 
             if contact is None:
-                message = "Контакт с ID {} не найден".format(contact_id)
+                message = "Контакты для клиента с ID {} не найдены".format(contact_id)
                 json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
-
+            
             contact_data = {
                 'contact_id': contact.contact_id,
                 'client_id': id,
