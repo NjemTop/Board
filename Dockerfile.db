@@ -15,8 +15,14 @@ COPY ./DataBase/database.db /var/lib/sqlite/
 COPY ./DataBase/model_class.py /app/model_class.py
 COPY ./DataBase/manage.py /app/manage.py
 
+# Добавляем сообщение о начале миграции
+RUN echo "Starting migration..."
+
 # Выполняем миграцию БД
 RUN python /app/manage.py migrate
+
+# Добавляем сообщение о завершении миграции
+RUN echo "Migration completed."
 
 # Удаляем скопированные файлы
 RUN rm /app/model_class.py /app/manage.py

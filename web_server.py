@@ -849,26 +849,34 @@ def get_contact_by_client_id(id):
                 return response
             
             contact_id = client.contacts
-            contact = ContactsCard.get_or_none(ContactsCard.contact_id == contact_id)
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == contact_id)
 
-            if contact is None:
+            if not contacts.exists():
                 message = "Контакты для клиента с ID {} не найдены".format(contact_id)
                 json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            contact_data = {
-                'contact_id': contact.contact_id,
+            client_name = BMInfo_onClient.get(BMInfo_onClient.client_info == id).client_name
+
+            contacts_data = []
+            for contact in contacts:
+                contacts_data.append({
+                    'contact_name': contact.contact_name,
+                    'contact_email': contact.contact_email,
+                    'contact_position': contact.contact_position,
+                    'notification_update': contact.notification_update,
+                    'contact_notes': contact.contact_notes
+                })
+
+            result = {
+                'client': client_name,
                 'client_id': id,
-                'contact_name': contact.contact_name,
-                'contact_position': contact.contact_position,
-                'contact_email': contact.contact_email,
-                'notification_update': contact.notification_update,
-                'contact_notes': contact.contact_notes
+                'contacts': contacts_data
             }
 
-            json_data = json.dumps(contact_data, ensure_ascii=False, indent=4)
+            json_data = json.dumps(result, ensure_ascii=False, indent=4)
             response = Response(json_data, content_type='application/json; charset=utf-8')
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response
