@@ -3,6 +3,11 @@ FROM python:3.10-alpine
 # Устанавливаем SQLite
 RUN apk add --no-cache sqlite
 
+# Устанавливаем Datasette
+RUN pip install --upgrade pip
+RUN pip install datasette
+RUN pip install peewee
+
 # Добавляем инструкцию USER root
 USER root
 
@@ -17,7 +22,7 @@ COPY ./DataBase/manage.py /app/manage.py
 RUN python -u /app/manage.py migrate
 
 # Удаляем скопированные файлы
-RUN rm /app/model_class.py /app/manage.py
+#RUN rm /app/model_class.py /app/manage.py
 
 # Добавляем healthcheck
 HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
