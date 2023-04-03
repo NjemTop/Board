@@ -206,7 +206,7 @@ def handle_unresponded_info_120(json_data):
         web_error_logger.error("Не удалось собрать информацию из запроса, который прислал HappyFox %s", error_message)
         return None, 'Не удалось собрать информацию из запроса, который прислал HappyFox.'
     return None, None
-    
+
 def handle_unresponded_info_180(json_data):
     """Находит информацию о "Unresponded for 180 min" в блоке массива update"""
     try:
@@ -668,15 +668,20 @@ def get_client_by_id(id):
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
 
-            # Здесь продолжайте с преобразованием данных и формированием ответа
+            bm_client = BMInfo_onClient.get_or_none(BMInfo_onClient.client_info == id)
+
+            if bm_client is None:
+                message = "Информация о клиенте с ID {} не найдена в таблице BM_info_on_clients".format(id)
+                json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+
+            # Преобразованием данных и формируем ответ
             client_data = {
                 'client_id': client.client_id,
-                'contacts': client.contacts,
-                'tech_notes': client.tech_notes,
-                'connect_info': client.connect_info,
-                'rdp': client.rdp,
-                'tech_account': client.tech_account,
-                'bm_servers': client.bm_servers
+                'client_name': bm_client.client_name,
+                'contact_status': bm_client.contact_status
             }
 
             json_data = json.dumps(client_data, ensure_ascii=False, indent=4)

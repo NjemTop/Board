@@ -19,7 +19,7 @@ COPY ./DataBase/manage.py /app/manage.py
 RUN echo "Starting migration..."
 
 # Выполняем миграцию БД
-RUN python /app/manage.py migrate
+RUN python -u /app/manage.py migrate
 
 # Добавляем сообщение о завершении миграции
 RUN echo "Migration completed."
