@@ -176,9 +176,8 @@ class BMServersCard(BaseModel):
     bm_servers_circuit = peewee.TextField(column_name='Контур')
     bm_servers_servers_name = peewee.TextField(column_name='Имя_сервера')
     bm_servers_servers_adress = peewee.TextField(column_name='Адрес_сервера')
-    bm_servers_operation_system = peewee.TextField(column_name='Операционная_система')
-    bm_servers_url = peewee.TextField(column_name='URL')
-    bm_servers_software = peewee.TextField(column_name='Программное_обеспечение')
+    bm_servers_operation_system = peewee.TextField(column_name='Операционная_система', null=True)
+    bm_servers_url = peewee.TextField(column_name='URL', null=True)
     bm_servers_role = peewee.TextField(column_name='Роль')
     # Список наименований столбцов
     COLUMN_NAMES = [
@@ -188,7 +187,6 @@ class BMServersCard(BaseModel):
         'bm_servers_servers_adress',
         'bm_servers_operation_system',
         'bm_servers_url',
-        'bm_servers_software',
         'bm_servers_role'
     ]   
     def __init__(self, *args, **kwargs):
