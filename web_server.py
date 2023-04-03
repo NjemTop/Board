@@ -927,16 +927,22 @@ def post_contact_api_by_id(id):
 
         web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
         return 'Contact data successfully saved to the database!', 201
-
+    
+    except peewee.IntegrityError as error:
+        # Обработка исключения при нарушении ограничений целостности
+        web_error_logger.error("Ошибка целостности данных: %s", error)
+        return f"Ошибка: указанный Email {data['contact_email']} уже есть в БД.", 409
+    
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
-        return f"Ошибка с БД: {error_message}"
+        return f"Ошибка с БД: {error_message}", 500
+    
     except Exception as error:
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}"
+        return f"Ошибка сервера: {error}", 500
 
 def get_connect_info_api():
     """Функция получения данных в БД со списком контактов клиентов"""
