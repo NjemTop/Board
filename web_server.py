@@ -857,7 +857,7 @@ def get_contact_by_client_id(id):
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
-            
+
             contact_data = {
                 'contact_id': contact.contact_id,
                 'client_id': id,
