@@ -9,11 +9,11 @@ RUN pip install datasette
 RUN pip install peewee
 
 # Копируем файл базы данных в новый контейнер
-COPY ./DataBase/database.db /var/lib/sqlite/
+COPY ./DataBase /var/lib/sqlite/
 
 # Копируем файлы с классами и миграцией
-COPY ./DataBase/model_class.py /var/lib/sqlite/model_class.py
-COPY ./DataBase/manage.py /var/lib/sqlite/manage.py
+# COPY ./DataBase/model_class.py /var/lib/sqlite/model_class.py
+# COPY ./DataBase/manage.py /var/lib/sqlite/manage.py
 
 # Выполняем миграцию БД
 RUN python -u /var/lib/sqlite/manage.py migrate
