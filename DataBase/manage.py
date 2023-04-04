@@ -49,7 +49,7 @@ def migrate():
                     # Переименовываем новую таблицу
                     with conn:
                         conn.execute_sql(f"ALTER TABLE {new_table_name} RENAME TO {model._meta.table_name}")
-                        print(f"Переименование таблицы {model} завершено")
+                        print(f"Переименование таблицы {new_table_name} в {model} завершено")
 
         print("Tables migrated successfully")
     except Exception as error_masage:
