@@ -52,8 +52,8 @@ def migrate():
                         print(f"Переименование таблицы {model} завершено")
 
         print("Tables migrated successfully")
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as error_masage:
+        print(f"Error: {error_masage}")
 
 print("Starting migration...", flush=True)
 migrate()
