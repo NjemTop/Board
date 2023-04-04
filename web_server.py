@@ -1195,16 +1195,18 @@ def post_bm_servers_card_api(client_id):
     except Exception as error:
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
-def get_integration(client_id):
+def get_integration_api(client_id):
     try:
-        client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+        with conn:
+            client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
         return jsonify({'error': 'Client not found'}), 404
 
     integration_id = client.integration
 
     try:
-        integration = Integration.get(Integration.integration_id == integration_id)
+        with conn:
+            integration = Integration.get(Integration.integration_id == integration_id)
     except DoesNotExist:
         return jsonify({'error': 'Integration not found'}), 404
 
@@ -1217,7 +1219,8 @@ def get_integration(client_id):
 
 def post_integration_api(client_id):
     try:
-        client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+        with conn:
+            client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
         return jsonify({'error': 'Client not found'}), 404
 
@@ -1232,7 +1235,8 @@ def post_integration_api(client_id):
     default_data.update(data)
 
     try:
-        integration = Integration.create(**default_data)
+        with conn:
+            integration = Integration.create(**default_data)
     except peewee.IntegrityError:
         return jsonify({'error': 'Integration already exists'}), 409
 
