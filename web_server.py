@@ -1195,6 +1195,26 @@ def post_bm_servers_card_api(client_id):
     except Exception as error:
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
+def get_integration(client_id):
+    try:
+        client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+    except DoesNotExist:
+        return jsonify({'error': 'Client not found'}), 404
+
+    integration_id = client.integration
+
+    try:
+        integration = Integration.get(Integration.integration_id == integration_id)
+    except DoesNotExist:
+        return jsonify({'error': 'Integration not found'}), 404
+
+    result = {}
+    for column in Integration.COLUMN_NAMES:
+        if column != 'integration_id':
+            result[column] = getattr(integration, column)
+
+    return jsonify(result)
+
 def post_integration_api(client_id):
     try:
         client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
@@ -1204,11 +1224,15 @@ def post_integration_api(client_id):
     integration_id = client.integration
     data = request.json
 
-    if not data or not all(key in Integration.COLUMN_NAMES for key in data):
-        return jsonify({'error': 'Invalid request'}), 400
+    # Создаем словарь с значениями по умолчанию
+    default_data = {key: False for key in Integration.COLUMN_NAMES}
+    default_data['integration_id'] = integration_id
+
+    # Обновляем значения по умолчанию данными из POST-запроса
+    default_data.update(data)
 
     try:
-        integration = Integration.create(integration_id=integration_id, **data)
+        integration = Integration.create(**default_data)
     except peewee.IntegrityError:
         return jsonify({'error': 'Integration already exists'}), 409
 
@@ -1582,6 +1606,7 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'post_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(post_bm_servers_card_api), methods=['POST'])
 
     
+    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'get_integration_api', require_basic_auth(USERNAME, PASSWORD)(get_integration_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(post_integration_api), methods=['POST'])
     
     return app

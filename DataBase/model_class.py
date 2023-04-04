@@ -1,5 +1,4 @@
 import peewee
-import random
 import uuid
 
 # Путь к файлу базы данных
