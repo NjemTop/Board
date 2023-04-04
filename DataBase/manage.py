@@ -34,6 +34,7 @@ def migrate():
                     # Копируем данные из старой таблицы в новую
                     common_columns = table_column_names.intersection(model_column_names)
                     common_columns_str = ', '.join(common_columns)
+                    print(f"Старые столбцы: {table_column_names}, для таблицы {model}.")
                     print(f"Новые столбцы: {model_column_names}, для таблицы {model}.")
                     query = f"INSERT INTO {new_table_name} ({common_columns_str}) SELECT {common_columns_str} FROM {model._meta.table_name};"
                     with conn:
