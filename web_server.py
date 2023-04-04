@@ -1202,7 +1202,7 @@ def get_integration_api(client_id):
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
         # Если запись клиента не найдена, возвращаем ошибку 404
-        return jsonify({'error': 'Клиент с ID {client_id} не найден'}), 404
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
 
     # Получаем integration_id из найденной записи клиента
     integration_id = client.integration
@@ -1213,21 +1213,29 @@ def get_integration_api(client_id):
             integration = Integration.get(Integration.integration_id == integration_id)
     except DoesNotExist:
         # Если запись интеграции не найдена, возвращаем ошибку 404
-        return jsonify({'error': 'Нет данных об интеграции'}), 404
+        return jsonify({'error': f'Нет данных об интеграции клиента {client_id}'}), 404
 
     # Создаем словарь для хранения данных интеграции
     integration_data = {}
 
     # Итерируемся по столбцам таблицы Integration и добавляем значения в словарь
     for column_name in Integration.COLUMN_NAMES:
+        # Пропускаем столбец "integration_id"
+        if column_name == 'integration_id':
+            continue
+
         value = getattr(integration, column_name)
         # Если значение равно None, устанавливаем его в False
         if value is None:
             value = False
         integration_data[column_name] = value
 
-    # Возвращаем данные интеграции в формате JSON
-    return jsonify(integration_data), 200
+    # Возвращаем данные интеграции в формате JSON с отступами для лучшей читаемости
+    response = jsonify(integration_data)
+    response.headers.add('Content-Type', 'application/json; charset=utf-8')
+    response.headers.add('Cache-Control', 'no-store')
+    response.headers.add('Pragma', 'no-cache')
+    return response, 200
 
 def post_integration_api(client_id):
     try:
