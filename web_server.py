@@ -1202,7 +1202,7 @@ def get_integration_api(client_id):
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
         # Если запись клиента не найдена, возвращаем ошибку 404
-        return jsonify({'error': 'Client not found'}), 404
+        return jsonify({'error': 'Клиент с ID {client_id} не найден'}), 404
 
     # Получаем integration_id из найденной записи клиента
     integration_id = client.integration
@@ -1213,7 +1213,7 @@ def get_integration_api(client_id):
             integration = Integration.get(Integration.integration_id == integration_id)
     except DoesNotExist:
         # Если запись интеграции не найдена, возвращаем ошибку 404
-        return jsonify({'error': 'Integration not found'}), 404
+        return jsonify({'error': 'Нет данных об интеграции'}), 404
 
     # Создаем словарь для хранения данных интеграции
     integration_data = {}
@@ -1236,7 +1236,7 @@ def post_integration_api(client_id):
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
         # Если запись клиента не найдена, возвращаем ошибку 404
-        return jsonify({'error': 'Client not found'}), 404
+        return jsonify({'error': 'Клиент с ID {client_id} не найден'}), 404
 
     # Получаем integration_id из найденной записи клиента
     integration_id = client.integration
