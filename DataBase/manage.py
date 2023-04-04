@@ -10,7 +10,7 @@ def migrate():
             if not model.table_exists():
                 with conn:
                     conn.create_tables([model])
-                    print("Таблица создана")
+                    print(f"Таблица {model} создана")
             else:
                 # Получаем столбцы таблицы и модели
                 table_columns = conn.get_columns(model._meta.table_name)
@@ -29,23 +29,26 @@ def migrate():
 
                     with conn:
                         conn.create_tables([TempModel])
-                        print(f"Новая таблица {model} - создана")
+                        print(f"Новая таблица {model} создана")
 
                     # Копируем данные из старой таблицы в новую
                     common_columns = table_column_names.intersection(model_column_names)
                     common_columns_str = ', '.join(common_columns)
-                    print(model_column_names)
+                    print(f"Новые столбцы: {model_column_names}, для таблицы {model}.")
                     query = f"INSERT INTO {new_table_name} ({common_columns_str}) SELECT {common_columns_str} FROM {model._meta.table_name};"
                     with conn:
                         conn.execute_sql(query)
+                        print(f"Копирование таблицы {model} завершено")
 
                     # Удаляем старую таблицу
                     with conn:
                         conn.execute_sql(f"DROP TABLE {model._meta.table_name}")
+                        print(f"Удаление старой таблицы {model} завершено")
 
                     # Переименовываем новую таблицу
                     with conn:
                         conn.execute_sql(f"ALTER TABLE {new_table_name} RENAME TO {model._meta.table_name}")
+                        print(f"Переименование таблицы {model} завершено")
 
         print("Tables migrated successfully")
     except Exception as e:
