@@ -1393,6 +1393,47 @@ def post_tech_account_api(client_id):
     response_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES}
     return jsonify(response_data), 201
 
+def patch_tech_account_api(client_id):
+    try:
+        with conn:
+            client = ClientsCard.get(ClientsCard.client_id == client_id)
+    except DoesNotExist:
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+
+    tech_account_id = client.tech_account
+
+    tech_account_data = request.json
+    if not isinstance(tech_account_data, dict):
+        return jsonify({'error': 'Неверный формат данных'}), 400
+
+    try:
+        with conn:
+            TechAccount.update(**tech_account_data).where(TechAccount.tech_account_id == tech_account_id).execute()
+    except Exception as e:
+        return jsonify({'error': f'Ошибка при обновлении технического аккаунта: {e}'}), 500
+
+    return jsonify({'message': 'Технический аккаунт успешно обновлен'}), 200
+
+def delete_tech_account_api(client_id):
+    try:
+        with conn:
+            client = ClientsCard.get(ClientsCard.client_id == client_id)
+    except DoesNotExist:
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+
+    tech_account_id = client.tech_account
+
+    try:
+        with conn:
+            deleted_rows = TechAccount.delete().where(TechAccount.tech_account_id == tech_account_id).execute()
+    except Exception as e:
+        return jsonify({'error': f'Ошибка при удалении технического аккаунта: {e}'}), 500
+
+    if deleted_rows == 0:
+        return jsonify({'error': 'Технический аккаунт не найден'}), 404
+
+    return jsonify({'message': 'Технический аккаунт успешно удален'}), 200
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1759,6 +1800,8 @@ def create_app():
     # Регистрация обработчика для API информация о тех УЗ клиента
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'get_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(get_tech_account_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'post_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(post_tech_account_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'patch_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(patch_tech_account_api), methods=['PATCH'])
+    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'delete_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(delete_tech_account_api), methods=['DELETE'])
 
     # Регистрация обработчика для API информация о серверах клиента
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'get_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(get_bm_servers_card_api), methods=['GET'])
