@@ -1338,11 +1338,11 @@ def get_tech_account_api(client_id):
     # Получаем все записи с указанным tech_account_id
     try:
         with conn:
-            tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+            client = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
     except DoesNotExist:
         return jsonify({'error': 'Нет данных о технических аккаунтах'}), 404
 
-    tech_account_id = tech_accounts.tech_account
+    tech_account_id = client.tech_account
 
     # Получаем все записи с указанным client_id
     try:
