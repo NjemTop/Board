@@ -10,6 +10,7 @@ def migrate():
             if not model.table_exists():
                 with conn:
                     conn.create_tables([model])
+                    print("Таблица создана")
             else:
                 # Получаем столбцы таблицы и модели
                 table_columns = conn.get_columns(model._meta.table_name)
