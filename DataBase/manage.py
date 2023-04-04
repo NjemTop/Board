@@ -44,7 +44,7 @@ def migrate():
                     # Удаляем старую таблицу
                     with conn:
                         conn.execute_sql(f"DROP TABLE {model._meta.table_name}")
-                        print(f"Удаление старой таблицы {model} завершено")
+                        print(f"Удаление старой таблицы {new_table_name} завершено")
 
                     # Переименовываем новую таблицу
                     with conn:
