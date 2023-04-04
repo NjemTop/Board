@@ -8,9 +8,10 @@ from flask import render_template
 import traceback
 import sqlite3
 import peewee
+from peewee import DoesNotExist
 import os
 from pathlib import Path
-from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
@@ -1194,6 +1195,25 @@ def post_bm_servers_card_api(client_id):
     except Exception as error:
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
+def post_integration_api(client_id):
+    try:
+        client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+    except DoesNotExist:
+        return jsonify({'error': 'Client not found'}), 404
+
+    integration_id = client.integration
+    data = request.json
+
+    if not data or not all(key in Integration.COLUMN_NAMES for key in data):
+        return jsonify({'error': 'Invalid request'}), 400
+
+    try:
+        integration = Integration.create(integration_id=integration_id, **data)
+    except peewee.IntegrityError:
+        return jsonify({'error': 'Integration already exists'}), 409
+
+    return jsonify({'message': 'Integration created successfully'}), 201
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1560,6 +1580,9 @@ def create_app():
     # Регистрация обработчика для API информация о серверах клиента
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'get_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(get_bm_servers_card_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'post_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(post_bm_servers_card_api), methods=['POST'])
+
+    
+    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(post_integration_api), methods=['POST'])
     
     return app
 

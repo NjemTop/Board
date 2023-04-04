@@ -31,4 +31,5 @@ HEALTHCHECK CMD sqlite3 /var/lib/sqlite/database.db "SELECT 1"
 WORKDIR /var/lib/sqlite/
 
 # Устанавливаем точку входа
-CMD ["datasette", "serve", "--host", "0.0.0.0", "--port", "5000", "database.db"]
+#CMD ["datasette", "serve", "--host", "0.0.0.0", "--port", "5000", "database.db"]
+ENTRYPOINT ["sh", "-c", "python -u /app/manage.py migrate && datasette serve --host 0.0.0.0 --port 5000 database.db"]

@@ -195,3 +195,49 @@ class BMServersCard(BaseModel):
     
     class Meta:
         table_name = 'bm_servers_card'
+
+class Integration(BaseModel):
+    """Класс наименований интеграций в БД"""
+    integration_id = peewee.TextField(column_name='ID_интеграций', primary_key=True)
+    elasticsearch = peewee.BooleanField(column_name='Elasticsearch', null=True)
+    ad = peewee.BooleanField(column_name='AD', null=True)
+    adfs = peewee.BooleanField(column_name='ADFS', null=True)
+    oauth_2 = peewee.BooleanField(column_name='OAuth_2.0', null=True)
+    module_translate = peewee.BooleanField(column_name='Модуль_трансляции', null=True)
+    ms_oos = peewee.BooleanField(column_name='MS OOS', null=True)
+    exchange = peewee.BooleanField(column_name='Exchange', null=True)
+    office_365 = peewee.BooleanField(column_name='Office_365', null=True)
+    sfb = peewee.BooleanField(column_name='Skype_For_Business', null=True)
+    zoom = peewee.BooleanField(column_name='Zoom', null=True)
+    teams = peewee.BooleanField(column_name='Teams', null=True)
+    smtp = peewee.BooleanField(column_name='SMTP', null=True)
+    cryptopro_dss = peewee.BooleanField(column_name='Cripto_DSS', null=True)
+    cryptopro_scp = peewee.BooleanField(column_name='Cripto_CSP', null=True)
+    smpp = peewee.BooleanField(column_name='SMPP', null=True)
+    limesurvey = peewee.BooleanField(column_name='Анкетирование', null=True)
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'integration_id',
+        'elasticsearch',
+        'ad',
+        'adfs',
+        'oauth_2',
+        'module_translate',
+        'ms_oos',
+        'exchange',
+        'office_365',
+        'sfb',
+        'zoom',
+        'teams',
+        'smtp',
+        'cryptopro_dss',
+        'cryptopro_scp',
+        'smpp',
+        'limesurvey'
+    ]   
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = Integration.COLUMN_NAMES
+    
+    class Meta:
+        table_name = 'integration'
