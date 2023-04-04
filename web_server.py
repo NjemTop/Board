@@ -1284,6 +1284,56 @@ def post_integration_api(client_id):
     # Возвращаем сообщение об успешном создании записи интеграции
     return jsonify({'message': 'Integration created successfully'}), 201
 
+def patch_integration_api(client_id):
+    try:
+        with conn:
+            # Получаем запись клиента с указанным ID
+            client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+    except DoesNotExist:
+        # Если запись клиента не найдена, возвращаем ошибку 404
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+
+    # Получаем integration_id из найденной записи клиента
+    integration_id = client.integration
+
+    try:
+        with conn:
+            # Получаем запись интеграции с указанным integration_id
+            integration = Integration.get(Integration.integration_id == integration_id)
+    except DoesNotExist:
+        # Если запись интеграции не найдена, возвращаем ошибку 404
+        return jsonify({'error': 'Нет данных об интеграции'}), 404
+
+    # Получаем данные из PATCH-запроса
+    patch_data = request.json
+
+    # Проверяем, что полученные данные являются словарем
+    if not isinstance(patch_data, dict):
+        return jsonify({'error': 'Неверный формат данных'}), 400
+
+    # Итерируемся по столбцам таблицы Integration, исключая столбец "integration_id"
+    for column_name in (column for column in Integration.COLUMN_NAMES if column != 'integration_id'):
+        # Если столбец присутствует в patch_data, обновляем значение в записи интеграции
+        if column_name in patch_data:
+            value = patch_data[column_name]
+
+            # Проверяем, что значение является булевым
+            if not isinstance(value, bool):
+                return jsonify({'error': f'Неверный тип данных для столбца {column_name}'}), 400
+
+            setattr(integration, column_name, value)
+
+    try:
+        with conn:
+            # Сохраняем обновленную запись интеграции в базе данных
+            integration.save()
+    except Exception as e:
+        # Если возникла ошибка при сохранении, возвращаем ошибку 500
+        return jsonify({'error': f'Ошибка при обновлении данных интеграции: {e}'}), 500
+
+    # Возвращаем успешный ответ
+    return jsonify({'message': 'Данные интеграции успешно обновлены'}), 200
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1654,6 +1704,7 @@ def create_app():
     
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'get_integration_api', require_basic_auth(USERNAME, PASSWORD)(get_integration_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(post_integration_api), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'patch_integration_api', require_basic_auth(USERNAME, PASSWORD)(patch_integration_api), methods=['PATCH'])
     
     return app
 
