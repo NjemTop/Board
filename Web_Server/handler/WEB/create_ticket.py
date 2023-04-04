@@ -1,6 +1,6 @@
 import json
 import logging
-from flask import request
+from flask import request, Response
 from Web_Server.function import parse_json_message
 from Web_Server.web_config import CONFIG_FILE
 from System_func.send_telegram_message import Alert
@@ -12,6 +12,15 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 # Создаем объект класса Alert
 alert = Alert()
+
+def handler_get_create_ticket():
+        """Функция обработки GET запросов по URL"""
+        ip_address = f"Request from {request.remote_addr}: {request.url}"
+        user_agent = request.headers.get('User-Agent')
+        user_who = f'User-Agent: {user_agent}'
+        web_info_logger.info('Кто-то зашёл на сайт c IP-адреса: %s', ip_address)
+        web_info_logger.info('Его данные подключения: %s', (user_who,))
+        return Response('Этот URL для получения вэбхуков(создание)', mimetype='text/plain')
 
 def handler_post_create_ticket():
         """Функция обработки создания тикета из HappyFox"""
@@ -36,3 +45,4 @@ def handler_post_create_ticket():
         web_info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
         # Отправляем ответ о том, что всё принято и всё хорошо
         return "OK", 201
+

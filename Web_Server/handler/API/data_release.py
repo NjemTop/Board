@@ -1,11 +1,11 @@
-from flask import request, Response
+from flask import Response
 import logging
 import peewee
 import json
 from DataBase.model_class import Release_info, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
-# Указываем настройки логов для нашего файла с классами
+# Указываем настройки логов
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
