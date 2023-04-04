@@ -1756,7 +1756,7 @@ def create_app():
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(patch_connect_info_api))
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(delete_connect_info_api))
 
-    # Регистрация обработчика для API информация об интеграции клиента
+    # Регистрация обработчика для API информация о тех УЗ клиента
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'get_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(get_tech_account_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'post_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(post_tech_account_api), methods=['POST'])
 
