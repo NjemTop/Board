@@ -244,15 +244,15 @@ class Integration(BaseModel):
 class TechAccount(BaseModel):
     """Класс тех. УЗ клиентов в БД"""
     id = peewee.AutoField(column_name='ID', primary_key=True)
-    client_id = peewee.TextField(column_name='ID_Тех_уз')
-    contact_info_name = peewee.TextField(column_name='Описание')
+    tech_account_id = peewee.TextField(column_name='ID_Тех_уз')
+    contact_info_disc = peewee.TextField(column_name='Описание')
     contact_info_account = peewee.TextField(column_name='Учетная_запись')
     contact_info_password = peewee.TextField(column_name='Пароль')
     # Список наименований столбцов
     COLUMN_NAMES = [
         'id',
-        'client_id',
-        'contact_info_name',
+        'tech_account_id',
+        'contact_info_disc',
         'contact_info_account',
         'contact_info_password'
     ]

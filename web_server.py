@@ -1365,24 +1365,31 @@ def get_tech_account_api(client_id):
     return response, 200
 
 def post_tech_account_api(client_id):
+    # Получаем клиента с указанным client_id
     try:
         with conn:
             client = ClientsCard.get(ClientsCard.client_id == client_id)
     except DoesNotExist:
         return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
 
+    tech_account_id = client.tech_account
+
+    # Получаем данные технического аккаунта из запроса
     tech_account_data = request.json
     if not isinstance(tech_account_data, dict):
         return jsonify({'error': 'Неверный формат данных'}), 400
 
-    tech_account_data['client_id'] = client_id
+    # Устанавливаем tech_account_id равным tech_account_id
+    tech_account_data['tech_account_id'] = tech_account_id
 
+    # Создаем запись технического аккаунта с полученными данными
     try:
         with conn:
             tech_account = TechAccount.create(**tech_account_data)
     except Exception as e:
         return jsonify({'error': f'Ошибка при создании технического аккаунта: {e}'}), 500
 
+    # Формируем ответ с данными созданного технического аккаунта
     response_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES}
     return jsonify(response_data), 201
 
