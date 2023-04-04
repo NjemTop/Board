@@ -18,7 +18,7 @@ def migrate():
                 model_column_names = set(model().columns.keys())
 
                 if table_column_names != model_column_names:
-                    print(f"Начат процесс миграции строк таблицы {model}")
+                    print(f"Начат процесс миграции строк таблицы {model} начат")
                     # Создаем новую таблицу с обновленными столбцами
                     new_table_name = model._meta.table_name + '_new'
 
