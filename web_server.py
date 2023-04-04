@@ -1220,11 +1220,16 @@ def get_integration_api(client_id):
 def post_integration_api(client_id):
     try:
         with conn:
+            # Получаем запись клиента с указанным ID
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
+        # Если запись клиента не найдена, возвращаем ошибку 404
         return jsonify({'error': 'Client not found'}), 404
 
+    # Получаем integration_id из найденной записи клиента
     integration_id = client.integration
+
+    # Получаем данные из POST-запроса
     data = request.json
 
     # Создаем словарь с значениями по умолчанию
@@ -1236,10 +1241,13 @@ def post_integration_api(client_id):
 
     try:
         with conn:
+            # Создаем запись интеграции в таблице Integration с полученными данными
             integration = Integration.create(**default_data)
     except peewee.IntegrityError:
+        # Если запись с таким integration_id уже существует, возвращаем ошибку 409
         return jsonify({'error': 'Integration already exists'}), 409
 
+    # Возвращаем сообщение об успешном создании записи интеграции
     return jsonify({'message': 'Integration created successfully'}), 201
 
 def get_app():
