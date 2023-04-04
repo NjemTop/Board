@@ -1198,24 +1198,36 @@ def post_bm_servers_card_api(client_id):
 def get_integration_api(client_id):
     try:
         with conn:
+            # Получаем запись клиента с указанным ID
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except DoesNotExist:
+        # Если запись клиента не найдена, возвращаем ошибку 404
         return jsonify({'error': 'Client not found'}), 404
 
+    # Получаем integration_id из найденной записи клиента
     integration_id = client.integration
 
     try:
         with conn:
+            # Получаем запись интеграции с указанным integration_id
             integration = Integration.get(Integration.integration_id == integration_id)
     except DoesNotExist:
+        # Если запись интеграции не найдена, возвращаем ошибку 404
         return jsonify({'error': 'Integration not found'}), 404
 
-    result = {}
-    for column in Integration.COLUMN_NAMES:
-        if column != 'integration_id':
-            result[column] = getattr(integration, column)
+    # Создаем словарь для хранения данных интеграции
+    integration_data = {}
 
-    return jsonify(result)
+    # Итерируемся по столбцам таблицы Integration и добавляем значения в словарь
+    for column_name in Integration.COLUMN_NAMES:
+        value = getattr(integration, column_name)
+        # Если значение равно None, устанавливаем его в False
+        if value is None:
+            value = False
+        integration_data[column_name] = value
+
+    # Возвращаем данные интеграции в формате JSON
+    return jsonify(integration_data), 200
 
 def post_integration_api(client_id):
     try:
@@ -1232,6 +1244,21 @@ def post_integration_api(client_id):
     # Получаем данные из POST-запроса
     data = request.json
 
+    # Проверяем, что входные данные являются словарем
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Invalid input data. Expected a JSON object'}), 400
+
+    # Проверяем, что в словаре data только допустимые ключи
+    allowed_keys = set(Integration.COLUMN_NAMES) - {'integration_id'}
+    for key in data:
+        if key not in allowed_keys:
+            return jsonify({'error': f'Invalid key: {key}. Allowed keys are: {", ".join(allowed_keys)}'}), 400
+
+    # Проверяем, что значения в словаре data имеют допустимый тип (bool)
+    for key, value in data.items():
+        if not isinstance(value, bool):
+            return jsonify({'error': f'Invalid value for key {key}. Expected a boolean value'}), 400
+        
     # Создаем словарь с значениями по умолчанию
     default_data = {key: False for key in Integration.COLUMN_NAMES}
     default_data['integration_id'] = integration_id
