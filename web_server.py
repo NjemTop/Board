@@ -11,7 +11,7 @@ import peewee
 from peewee import DoesNotExist
 import os
 from pathlib import Path
-from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, conn
+from DataBase.model_class import Release_info, BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, TechAccount, conn
 import xml.etree.ElementTree as ET
 from System_func.send_telegram_message import Alert
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
@@ -1334,6 +1334,56 @@ def patch_integration_api(client_id):
     # Возвращаем успешный ответ
     return jsonify({'message': 'Данные интеграции успешно обновлены'}), 200
 
+def get_tech_account_api(client_id):
+    try:
+        with conn:
+            client = ClientsCard.get(ClientsCard.client_id == client_id)
+    except DoesNotExist:
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+
+    # Получаем все записи с указанным client_id
+    try:
+        with conn:
+            tech_accounts = TechAccount.select().where(TechAccount.client_id == client_id)
+    except DoesNotExist:
+        return jsonify({'error': 'Нет данных о технических аккаунтах'}), 404
+
+    # Создаем список для хранения данных технических аккаунтов
+    tech_accounts_data = []
+
+    # Итерируемся по найденным записям и добавляем их данные в список
+    for tech_account in tech_accounts:
+        account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES}
+        tech_accounts_data.append(account_data)
+
+    # Возвращаем данные технических аккаунтов в формате JSON с отступами для лучшей читаемости
+    response = Response(json.dumps(tech_accounts_data, indent=2), content_type='application/json; charset=utf-8')
+    response.headers.add('Cache-Control', 'no-store')
+    response.headers.add('Pragma', 'no-cache')
+    return response, 200
+
+def post_tech_account_api(client_id):
+    try:
+        with conn:
+            client = ClientsCard.get(ClientsCard.client_id == client_id)
+    except DoesNotExist:
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+
+    tech_account_data = request.json
+    if not isinstance(tech_account_data, dict):
+        return jsonify({'error': 'Неверный формат данных'}), 400
+
+    tech_account_data['client_id'] = client_id
+
+    try:
+        with conn:
+            tech_account = TechAccount.create(**tech_account_data)
+    except Exception as e:
+        return jsonify({'error': f'Ошибка при создании технического аккаунта: {e}'}), 500
+
+    response_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES}
+    return jsonify(response_data), 201
+
 def get_app():
     """Функция приложения ВЭБ-сервера"""
     app = Flask(__name__)
@@ -1697,11 +1747,15 @@ def create_app():
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(patch_connect_info_api))
     app.route('/clients_all_info/api/connect_info/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(delete_connect_info_api))
 
+    # Регистрация обработчика для API информация об интеграции клиента
+    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'get_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(get_tech_account_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'post_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(post_tech_account_api), methods=['POST'])
+
     # Регистрация обработчика для API информация о серверах клиента
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'get_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(get_bm_servers_card_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'post_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(post_bm_servers_card_api), methods=['POST'])
 
-    
+    # Регистрация обработчика для API информация об интеграции клиента
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'get_integration_api', require_basic_auth(USERNAME, PASSWORD)(get_integration_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(post_integration_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'patch_integration_api', require_basic_auth(USERNAME, PASSWORD)(patch_integration_api), methods=['PATCH'])

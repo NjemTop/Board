@@ -240,3 +240,24 @@ class Integration(BaseModel):
     
     class Meta:
         table_name = 'integration'
+
+class TechAccount(BaseModel):
+    """Класс тех. УЗ клиентов в БД"""
+    id = peewee.AutoField(column_name='ID', primary_key=True)
+    client_id = peewee.TextField(column_name='ID_Тех_уз')
+    contact_info_name = peewee.TextField(column_name='Описание')
+    contact_info_account = peewee.TextField(column_name='Учетная_запись')
+    contact_info_password = peewee.TextField(column_name='Пароль')
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'id',
+        'client_id',
+        'contact_info_name',
+        'contact_info_account',
+        'contact_info_password'
+    ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = TechAccount.COLUMN_NAMES
+    class Meta:
+        table_name = 'tech_account'
