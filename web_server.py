@@ -1355,11 +1355,21 @@ def get_tech_account_api(client_id):
 
     # Итерируемся по найденным записям и добавляем их данные в список
     for tech_account in tech_accounts:
-        account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES}
+        account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
         tech_accounts_data.append(account_data)
 
-    # Возвращаем данные технических аккаунтов в формате JSON с отступами для лучшей читаемости
-    response = Response(json.dumps(tech_accounts_data, indent=2), content_type='application/json; charset=utf-8')
+    # Проверяем, если список результатов пуст
+    if not tech_accounts_data:
+        return jsonify({'message': f'По текущему клиенту с ID {client_id} информации нет'}), 200
+
+    # Формируем структуру ответа
+    response_data = {
+        'client_id': client_id,
+        'contacts': tech_accounts_data
+    }
+
+    # Возвращаем данные технических аккаунтов в формате JSON с отступами для лучшей читаемости и корректным отображением текста на русском языке
+    response = Response(json.dumps(response_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
     response.headers.add('Cache-Control', 'no-store')
     response.headers.add('Pragma', 'no-cache')
     return response, 200
