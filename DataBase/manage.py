@@ -18,6 +18,7 @@ def migrate():
                 model_column_names = set(model().columns.keys())
 
                 if table_column_names != model_column_names:
+                    print(f"Начат процесс миграции строк таблицы {model}")
                     # Создаем новую таблицу с обновленными столбцами
                     new_table_name = model._meta.table_name + '_new'
 
@@ -28,6 +29,7 @@ def migrate():
 
                     with conn:
                         conn.create_tables([TempModel])
+                        print(f"Новая таблица {model} - создана")
 
                     # Копируем данные из старой таблицы в новую
                     common_columns = table_column_names.intersection(model_column_names)
