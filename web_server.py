@@ -1231,8 +1231,7 @@ def get_integration_api(client_id):
         integration_data[column_name] = value
 
     # Возвращаем данные интеграции в формате JSON с отступами для лучшей читаемости
-    response = jsonify(integration_data)
-    response.headers.add('Content-Type', 'application/json; charset=utf-8')
+    response = Response(json.dumps(integration_data, indent=2), content_type='application/json; charset=utf-8')
     response.headers.add('Cache-Control', 'no-store')
     response.headers.add('Pragma', 'no-cache')
     return response, 200
