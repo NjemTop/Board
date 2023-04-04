@@ -1335,13 +1335,14 @@ def patch_integration_api(client_id):
     return jsonify({'message': 'Данные интеграции успешно обновлены'}), 200
 
 def get_tech_account_api(client_id):
+    # Получаем все записи с указанным tech_account_id
     try:
         with conn:
-            client = ClientsCard.get(ClientsCard.client_id == client_id)
+            tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
     except DoesNotExist:
-        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
+        return jsonify({'error': 'Нет данных о технических аккаунтах'}), 404
 
-    tech_account_id = client.tech_account
+    tech_account_id = tech_accounts.tech_account
 
     # Получаем все записи с указанным client_id
     try:
