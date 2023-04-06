@@ -10,7 +10,7 @@ config_file = "Main.config"
 ## перебираем тикеты и вытягиваем инфу по ним
 def info_from_ticket_id(ticket_info):
     """Функция ... """
-    name_of_ticket = ticket_info['subject'].replace('RE: ', '').replace('FW: ', '')
+    name_of_ticket = ticket_info['subject'].replace('RE: ', '').replace('FW: ', '').replace('Fwd: ', '')
     date_ticket_start_0 = ticket_info['created_at']
     datetime_object_start = datetime.strptime(date_ticket_start_0, '%Y-%m-%d %H:%M:%S')
     date_ticket_start = datetime_object_start.strftime('%d.%m.%Y')
@@ -58,4 +58,3 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     docx.render(context)
     # сохраняем файл
     docx.save("./Temp_report_tele2_final.docx")
-    

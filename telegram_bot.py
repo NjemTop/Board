@@ -612,10 +612,7 @@ def send_text_version(result_client_version):
 def answer_start_end_date(answer_id):
     user_state = user_states.get(answer_id.chat.id)
     if user_state == "waiting_for_client_name":
-        two_date = str(answer_id.chat.id).split('-')
-        print(str(answer_id.chat.id))
-        print(two_date)
-        print(two_date[0])
+        two_date = str(answer_id.text).split('-')
         start_date = two_date[0]
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -677,3 +674,5 @@ def start_telegram_bot():
     except Exception as error_message:
         print(f"Error in Telegram bot: {error_message}")
         bot_error_logger.error("Error in Telegram bot: %s", error_message)
+
+start_telegram_bot()
