@@ -1,4 +1,5 @@
-from flask import request, Response, jsonify, send_from_directory
+from flask import request, Response, jsonify, send_file
+import mimetypes
 import logging
 import json
 import peewee
@@ -73,7 +74,13 @@ def get_serve_file(client_id):
 
     # Выбираем первый файл из списка (можно добавить логику выбора нужного файла, если требуется)
     connection_info = connection_infos[0]
-    return send_from_directory(app.config['UPLOAD_FOLDER'], os.path.basename(connection_info.file_path))
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(connection_info.file_path))
+
+    # Определение MIME-типа файла
+    mimetype = mimetypes.guess_type(file_path)[0]
+
+    # Отправка файла с правильным MIME-типом
+    return send_file(file_path, mimetype=mimetype)
 
 def post_upload_conn_file(client_id):
     # Проверяем существование клиента с указанным client_id
