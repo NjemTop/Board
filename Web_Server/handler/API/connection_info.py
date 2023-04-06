@@ -3,6 +3,8 @@ import logging
 import json
 import peewee
 from werkzeug.utils import secure_filename
+import re
+from unicodedata import normalize
 import os
 from DataBase.model_class import ClientsCard, ConnectionInfo, conn
 from logger.log_config import setup_logger, get_abs_log_path
@@ -23,10 +25,16 @@ def init_app(flask_app):
     app = flask_app
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def secure_filename_custom(filename):
+    filename = normalize("NFKD", filename).encode("utf-8", "ignore").decode("utf-8")
+    filename = re.sub(r"[^\w\s-]", "", filename).strip().lower()
+    filename = re.sub(r"[-\s]+", "-", filename)
+    return filename
+
 def get_uploaded_conn_files(client_id):
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
-    except ClientsCard.DoesNotExist:
+    except peewee.DoesNotExist:
         return {'error': f'Client with client_id {client_id} not found'}, 404
 
     connection_infos = ConnectionInfo.select().where(ConnectionInfo.client_id == client_card)
@@ -53,7 +61,7 @@ def post_upload_conn_file(client_id):
     # Проверяем существование клиента с указанным client_id
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
-    except ClientsCard.DoesNotExist:
+    except peewee.DoesNotExist:
         return {'error': f'Client with client_id {client_id} not found'}, 404
 
     # Проверяем наличие файла в запросе
@@ -71,7 +79,7 @@ def post_upload_conn_file(client_id):
     # Если файл существует и имеет допустимое расширение
     if file and allowed_file(file.filename):
         # Создаем безопасное имя файла и сохраняем его
-        filename = secure_filename(file.filename)
+        filename = secure_filename_custom(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         # Создание записи в БД
