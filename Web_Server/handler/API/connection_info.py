@@ -1,4 +1,4 @@
-from flask import request, Response, jsonify, send_file
+from flask import request, Response, jsonify, send_file, make_response
 import mimetypes
 import logging
 import json
@@ -80,7 +80,14 @@ def get_serve_file(client_id):
     mimetype = mimetypes.guess_type(file_path)[0]
 
     # Отправка файла с правильным MIME-типом
-    return send_file(file_path, mimetype=mimetype)
+    response = make_response(send_file(file_path, mimetype=mimetype))
+
+    # Добавление заголовков, чтобы предотвратить кеширование
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+
+    return response
 
 def post_upload_conn_file(client_id):
     # Проверяем существование клиента с указанным client_id
