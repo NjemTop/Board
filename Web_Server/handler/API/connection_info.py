@@ -70,7 +70,7 @@ def get_serve_file(client_id):
 
     # Выбираем первый файл из списка (можно добавить логику выбора нужного файла, если требуется)
     connection_info = connection_infos[0]
-    return send_from_directory(app.config['UPLOAD_FOLDER'], connection_info.file_path)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], os.path.basename(connection_info.file_path))
 
 def post_upload_conn_file(client_id):
     # Проверяем существование клиента с указанным client_id
