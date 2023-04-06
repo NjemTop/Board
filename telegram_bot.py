@@ -385,14 +385,14 @@ def inline_button_clients(call):
     elif call.data == "button_psb":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         client_report_id = 11
-        create_report_tele2(client_report_id)
+        #create_report_tele2(client_report_id)
         with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         client_report_id = 12
-        create_report_tele2(client_report_id)
+        #create_report_tele2(client_report_id)
         with open("./Temp_report_REC_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
         # setup_script = 'Скрипт_формирования_отчёта_клиента_РЭЦ.ps1'
@@ -422,7 +422,7 @@ def inline_button_clients(call):
     elif call.data == "button_pochtaR":
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         client_report_id = 13
-        create_report_tele2(client_report_id)
+        #create_report_tele2(client_report_id)
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(call.message.chat.id, report_file)
 # Добавляем подуровни к разделу Обновление версии

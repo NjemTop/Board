@@ -58,5 +58,4 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     docx.render(context)
     # сохраняем файл
     docx.save("./Temp_report_tele2_final.docx")
-
-create_report_tele2(37)
+    
