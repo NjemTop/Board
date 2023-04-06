@@ -44,6 +44,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_uploaded_conn_files(client_id):
+    """Функция определения списка файлов у клиента по запросу client_id"""
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
     except peewee.DoesNotExist:
