@@ -267,6 +267,9 @@ class ConnectionInfo(BaseModel):
     client_id = peewee.ForeignKeyField(ClientsCard, column_name='client_id', backref='connection_info', on_delete='CASCADE', null=True)
     file_path = peewee.TextField(column_name='file_path', null=True)
     text = peewee.TextField(column_name='text', null=True)
+
+    COLUMN_NAMES = ["id", "client_id", "file_path", "text"]
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.column_names = ConnectionInfo.COLUMN_NAMES
