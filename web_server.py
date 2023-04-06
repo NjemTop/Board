@@ -90,7 +90,8 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'get_uploaded_conn_files', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_uploaded_conn_files), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/connection_info/clients/<int:client_id>/file', 'get_serve_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_serve_file), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'post_upload_conn_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.post_upload_conn_file), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'delete_upload_conn_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_connection_info), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'delete_all_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_all_connection_info), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>/<int:connection_info_id>', 'delete_specific_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_specific_connection_info), methods=['DELETE'])
     
     return app
 
