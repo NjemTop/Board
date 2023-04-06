@@ -613,6 +613,9 @@ def answer_start_end_date(answer_id):
     user_state = user_states.get(answer_id.chat.id)
     if user_state == "waiting_for_client_name":
         two_date = str(answer_id.chat.id).split('-')
+        print(str(answer_id.chat.id))
+        print(two_date)
+        print(two_date[0])
         start_date = two_date[0]
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
