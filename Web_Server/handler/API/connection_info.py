@@ -28,10 +28,11 @@ def init_app(flask_app):
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def secure_filename_custom(filename):
-    filename = normalize("NFKD", filename).encode("utf-8", "ignore").decode("utf-8")
-    filename = re.sub(r"[^\w\s-]", "", filename).strip().lower()
-    filename = re.sub(r"[-\s]+", "-", filename)
-    return filename
+    basename, ext = os.path.splitext(filename)
+    basename = normalize("NFKD", basename).encode("utf-8", "ignore").decode("utf-8")
+    basename = re.sub(r"[^\w\s-]", "", basename).strip().lower()
+    basename = re.sub(r"[-\s]+", "-", basename)
+    return f"{basename}{ext}"
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
