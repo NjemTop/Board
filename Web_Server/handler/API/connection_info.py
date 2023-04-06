@@ -109,18 +109,42 @@ def post_upload_conn_file(client_id):
         # Возвращаем ошибку, если формат файла не допустим
         return {'error': 'File format not allowed'}, 400
 
-def delete_connection_info(client_id):
+def delete_all_connection_info(client_id):
     # Проверяем существование клиента с указанным client_id
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
     except peewee.DoesNotExist:
         return {'error': f'Client with client_id {client_id} not found'}, 404
 
-    # Находим информацию о подключении для указанного клиента
+    # Находим все записи информации о подключении для указанного клиента
+    connection_info_list = ConnectionInfo.select().where(ConnectionInfo.client_id == client_card)
+
+    if not connection_info_list:
+        return {'error': f'No connection info records for client_id {client_id}'}, 404
+
+    # Удаляем все файлы, связанные с записями
+    for connection_info in connection_info_list:
+        try:
+            os.remove(connection_info.file_path)
+        except FileNotFoundError:
+            pass
+        # Удаляем запись из БД
+        connection_info.delete_instance()
+
+    return jsonify({'message': f'All connection info records and related files for client_id {client_id} have been deleted'}), 200
+
+def delete_specific_connection_info(client_id, connection_info_id):
+    # Проверяем существование клиента с указанным client_id
     try:
-        connection_info = ConnectionInfo.get(ConnectionInfo.client_id == client_card)
+        client_card = ClientsCard.get(ClientsCard.client_id == client_id)
     except peewee.DoesNotExist:
-        return {'error': f'Connection info for client_id {client_id} not found'}, 404
+        return {'error': f'Client with client_id {client_id} not found'}, 404
+
+    # Находим информацию о подключении для указанного клиента и connection_info_id
+    try:
+        connection_info = ConnectionInfo.get((ConnectionInfo.client_id == client_card) & (ConnectionInfo.id == connection_info_id))
+    except peewee.DoesNotExist:
+        return {'error': f'Connection info with connection_info_id {connection_info_id} for client_id {client_id} not found'}, 404
 
     # Удаляем файл, связанный с записью
     try:
@@ -131,4 +155,4 @@ def delete_connection_info(client_id):
     # Удаляем запись из БД
     connection_info.delete_instance()
 
-    return jsonify({'message': f'Connection info for client_id {client_id} and the related file have been deleted'}), 200
+    return jsonify({'message': f'Connection info with connection_info_id {connection_info_id} for client_id {client_id} and the related file have been deleted'}), 200
