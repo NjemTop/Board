@@ -1,4 +1,4 @@
-from flask import request, Response, jsonify
+from flask import request, Response, send_from_directory
 import logging
 import json
 import peewee
@@ -31,6 +31,9 @@ def secure_filename_custom(filename):
     filename = re.sub(r"[-\s]+", "-", filename)
     return filename
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 def get_uploaded_conn_files(client_id):
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
@@ -54,8 +57,20 @@ def get_uploaded_conn_files(client_id):
 
     return {'client_id': client_id, 'files': files}, 200
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def get_serve_file(client_id):
+    try:
+        client_card = ClientsCard.get(ClientsCard.client_id == client_id)
+    except peewee.DoesNotExist:
+        return {'error': f'Client with client_id {client_id} not found'}, 404
+
+    connection_infos = ConnectionInfo.select().where(ConnectionInfo.client_id == client_card)
+
+    if connection_infos.count() == 0:
+        return {'error': f'No uploaded files found for client with client_id {client_id}'}, 404
+
+    # Выбираем первый файл из списка (можно добавить логику выбора нужного файла, если требуется)
+    connection_info = connection_infos[0]
+    return send_from_directory(app.config['UPLOAD_FOLDER'], connection_info.file_path)
 
 def post_upload_conn_file(client_id):
     # Проверяем существование клиента с указанным client_id

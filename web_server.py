@@ -88,6 +88,7 @@ def create_app():
 
     # Регистрация обработчика для API информация о настройки подключения к клиенту
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'get_uploaded_conn_files', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_uploaded_conn_files), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/connection_info/clients/<int:client_id>/file', 'get_serve_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_serve_file), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'post_upload_conn_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.post_upload_conn_file), methods=['POST'])
     
     return app
