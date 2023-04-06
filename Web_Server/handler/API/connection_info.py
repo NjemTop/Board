@@ -1,7 +1,7 @@
 from flask import request, Response, jsonify, send_file, make_response
 import mimetypes
 import logging
-import json
+import time
 import peewee
 from werkzeug.utils import secure_filename
 import re
@@ -27,6 +27,10 @@ def init_app(flask_app):
     global app
     app = flask_app
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def unique_filename(filename):
+    timestamp = int(time.time())
+    return f"{timestamp}_{filename}"
 
 def secure_filename_custom(filename):
     basename, ext = os.path.splitext(filename)
@@ -112,10 +116,11 @@ def post_upload_conn_file(client_id):
     if file and allowed_file(file.filename):
         # Создаем безопасное имя файла и сохраняем его
         filename = secure_filename_custom(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        unique_name = unique_filename(filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
 
         # Создание записи в БД
-        connection_info = ConnectionInfo.create(client_id=client_card, file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename), text=text)
+        connection_info = ConnectionInfo.create(client_id=client_card, file_path=os.path.join(app.config['UPLOAD_FOLDER'], unique_name), text=text)
         connection_info.save()
 
         # Возвращаем сообщение об успешной загрузке файла
