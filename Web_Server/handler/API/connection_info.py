@@ -48,27 +48,36 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def post_upload_conn_file(client_id):
+    # Проверяем существование клиента с указанным client_id
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
     except ClientsCard.DoesNotExist:
         return {'error': f'Client with client_id {client_id} not found'}, 404
 
+    # Проверяем наличие файла в запросе
     if 'file' not in request.files:
         return {'error': 'No file part'}, 400
 
+    # Получаем файл и текст (если есть) из запроса
     file = request.files['file']
-    text = request.form.get('text')
+    text = request.form.get('text', None)
 
+    # Проверяем наличие имени файла
     if file.filename == '':
         return {'error': 'No selected file'}, 400
 
+    # Если файл существует и имеет допустимое расширение
     if file and allowed_file(file.filename):
+        # Создаем безопасное имя файла и сохраняем его
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         # Создание записи в БД
         connection_info = ConnectionInfo.create(client_id=client_card, file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename), text=text)
         connection_info.save()
+
+        # Возвращаем сообщение об успешной загрузке файла
         return {'message': 'File uploaded and saved in the database successfully'}, 201
     else:
+        # Возвращаем ошибку, если формат файла не допустим
         return {'error': 'File format not allowed'}, 400
