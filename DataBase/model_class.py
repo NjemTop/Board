@@ -123,6 +123,7 @@ class ClientsCard(BaseModel):
 ######ID_Технические_заметки и ID_Технологическая_учетная_запись - это просто текст. Нужен разве класс и столбцы?
 ######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
 class ContactsCard(BaseModel):
+    """Список клиентов (Контакты)"""
     contact_id = peewee.TextField(column_name='ID_Контакта')
     contact_name = peewee.TextField(column_name='ФИО')
     contact_position = peewee.TextField(column_name='Должность', null=True)
@@ -146,6 +147,7 @@ class ContactsCard(BaseModel):
         table_name = 'contacts_card'
 
 class СonnectInfoCard(BaseModel):
+    """Информация для подключения"""
     id = peewee.AutoField(column_name='ID', primary_key=True)
     client_id = peewee.IntegerField(column_name='ID_Клиента')
     contact_info_name = peewee.TextField(column_name='ФИО')
@@ -166,6 +168,7 @@ class СonnectInfoCard(BaseModel):
         table_name = 'connect_info_card'
 
 class BMServersCard(BaseModel):
+    """Серверы ВМ"""
     bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ', primary_key=True)
     bm_servers_circuit = peewee.TextField(column_name='Контур')
     bm_servers_servers_name = peewee.TextField(column_name='Имя_сервера')
@@ -237,7 +240,7 @@ class Integration(BaseModel):
         table_name = 'integration'
 
 class TechAccount(BaseModel):
-    """Класс тех. УЗ клиентов в БД"""
+    """Класс тех. УЗ клиентов в БД (Технологическая учетная запись)"""
     id = peewee.AutoField(column_name='ID', primary_key=True)
     tech_account_id = peewee.TextField(column_name='ID_Тех_уз')
     contact_info_disc = peewee.TextField(column_name='Описание')
@@ -254,15 +257,75 @@ class TechAccount(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.column_names = TechAccount.COLUMN_NAMES
+
     class Meta:
         table_name = 'tech_account'
 
 class ConnectionInfo(BaseModel):
-    """Класс с информацией о настройке подключении по ВПН"""
+    """Класс с информацией о настройке подключении по ВПН (Настройки подключения)"""
     id = peewee.AutoField(primary_key=True)
     client_id = peewee.ForeignKeyField(ClientsCard, column_name='client_id', backref='connection_info', on_delete='CASCADE', null=True)
     file_path = peewee.TextField(column_name='file_path', null=True)
     text = peewee.TextField(column_name='text', null=True)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = ConnectionInfo.COLUMN_NAMES
 
     class Meta:
         table_name = 'connection_info'
+
+
+
+class Servise(BaseModel):
+    """Класс 'обслуживание' """
+    service_id = peewee.AutoField(column_name='ID_сервис', primary_key=True)
+    service_pack = peewee.TextField(column_name='Пакет_услуг')
+    manager = peewee.TextField(column_name='Менеджер')
+    loyal = peewee.TextField(column_name='Лояльность')
+    # Список наименований столбцов
+    COLUMN_NAMES = [ 
+        'ID_сервис',
+        'Пакет_услуг',
+        'Менеджер',
+        'Лояльность'
+    ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = Servise.COLUMN_NAMES
+
+    class Meta:
+        table_name = 'service'       
+
+class TechInformation(BaseModel):
+    """класс техническая информация"""
+    tech_information_id = peewee.AutoField(column_name='ID_тех_информация', primary_key=True)
+    server_version = peewee.TextField(column_name='Версия_сервера')
+    update_date = peewee.TextField(column_name='Дата_обновления')
+    api = peewee.TextField(column_name='API')
+    ipad = peewee.TextField(column_name='iPad')
+    android = peewee.TextField(column_name='Andriod')
+    mdm = peewee.TextField(column_name='MDM')
+    localizable_web = peewee.TextField(column_name='Локализация Web')
+    localizable_ios = peewee.TextField(column_name='Локализация iOS')
+    skins_web = peewee.TextField(column_name='Скины Web')
+    skins_ios = peewee.TextField(column_name='Скины iOS')
+    # Список наименований столбцов
+    COLUMN_NAMES = [ 
+        'Версия_сервера',
+        'Дата_обновления',
+        'API',
+        'iPad',
+        'Andriod',
+        'MDM',
+        'Локализация Web',
+        'Локализация iOS',
+        'Скины Web',
+        'Скины iOS'
+    ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = TechInformation.COLUMN_NAMES
+
+    class Meta:
+        table_name = 'tech_information' 
+

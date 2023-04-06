@@ -14,8 +14,8 @@ web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), 
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
 # Выбираем путь куда будут сохраняться принимающие файлы
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'connection_files')
+PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+UPLOAD_FOLDER = os.path.join(PROJECT_DIR, 'connection_files')
 
 # Укажем формат каких файлов мы можем принимать
 ALLOWED_EXTENSIONS = {'docx', 'pdf'}
