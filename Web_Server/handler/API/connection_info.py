@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 import re
 from unicodedata import normalize
 import os
+import base64
 from DataBase.model_class import ClientsCard, ConnectionInfo, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
@@ -104,20 +105,30 @@ def post_upload_conn_file(client_id):
     if 'file' not in request.files:
         return {'error': 'No file part'}, 400
 
-    # Получаем файл и текст (если есть) из запроса
+    # Получаем файл, текст (если есть) и формат файла из запроса
     file = request.files['file']
     text = request.form.get('text', None)
-
-    # Проверяем наличие имени файла
-    if file.filename == '':
-        return {'error': 'No selected file'}, 400
+    file_format = request.form.get('file_format', 'binary')  # Значение по умолчанию: 'binary'
 
     # Если файл существует и имеет допустимое расширение
     if file and allowed_file(file.filename):
         # Создаем безопасное имя файла и сохраняем его
         filename = secure_filename_custom(file.filename)
         unique_name = unique_filename(filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_name))
+
+        try:
+            # Декодирование Base64 (если файл приходит в формате Base64)
+            file_data = file.read()
+            if file_format == 'base64':
+                file_data = base64.b64decode(file_data)
+        except Exception as e:
+            return {'error': f'Error decoding file: {str(e)}'}, 400
+
+        try:
+            with open(os.path.join(app.config['UPLOAD_FOLDER'], unique_name), 'wb') as f:
+                f.write(file_data)
+        except Exception as e:
+            return {'error': f'Error saving file: {str(e)}'}, 500
 
         # Создание записи в БД
         connection_info = ConnectionInfo.create(client_id=client_card, file_path=os.path.join(app.config['UPLOAD_FOLDER'], unique_name), text=text)
