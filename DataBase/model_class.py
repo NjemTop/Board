@@ -6,11 +6,6 @@ db_filename = './DataBase/database.db'
 # Подключение к базе данных SQLite
 conn = peewee.SqliteDatabase(f'file:{db_filename}?encoding=utf-8')
 
-# def generate_unique_id():
-#     """Функция генерации случайного числа для БД"""
-#     # Генерируем уникальный ID. В данном примере используется случайное число.
-#     return random.randint(1, 10000)
-
 def generate_unique_id():
     """Функция генерации случайного числа для БД"""
     return str(uuid.uuid4())
@@ -261,3 +256,13 @@ class TechAccount(BaseModel):
         self.column_names = TechAccount.COLUMN_NAMES
     class Meta:
         table_name = 'tech_account'
+
+class ConnectionInfo(BaseModel):
+    """Класс с информацией о настройке подключении по ВПН"""
+    id = peewee.AutoField(primary_key=True)
+    client_id = peewee.ForeignKeyField(ClientsCard, column_name='client_id', backref='connection_info', on_delete='CASCADE', null=True)
+    file_path = peewee.TextField(column_name='file_path', null=True)
+    text = peewee.TextField(column_name='text', null=True)
+
+    class Meta:
+        table_name = 'connection_info'

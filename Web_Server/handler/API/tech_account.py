@@ -9,7 +9,6 @@ from logger.log_config import setup_logger, get_abs_log_path
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
-
 def get_tech_account_api(client_id):
     try:
         with conn:

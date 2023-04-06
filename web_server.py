@@ -5,7 +5,8 @@ from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback
-from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card
+from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info
+from Web_Server.handler.API.connection_info import init_app
 
 # Указываем настройки логов для нашего файла с классами
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
@@ -14,6 +15,7 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
+    init_app(app)
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
 
@@ -83,6 +85,10 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'get_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.get_integration_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.post_integration_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'patch_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.patch_integration_api), methods=['PATCH'])
+
+    # Регистрация обработчика для API информация о настройки подключения к клиенту
+    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'get_uploaded_conn_files', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_uploaded_conn_files), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'post_upload_conn_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.post_upload_conn_file), methods=['POST'])
     
     return app
 
