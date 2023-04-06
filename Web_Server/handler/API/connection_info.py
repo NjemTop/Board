@@ -1,4 +1,4 @@
-from flask import request, Response, send_from_directory
+from flask import request, Response, jsonify, send_from_directory
 import logging
 import json
 import peewee
@@ -108,3 +108,27 @@ def post_upload_conn_file(client_id):
     else:
         # Возвращаем ошибку, если формат файла не допустим
         return {'error': 'File format not allowed'}, 400
+
+def delete_connection_info(client_id):
+    # Проверяем существование клиента с указанным client_id
+    try:
+        client_card = ClientsCard.get(ClientsCard.client_id == client_id)
+    except peewee.DoesNotExist:
+        return {'error': f'Client with client_id {client_id} not found'}, 404
+
+    # Находим информацию о подключении для указанного клиента
+    try:
+        connection_info = ConnectionInfo.get(ConnectionInfo.client_id == client_card)
+    except peewee.DoesNotExist:
+        return {'error': f'Connection info for client_id {client_id} not found'}, 404
+
+    # Удаляем файл, связанный с записью
+    try:
+        os.remove(connection_info.file_path)
+    except FileNotFoundError:
+        pass
+
+    # Удаляем запись из БД
+    connection_info.delete_instance()
+
+    return jsonify({'message': f'Connection info for client_id {client_id} and the related file have been deleted'}), 200
