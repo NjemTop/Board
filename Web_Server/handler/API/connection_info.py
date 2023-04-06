@@ -11,8 +11,10 @@ from logger.log_config import setup_logger, get_abs_log_path
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
+# Выбираем путь куда будут сохраняться принимающие файлы
 UPLOAD_FOLDER = './connection_files'
-ALLOWED_EXTENSIONS = {'docx'}
+# Укажем формат каких файлов мы можем принимать
+ALLOWED_EXTENSIONS = {'docx', 'pdf'}
 
 app = None
 
