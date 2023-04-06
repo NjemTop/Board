@@ -372,11 +372,11 @@ def inline_button_clients(call):
         bot.edit_message_text('Шаблон какого клиента необходимо выгрузить?', call.message.chat.id, call.message.message_id,reply_markup=button_templates)
     ### УРОВЕНЬ 4 "ТЕЛЕ2" 
     elif call.data == "button_tele2":
-        question_start_end_date = bot.send_message(call.message.chat.id, text='Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023')
         button_tele2 = types.InlineKeyboardMarkup()
         back_from_button_tele2 = types.InlineKeyboardButton(text='Отмена', callback_data='cancel_button_tele2') 
         main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
         button_tele2.add(back_from_button_tele2, main_menu, row_width=2)
+        question_start_end_date = bot.edit_message_text('Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023', call.message.chat.id, call.message.message_id, reply_markup=button_tele2)
         user_states[call.message.chat.id] = "waiting_for_client_name"
         bot.register_next_step_handler(question_start_end_date, answer_start_end_date)
     elif call.data == "cancel_button_tele2":
@@ -612,7 +612,7 @@ def send_text_version(result_client_version):
 def answer_start_end_date(answer_id):
     user_state = user_states.get(answer_id.chat.id)
     if user_state == "waiting_for_client_name":
-        two_date = answer_id.chat.id.split('-')
+        two_date = str(answer_id.chat.id).split('-')
         start_date = two_date[0]
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
