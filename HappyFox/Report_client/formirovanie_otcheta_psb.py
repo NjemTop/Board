@@ -54,7 +54,7 @@ def info_from_ticket_id(ticket_info):
             else:
                 continue
     return name_of_ticket, date_ticket_start, date_ticket_close, sla, result
-def create_report_tele2(contact_group_id, start_date, end_date):
+def create_report_psb(contact_group_id, start_date, end_date):
     """Функция ... """
     connector = HappyFoxConnector(config_file)
     object_start_time = datetime.strptime(start_date, '%d.%m.%Y')

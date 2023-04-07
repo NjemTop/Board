@@ -3,7 +3,7 @@ import locale
 import requests
 from datetime import datetime
 import subprocess, sys
-from formirovanie_otcheta_tele2 import list_of_rows
+from Report_client.formirovanie_otcheta_tele2 import list_of_rows
 
 # Прописываем id клиента для ссылки на отчет
 client_report_id = 12

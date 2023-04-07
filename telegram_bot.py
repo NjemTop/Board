@@ -28,7 +28,7 @@ from DataBase.database_result_update import upload_db_result
 from Telegram_Bot.ButtonClasses.button_clients import ButtonClients
 from Telegram_Bot.ButtonClasses.button_update import ButtonUpdate
 from Telegram_Bot.ButtonClasses.button_else_tickets import ButtonElseTickets
-from formirovanie_otcheta_tele2 import create_report_tele2
+from HappyFox.Report_client import formirovanie_otcheta_tele2, formirovanie_otcheta_psb
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
@@ -621,7 +621,7 @@ def answer_start_end_date_tele2(answer_id):
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 37
-        create_report_tele2(contact_group_id, start_date, end_date)
+        formirovanie_otcheta_tele2.create_report_tele2(contact_group_id, start_date, end_date)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
             bot.send_document(answer_id.from_user.id, report_file)
     else:
@@ -635,7 +635,7 @@ def answer_start_end_date_psb(answer_id):
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
-        create_report_tele2(contact_group_id, start_date, end_date)
+        formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date)
         with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
             bot.send_document(answer_id.from_user.id, report_file)
     else:
