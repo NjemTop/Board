@@ -647,6 +647,7 @@ def answer_start_end_date_psb(answer_id_psb):
         print(os.listdir(os.path.join(os.getcwd(), 'templates')))
         if not os.path.exists(template_path):
             bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
+            bot_error_logger.error(os.listdir(os.path.join(os.getcwd(), 'templates')))
             bot.send_message(answer_id_psb.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
         formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
@@ -726,5 +727,3 @@ def start_telegram_bot():
     except Exception as error_message:
         print(f"Error in Telegram bot: {error_message}")
         bot_error_logger.error("Error in Telegram bot: %s", error_message)
-
-start_telegram_bot()
