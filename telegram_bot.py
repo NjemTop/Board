@@ -42,6 +42,8 @@ if platform.system() == 'Windows':
 else:
     local_appdata_path = os.environ['HOME']
 
+project_root = os.path.dirname(os.path.abspath(__file__))
+
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
 
@@ -626,8 +628,6 @@ def answer_start_end_date_tele2(answer_id):
             bot.send_document(answer_id.from_user.id, report_file)
     else:
         pass
-    
-project_root = os.path.dirname(os.path.abspath(__file__))
 
 @bot.chosen_inline_handler(func=lambda answer_id: True)
 def answer_start_end_date_psb(answer_id):
