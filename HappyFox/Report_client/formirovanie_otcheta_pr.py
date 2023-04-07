@@ -188,8 +188,6 @@ def create_report_pr(contact_group_id, start_date, end_date, template_path):
         else:
             print('Ошибка')
     
-    
-    
     # Выполнено в срок всего len_tickets_list_1
     # Выполнено в срок Запросы на обслуживание len_tickets_list_28_1
     # Выполнено в срок Запросы на обслуживание Высокий len_tickets_list_28_H_1
@@ -246,7 +244,16 @@ def create_report_pr(contact_group_id, start_date, end_date, template_path):
     # Процент SLA Инциденты Низкий len_tickets_list_27_L_result
 
     # передаем параметры и заполняем файл
-    context = {'today' : today, 'start_date': start_date, 'end_date': end_date, 'table_rows' : table_rows}
+    context = {'today' : today, 'start_date': start_date, 'end_date': end_date, 'table_rows' : table_rows, 'len_tickets_list_old': len_tickets_list_old, 'len_tickets_list_28': len_tickets_list_28, 
+        'len_tickets_list_27': len_tickets_list_27, 'len_tickets_list_28_H': len_tickets_list_28_H, 
+        'len_tickets_list_28_M': len_tickets_list_28_M, 'len_tickets_list_28_L': len_tickets_list_28_L,
+        'len_tickets_list_27_C': len_tickets_list_27_C, 'len_tickets_list_27_H': len_tickets_list_27_H, 
+        'len_tickets_list_27_M': len_tickets_list_27_M, 'len_tickets_list_27_L': len_tickets_list_27_L,
+        'len_tickets_list_28_old': len_tickets_list_28_old, 'len_tickets_list_27_old': len_tickets_list_27_old,
+        'len_tickets_list_28_H_old': len_tickets_list_28_H_old, 'len_tickets_list_28_M_old': len_tickets_list_28_M_old,
+        'len_tickets_list_28_L_old': len_tickets_list_28_L_old, 'len_tickets_list_27_C_old': len_tickets_list_27_C_old,
+        'len_tickets_list_27_H_old': len_tickets_list_27_H_old, 'len_tickets_list_27_M_old': len_tickets_list_27_M_old, 
+        'len_tickets_list_27_L_old': len_tickets_list_27_L_old}
     docx.render(context)
     # сохраняем файл
     docx.save("./Temp_report_PR_final.docx")
