@@ -31,7 +31,7 @@ def info_from_ticket_id(ticket_info):
     else:
         result  = 'Выполнено'
     return name_of_ticket, date_ticket_start, date_ticket_close, sla, result
-def create_report_tele2(contact_group_id, start_date, end_date):
+def create_report_tele2(contact_group_id, start_date, end_date, template_path):
     """Функция ... """
     connector = HappyFoxConnector(config_file)
     object_start_time = datetime.strptime(start_date, '%d.%m.%Y')
@@ -41,8 +41,6 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     filtered_tickets = connector.get_filtered_tickets(start_time, end_time, contact_group_id)
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
-    current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
-    template_path = current_dir.parent.parent / '..' / 'templates' / 'Temp_report_tele2.docx'
     ## Создаем файл и делаем русскую локализацию для даты
     docx = DocxTemplate(template_path)
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')

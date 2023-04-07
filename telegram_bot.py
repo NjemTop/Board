@@ -627,7 +627,13 @@ def answer_start_end_date_tele2(answer_id_tele2):
         end_date = two_date[1]
         bot.send_message(answer_id_tele2.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 37
-        formirovanie_otcheta_tele2.create_report_tele2(contact_group_id, start_date, end_date)
+        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_tele2.docx')
+        if not os.path.exists(template_path):
+            bot.send_message(answer_id_tele2.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
+            bot_error_logger.error(os.listdir(os.path.join(os.getcwd(), 'templates')))
+            bot.send_message(answer_id_tele2.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
+            return
+        formirovanie_otcheta_tele2.create_report_tele2(contact_group_id, start_date, end_date, template_path)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
             bot.send_document(answer_id_tele2.from_user.id, report_file)
     else:
@@ -642,9 +648,7 @@ def answer_start_end_date_psb(answer_id_psb):
         end_date = two_date[1]
         bot.send_message(answer_id_psb.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
-        #template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB.docx'
         template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB.docx')
-        print(os.listdir(os.path.join(os.getcwd(), 'templates')))
         if not os.path.exists(template_path):
             bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
             bot_error_logger.error(os.listdir(os.path.join(os.getcwd(), 'templates')))
