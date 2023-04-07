@@ -665,12 +665,12 @@ def answer_start_end_date_pr(answer_id_pr):
         end_date = two_date[1]
         bot.send_message(answer_id_pr.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 9
-        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_RP.docx')
+        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PR.docx')
         if not os.path.exists(template_path):
             bot.send_message(answer_id_pr.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
         formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
-        with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
+        with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(answer_id_pr.from_user.id, report_file)
     else:
         pass
