@@ -277,8 +277,6 @@ class ConnectionInfo(BaseModel):
     class Meta:
         table_name = 'connection_info'
 
-
-
 class Servise(BaseModel):
     """Класс 'обслуживание' """
     service_id = peewee.AutoField(column_name='ID_сервис', primary_key=True)
