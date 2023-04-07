@@ -56,7 +56,7 @@ def info_from_ticket_info(ticket_info):
 
     return display_id, date_ticket_start, date_ticket_close, request_type, subject, client_user, status, fact_resp_time, priority, date_ticket_start_0
 
-def create_report_psb(contact_group_id, start_date, end_date, template_path):
+def create_report_pr(contact_group_id, start_date, end_date, template_path):
     """Функция ... """
     connector = HappyFoxConnector(config_file)
     object_start_time = datetime.strptime(start_date, '%d.%m.%Y')

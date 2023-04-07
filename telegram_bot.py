@@ -28,7 +28,7 @@ from DataBase.database_result_update import upload_db_result
 from Telegram_Bot.ButtonClasses.button_clients import ButtonClients
 from Telegram_Bot.ButtonClasses.button_update import ButtonUpdate
 from Telegram_Bot.ButtonClasses.button_else_tickets import ButtonElseTickets
-from HappyFox.Report_client import formirovanie_otcheta_tele2, formirovanie_otcheta_psb
+from HappyFox.Report_client import formirovanie_otcheta_tele2, formirovanie_otcheta_psb, formirovanie_otcheta_pr
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
@@ -673,7 +673,7 @@ def answer_start_end_date_pr(answer_id_pr):
         if not os.path.exists(template_path):
             bot.send_message(answer_id_pr.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
-        formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
+        formirovanie_otcheta_pr.create_report_pr(contact_group_id, start_date, end_date, template_path)
         with open("./Temp_report_PR_final.docx", 'rb') as report_file:
             bot.send_document(answer_id_pr.from_user.id, report_file)
     else:
