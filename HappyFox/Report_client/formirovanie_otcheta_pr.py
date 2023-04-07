@@ -30,9 +30,9 @@ def info_from_ticket_info(ticket_info):
     # Тема 
     subject = ticket_info['subject'].replace('RE: ', '').replace('FW: ', '').replace('Fwd: ', '')
     # Заявитель
-    client_user = ticket_info['user'].get['name']
+    client_user = ticket_info['user']['name']
     # Статус 
-    status_eng = ticket_info['status'].get['name']
+    status_eng = ticket_info['status']['name']
     if status_eng == 'Closed':
         status = 'Закрыт'
     else:
@@ -42,7 +42,7 @@ def info_from_ticket_info(ticket_info):
     result_time = subprocess.run([ "pwsh", "-File", setup_script, str(ticket_info)], capture_output=True, text=True)
     fact_resp_time = str(result_time.stdout).rstrip()
     # Приоритет
-    priority_eng = ticket_info['priority'].get('name')
+    priority_eng = ticket_info['priority']['name']
     if priority_eng == 'Low':
         priority = 'Низкий'
     elif priority_eng == 'Medium':
@@ -68,7 +68,7 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
     today = datetime.now().date().strftime('%d %B %Y')
     ## Создаем файл и делаем русскую локализацию для даты
     docx = DocxTemplate(template_path)
-    locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
+    #locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     today = datetime.now().date().strftime('%d %B %Y')
     # Формируем общий список для добавления в файл
     table_rows = []
@@ -115,13 +115,13 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
         # добавляем соответствие и добавляем список в table_rows
         table_rows.append({'num': num, 'display_id' : display_id, 'date_ticket_start' : date_ticket_start, 'date_ticket_close' : date_ticket_close, 'request_type' : request_type,
         'subject' : subject, 'client_user' : client_user, 'status' : status, 'fact_resp_time' : fact_resp_time, 'priority' : priority})
-        request_type_find_id = ticket_info.get['custom_fields']
+        request_type_find_id = ticket_info['custom_fields']
         request_type = ''
         if date_ticket_start_0 >= start_date:
             for a in range(len(request_type_find_id)):
-                priority_27_28 = ticket_info.get['priority'].get['name']
+                priority_27_28 = ticket_info['priority']['name']
                 # Зарегистрировано в отчетный период Запросы на обслуживание
-                if request_type_find_id[a].get('id') == 28:
+                if request_type_find_id[a]['id'] == 28:
                     len_tickets_list_28 += 1
                     new_tickets_list.append(ticket_info)
                     # Зарегистрировано в отчетный период Запросы на обслуживание Высокий
@@ -134,7 +134,7 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
                     elif priority_27_28 == 'Low':
                         len_tickets_list_28_L += 1
                 # Зарегистрировано в отчетный период Инциденты len_tickets_list_27
-                elif request_type_find_id[a].get('id') == 27:
+                elif request_type_find_id[a]['id'] == 27:
                     len_tickets_list_27 += 1
                     new_tickets_list.append(ticket_info)
                     # Зарегистрировано в отчетный период Инциденты Критичный len_tickets_list_27_C
@@ -153,9 +153,9 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
                     continue
         elif date_ticket_start_0 < start_date:
             for b in range(len(request_type_find_id)):
-                priority_27_28_old = ticket_info.get['priority'].get['name']
+                priority_27_28_old = ticket_info['priority']['name']
                 # Перешло с прошлого периода Запросы на обслуживание len_tickets_list_28_old 
-                if request_type_find_id[b].get('id') == 28:
+                if request_type_find_id[b]['id'] == 28:
                     len_tickets_list_28_old += 1
                     old_tickets_list.append(ticket_info)
                     # Перешло с прошлого периода Запросы на обслуживание Высокий len_tickets_list_28_H_old
@@ -168,7 +168,7 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
                     elif priority_27_28_old == 'Low':
                         len_tickets_list_28_L_old += 1
                 # Перешло с прошлого периода Инциденты len_tickets_list_27_old 
-                elif request_type_find_id[b].get('id') == 27:
+                elif request_type_find_id[b]['id'] == 27:
                     len_tickets_list_27_old += 1
                     old_tickets_list.append(ticket_info)
                     # Перешло с прошлого периода Инциденты Критичный len_tickets_list_27_C_old
@@ -246,10 +246,7 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
     # Процент SLA Инциденты Низкий len_tickets_list_27_L_result
 
     # передаем параметры и заполняем файл
-    print('Запись файла в документ')
     context = {'today' : today, 'start_date': start_date, 'end_date': end_date, 'table_rows' : table_rows}
     docx.render(context)
     # сохраняем файл
-    print('*****************************************')
-    print('Сохранение файла')
     docx.save("./Temp_report_PR_final.docx")
