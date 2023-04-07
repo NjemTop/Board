@@ -65,7 +65,7 @@ def create_report_psb(contact_group_id, start_date, end_date):
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
     ## Создаем файл и делаем русскую локализацию для даты
-    docx = DocxTemplate("./templates/Temp_report_PSB_.docx")
+    docx = DocxTemplate("../templates/Temp_report_PSB_.docx")
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     # Формируем общий список для добавления в файл
     table_rows = []
