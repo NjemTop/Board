@@ -642,12 +642,12 @@ def answer_start_end_date_psb(answer_id_psb):
         end_date = two_date[1]
         bot.send_message(answer_id_psb.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
-        template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB.docx'
-        #template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB.docx')
-        #print(os.listdir(os.path.join(os.getcwd(), 'templates')))
+        #template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB.docx'
+        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB.docx')
+        print(os.listdir(os.path.join(os.getcwd(), 'templates')))
         if not os.path.exists(template_path):
-            #bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
-            #bot_error_logger.error(os.listdir(os.path.join(os.getcwd(), 'templates')))
+            bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
+            bot_error_logger.error(os.listdir(os.path.join(os.getcwd(), 'templates')))
             bot.send_message(answer_id_psb.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
         formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
@@ -665,7 +665,7 @@ def answer_start_end_date_pr(answer_id_pr):
         end_date = two_date[1]
         bot.send_message(answer_id_pr.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 9
-        template_path = Path(__file__).parent / 'templates' / 'Temp_report_PR_final.docx'
+        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_RP.docx')
         if not os.path.exists(template_path):
             bot.send_message(answer_id_pr.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
