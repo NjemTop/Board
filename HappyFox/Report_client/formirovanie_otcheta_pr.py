@@ -246,7 +246,10 @@ def create_report_psb(contact_group_id, start_date, end_date, template_path):
     # Процент SLA Инциденты Низкий len_tickets_list_27_L_result
 
     # передаем параметры и заполняем файл
+    print('Запись файла в документ')
     context = {'today' : today, 'start_date': start_date, 'end_date': end_date, 'table_rows' : table_rows}
     docx.render(context)
     # сохраняем файл
+    print('*****************************************')
+    print('Сохранение файла')
     docx.save("./Temp_report_PR_final.docx")
