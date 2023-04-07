@@ -546,7 +546,7 @@ def send_text_for_create(result_update_version):
         global version_release
         version_release = result_update_version.text 
         if '.' in version_release:
-            button_release, question = ButtonUpdate.button_release(version_release)
+            button_release, question = ButtonUpdate.correct_version_release(version_release)
             bot.send_message(result_update_version.from_user.id, text=question, reply_markup=button_release)   
         else:
             button_release = types.InlineKeyboardMarkup()
