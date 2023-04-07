@@ -462,13 +462,13 @@ def inline_button_SD_update(call):
             updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
             # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
             bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
+            # !!! download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
             bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            move_distr_and_manage_share(version_release)
+            # !!! move_distr_and_manage_share(version_release)
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             release_result = subprocess.run(["pwsh", "-File", setup_script, str(version_release), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
-            upload_db_result(version_release, release_result)
+            # !!! upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
