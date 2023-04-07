@@ -646,6 +646,7 @@ def answer_start_end_date_psb(answer_id_psb):
         template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB_.docx')
         print(os.listdir(os.path.join(os.getcwd(), 'templates')))
         if not os.path.exists(template_path):
+            bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
             bot.send_message(answer_id_psb.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
         formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
