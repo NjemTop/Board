@@ -87,6 +87,34 @@ $STATUS_ID = "5"
 ### СОЗДАДИМ DUE DATE ДЛЯ ТИКЕТА
 $DUE_DATE_REPLY = ((Get-Date).AddDays(7)).ToString('yyyy-MM-dd', [cultureinfo]::GetCultureInfo('en-US'))
 
+### ФОРМИРУЕМ HTML ТЕКСТ СОЗДАНИЯ ТИКЕТА VIP КЛИЕНТА
+$HTML_BODY_VIP = @"
+<body style="margin: 0; padding: 0;">
+    <font style="color: #2f2f2f; font-family: Arial, sans-serif; font-size: 14px; line-height: 16px;" align="justify">
+        <table border="0" align="left" width="100%" height="auto" cellpadding="0" cellspacing ="0" background-size= "contain" background-repeat="no-repeat" background-position="left">
+        <tr>
+        <td>
+            <table style="border-collapse:collapse;" border="0" width="95%" cellpadding="0" cellspacing ="0" align="center">
+                <tr>
+                    <td>
+                        Здравствуйте!<br>
+                        <p>Сообщаем Вам о выходе новой версии серверной части приложения - <b>$NUMBER_VERSION</b>, в которую внесены функциональные улучшения.</p>
+                        <p><ins>Просим согласовать сервисное окно, для установки обновления.</ins></p>
+                        <p>Для скачивания документации и дистрибутива, Вы можете воспользоваться ссылкой: <a href="https://cloud.boardmaps.ru" target="_blank" rel="noopener noreferrer">https://cloud.boardmaps.ru</a> </p>
+                    </td>
+                </tr>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p font style="color: #a8a6a6"><br>С уважением,<br>Служба технической поддержки BoardMaps<br></p>
+            </td>
+        </tr>
+        </table>
+    </font>
+</body>
+"@
+
 ### ФОРМИРУЕМ ДАННЫЕ ПОЧТЫ ДЛЯ ОТПРАВКИ ПИСЬМА КЛИЕНТУ
 $CLIENT_POST_PASS = ConvertTo-SecureString -String "X5k-WFw-7bn-Aq6" -AsPlainText -Force
 $CLIENT_POST_CREDS = new-object Management.Automation.PSCredential -ArgumentList “support@boardmaps.ru”, $CLIENT_POST_PASS
@@ -226,6 +254,99 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                 $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)" 
                                 ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ 
                                 $PS = $TABLE_REPORT.Add($PS)
+                            }
+                            # ПОПРОБУЕМ ОТПРАВИТЬ ПИСЬМО С ЗАПРОСОМ СЕРВИСНОГО ОКНА, ЕСЛИ КЛИЕНТ ВИП
+                            try {
+                                # ПРОВЕРИМ, ЧТО КЛИЕНТ ЯВЛЯЕТСЯ ГОЛД ИЛИ ПЛАТИНУМ
+                                if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum1") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold1")) {
+                                    ### ПОПРОБУЕМ ОТПРАВИТЬ POST ЗАПРОС НА СОЗДАНИЕ ТИКЕТА
+                                    try {
+                                        ### ФОРМИРУЕМ ТЕЛО НА СОЗДАНИЕ ТИКЕТА, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
+                                        $BODY_CREATE = @{
+                        
+                                            name = "$MAIN_CONTACT";
+                                            
+                                            email = "$MAIN_EMAIL";
+                        
+                                            cc = "$COPY_EMAIL";
+                                            
+                                            category = 6;
+                        
+                                            priority = "4";
+                                            
+                                            subject = "$TICKET_SUBJECT";
+                                            
+                                            html = "$HTML_BODY_VIP";
+                                            
+                                            }
+                                        ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
+                                        $CREATE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_CREATE | ConvertTo-Json -Depth 5))
+                                        ### ОТПРАВЛЯЕМ ЗАПРОС НА СОЗДАНИЕ ТИКЕТА
+                                        $CREATE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/tickets/" -Headers $HEADERS -Body $CREATE_TICKET -ContentType "application/json"
+                                        ### ПРОБУЕМ ОТПРАВИТЬ ОТВЕТ В ТИКЕТЕ (ОТПРАВЛЯЕМ ПИСЬМО КЛИЕНТУ О НОВОЙ ВЕРСИИ)
+                                        try {
+                                            ### ФОРМИРУЕМ ТЕЛО, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
+                                            $BODY_REPLY = @{
+                        
+                                                html = "$HTML_BODY_VIP";
+                        
+                                                cc = "$COPY_EMAIL";
+                                                
+                                                staff = $USER_ID;
+                        
+                                                status = $STATUS_ID;
+                        
+                                                update_customer = "true";
+                        
+                                                due_date = "$DUE_DATE_REPLY";
+                                                
+                                                }
+                                            ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
+                                            $REPLY_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_REPLY | ConvertTo-Json -Depth 5))
+                                            ### ОТПРАВЛЯЕМ POST ЗАПРОС НА ОТВЕТ В HF
+                                            $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $REPLY_TICKET -ContentType "application/json"
+                                            ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
+                                            $PS = New-Object PSObject
+                                            $PS | Add-Member -Type NoteProperty "Операция" -Value "Рассылка клиенту отправлена"
+                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                                        }
+                                        catch {
+                                            ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШИМ В ТАБЛИЦУ
+                                            $PS = New-Object PSObject
+                                            $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
+                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                                            Write-Host -ForegroundColor Red -Object "ERROR REPLY"
+                                        }
+                                    }
+                                    catch {
+                                        ### ЕСЛИ ОШИБКА СОЗДАНИИ ТИКЕТА, ЗАПИШИМ В ТАБЛИЦУ
+                                        $PS = New-Object PSObject
+                                        $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка создания тикета"
+                                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                                        $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "Тикет не был создан"
+                                        Write-Host -ForegroundColor Red -Object "ERROR CREATE"
+                                    }
+                                    finally {
+                                        ### ОТПИШИМСЯ ОТ СОЗДАННОГО ТИКЕТА
+                                        $BODY_UNSUBSCRIBE = @{
+                        
+                                            staff_id = "$USER_ID";
+                        
+                                        }
+                                        ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
+                                        $UNSUBSCRIBE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_UNSUBSCRIBE | ConvertTo-Json -Depth 5))
+                                        $GET_JSON_RESPONSE_UNSUBSCRIBE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/unsubscribe/" -Headers $HEADERS -Body $UNSUBSCRIBE_TICKET -ContentType "application/json"
+                                        $GET_JSON_RESPONSE_UNSUBSCRIBE.name
+                                        ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
+                                        $PS = $TABLE_REPORT.Add($PS)
+                                        Write-Host -ForegroundColor Green -Object "Запрос сервисного окна клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_CONTACT`n"
+                                    }
+                                }
+                            }
+                            catch {
+                                
                             }
                         }
                         catch {
