@@ -66,7 +66,7 @@ def create_report_psb(contact_group_id, start_date, end_date):
     filtered_tickets = connector.get_filtered_tickets(start_time, end_time, contact_group_id)
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
-    template_path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'Temp_report_PSB_.docx')
+    template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'templates', 'Temp_report_PSB_.docx')
     ## Создаем файл и делаем русскую локализацию для даты
     docx = DocxTemplate(template_path)
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
