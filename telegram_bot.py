@@ -426,11 +426,15 @@ def inline_button_clients(call):
         #         bot.send_document(call.message.chat.id, report_file)
     ### УРОВЕНЬ 4 "ПОЧТА РОССИИ" ///////////////////////////////////////// в работе
     elif call.data == "button_pochtaR":
-        bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        client_report_id = 13
-        #create_report_tele2(client_report_id)
-        with open("./Temp_report_PR_final.docx", 'rb') as report_file:
-            bot.send_document(call.message.chat.id, report_file)
+        button_pr = types.InlineKeyboardMarkup()
+        back_from_button_pr = types.InlineKeyboardButton(text='Отмена', callback_data='cancel_button_pr') 
+        main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
+        button_pr.add(back_from_button_pr, main_menu, row_width=2)
+        question_start_end_date_pr = bot.edit_message_text('Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023', call.message.chat.id, call.message.message_id, reply_markup=button_pr)
+        user_states[call.message.chat.id] = "waiting_for_client_name"
+        bot.register_next_step_handler(question_start_end_date_pr, answer_start_end_date_pr)
+    elif call.data == "cancel_button_pr":
+        user_states[call.message.chat.id] = "canceled"
 # Добавляем подуровни к разделу Обновление версии
 @bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable", "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
 def inline_button_SD_update(call):
@@ -614,37 +618,56 @@ def send_text_version(result_client_version):
     else:
         pass
 
-@bot.chosen_inline_handler(func=lambda answer_id: True)
-def answer_start_end_date_tele2(answer_id):
-    user_state = user_states.get(answer_id.chat.id)
+@bot.chosen_inline_handler(func=lambda answer_id_tele2: True)
+def answer_start_end_date_tele2(answer_id_tele2):
+    user_state = user_states.get(answer_id_tele2.chat.id)
     if user_state == "waiting_for_client_name":
-        two_date = str(answer_id.text).split('-')
+        two_date = str(answer_id_tele2.text).split('-')
         start_date = two_date[0]
         end_date = two_date[1]
-        bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
+        bot.send_message(answer_id_tele2.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 37
         formirovanie_otcheta_tele2.create_report_tele2(contact_group_id, start_date, end_date)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
-            bot.send_document(answer_id.from_user.id, report_file)
+            bot.send_document(answer_id_tele2.from_user.id, report_file)
     else:
         pass
 
-@bot.chosen_inline_handler(func=lambda answer_id: True)
-def answer_start_end_date_psb(answer_id):
-    user_state = user_states.get(answer_id.chat.id)
+@bot.chosen_inline_handler(func=lambda answer_id_psb: True)
+def answer_start_end_date_psb(answer_id_psb):
+    user_state = user_states.get(answer_id_psb.chat.id)
     if user_state == "waiting_for_client_name":
-        two_date = str(answer_id.text).split('-')
+        two_date = str(answer_id_psb.text).split('-')
         start_date = two_date[0]
         end_date = two_date[1]
-        bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
+        bot.send_message(answer_id_psb.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
         template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB_.docx'
         if not os.path.exists(template_path):
-            bot.send_message(answer_id.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
+            bot.send_message(answer_id_psb.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
             return
         formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
         with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
-            bot.send_document(answer_id.from_user.id, report_file)
+            bot.send_document(answer_id_psb.from_user.id, report_file)
+    else:
+        pass
+
+@bot.chosen_inline_handler(func=lambda answer_id_pr: True)
+def answer_start_end_date_pr(answer_id_pr):
+    user_state = user_states.get(answer_id_pr.chat.id)
+    if user_state == "waiting_for_client_name":
+        two_date = str(answer_id_pr.text).split('-')
+        start_date = two_date[0]
+        end_date = two_date[1]
+        bot.send_message(answer_id_pr.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
+        contact_group_id = 9
+        template_path = Path(__file__).parent / 'templates' / 'Temp_report_PR_final.docx'
+        if not os.path.exists(template_path):
+            bot.send_message(answer_id_pr.from_user.id, text=f"Ошибка: файл шаблона не найден по пути {template_path}")
+            return
+        formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
+        with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
+            bot.send_document(answer_id_pr.from_user.id, report_file)
     else:
         pass
 

@@ -3,7 +3,7 @@ from HappyFox.happyfox_class import HappyFoxConnector
 config_file = "Main.config"
 start_date = "2023-01-01"
 end_date = "2023-04-07"
-contact_group_id = 37
+contact_group_id = 9
 
 connector = HappyFoxConnector(config_file)
 filtered_tickets = connector.get_filtered_tickets(start_date, end_date, contact_group_id)
