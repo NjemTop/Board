@@ -3,6 +3,8 @@ from datetime import datetime
 import locale
 import requests
 from HappyFox.happyfox_class import HappyFoxConnector
+import os
+from pathlib import Path
 
 config_file = "Main.config"
 
@@ -39,8 +41,10 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     filtered_tickets = connector.get_filtered_tickets(start_time, end_time, contact_group_id)
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
+    current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+    template_path = current_dir.parent / 'templates' / 'Temp_report_tele2.docx'
     ## Создаем файл и делаем русскую локализацию для даты
-    docx = DocxTemplate("../templates/Temp_report_tele2.docx")
+    docx = DocxTemplate(template_path)
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     ### ЗАПОЛНЯЕМ ШАПКУ
     # Формируем общий список для добавления в файл
