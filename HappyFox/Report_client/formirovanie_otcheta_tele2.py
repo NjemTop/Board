@@ -42,7 +42,7 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     ## Находим дату (Отчет об оказанных услугах ОТ [___] )
     today = datetime.now().date().strftime('%d %B %Y')
     current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
-    template_path = current_dir.parent.parent / 'templates' / 'Temp_report_tele2.docx'
+    template_path = current_dir.parent / 'templates' / 'Temp_report_tele2.docx'
     ## Создаем файл и делаем русскую локализацию для даты
     docx = DocxTemplate(template_path)
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
