@@ -642,8 +642,8 @@ def answer_start_end_date_psb(answer_id_psb):
         end_date = two_date[1]
         bot.send_message(answer_id_psb.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
-        #template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB_.docx'
-        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB_.docx')
+        #template_path = Path(__file__).parent / 'templates' / 'Temp_report_PSB.docx'
+        template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_PSB.docx')
         print(os.listdir(os.path.join(os.getcwd(), 'templates')))
         if not os.path.exists(template_path):
             bot.send_message(answer_id_psb.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
