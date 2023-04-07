@@ -20,8 +20,6 @@ RUN mkdir -p ./backup
 
 # Копируем файлы проекта в контейнер
 COPY . /app
-# Копируем папку с шаблонами
-COPY templates ./templates
 
 # Создаем директорию logs внутри контейнера
 RUN mkdir -p /app/logs
