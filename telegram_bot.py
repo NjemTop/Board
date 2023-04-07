@@ -635,7 +635,8 @@ def answer_start_end_date_psb(answer_id):
         end_date = two_date[1]
         bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
         contact_group_id = 21
-        formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date)
+        template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'Temp_report_PSB_.docx')
+        formirovanie_otcheta_psb.create_report_psb(contact_group_id, start_date, end_date, template_path)
         with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
             bot.send_document(answer_id.from_user.id, report_file)
     else:

@@ -42,7 +42,7 @@ class HappyFoxConnector:
 
         while True:
             params = {
-                'q': f'last-modified-on-or-after:"{start_date}" last-modified-on-or-before:"{end_date}"',
+                'q': f'last-staff-replied-on-or-after:"{start_date}" last-staff-replied-on-or-before:"{end_date}"',
                 'page': page,
                 'size': 50
             }
