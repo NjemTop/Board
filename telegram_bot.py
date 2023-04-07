@@ -376,18 +376,22 @@ def inline_button_clients(call):
         back_from_button_tele2 = types.InlineKeyboardButton(text='Отмена', callback_data='cancel_button_tele2') 
         main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
         button_tele2.add(back_from_button_tele2, main_menu, row_width=2)
-        question_start_end_date = bot.edit_message_text('Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023', call.message.chat.id, call.message.message_id, reply_markup=button_tele2)
+        question_start_end_date_tele2 = bot.edit_message_text('Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023', call.message.chat.id, call.message.message_id, reply_markup=button_tele2)
         user_states[call.message.chat.id] = "waiting_for_client_name"
-        bot.register_next_step_handler(question_start_end_date, answer_start_end_date)
+        bot.register_next_step_handler(question_start_end_date_tele2, answer_start_end_date_tele2)
     elif call.data == "cancel_button_tele2":
         user_states[call.message.chat.id] = "canceled"
     ### УРОВЕНЬ 4 "ПСБ"
     elif call.data == "button_psb":  
-        bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        client_report_id = 11
-        #create_report_tele2(client_report_id)
-        with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
-            bot.send_document(call.message.chat.id, report_file)
+        button_psb = types.InlineKeyboardMarkup()
+        back_from_button_psb = types.InlineKeyboardButton(text='Отмена', callback_data='cancel_button_psb') 
+        main_menu = types.InlineKeyboardButton(text='Главное меню', callback_data='mainmenu')
+        button_psb.add(back_from_button_psb, main_menu, row_width=2)
+        question_start_end_date_psb = bot.edit_message_text('Пожалуйста, укажите период, за который необходимо сформировать отчет. Например: 25.06.2023-27.09.2023', call.message.chat.id, call.message.message_id, reply_markup=button_psb)
+        user_states[call.message.chat.id] = "waiting_for_client_name"
+        bot.register_next_step_handler(question_start_end_date_psb, answer_start_end_date_psb)
+    elif call.data == "cancel_button_psb":
+        user_states[call.message.chat.id] = "canceled"
     ### УРОВЕНЬ 4 "РЭЦ"
     elif call.data == "button_rez":  
         bot.send_message(call.message.chat.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
@@ -609,7 +613,7 @@ def send_text_version(result_client_version):
         pass
 
 @bot.chosen_inline_handler(func=lambda answer_id: True)
-def answer_start_end_date(answer_id):
+def answer_start_end_date_tele2(answer_id):
     user_state = user_states.get(answer_id.chat.id)
     if user_state == "waiting_for_client_name":
         two_date = str(answer_id.text).split('-')
@@ -619,6 +623,20 @@ def answer_start_end_date(answer_id):
         contact_group_id = 37
         create_report_tele2(contact_group_id, start_date, end_date)
         with open("./Temp_report_tele2_final.docx", 'rb') as report_file:
+            bot.send_document(answer_id.from_user.id, report_file)
+    else:
+        pass
+@bot.chosen_inline_handler(func=lambda answer_id: True)
+def answer_start_end_date_psb(answer_id):
+    user_state = user_states.get(answer_id.chat.id)
+    if user_state == "waiting_for_client_name":
+        two_date = str(answer_id.text).split('-')
+        start_date = two_date[0]
+        end_date = two_date[1]
+        bot.send_message(answer_id.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
+        contact_group_id = 21
+        create_report_tele2(contact_group_id, start_date, end_date)
+        with open("./Temp_report_PSB_final.docx", 'rb') as report_file:
             bot.send_document(answer_id.from_user.id, report_file)
     else:
         pass

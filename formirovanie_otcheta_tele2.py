@@ -37,12 +37,12 @@ def create_report_tele2(contact_group_id, start_date, end_date):
     object_end_time = datetime.strptime(end_date, '%d.%m.%Y')
     end_time = object_end_time.strftime('%Y-%m-%d')
     filtered_tickets = connector.get_filtered_tickets(start_time, end_time, contact_group_id)
+    ## Находим дату (Отчет об оказанных услугах ОТ [___] )
+    today = datetime.now().date().strftime('%d %B %Y')
     ## Создаем файл и делаем русскую локализацию для даты
     docx = DocxTemplate("./templates/Temp_report_tele2.docx")
     locale.setlocale(locale.LC_TIME, 'ru_RU.utf8')
     ### ЗАПОЛНЯЕМ ШАПКУ
-    ## Находим дату (Отчет об оказанных услугах ОТ [___] )
-    today = datetime.now().date().strftime('%d %B %Y')
     # Формируем общий список для добавления в файл
     table_rows = []
     # Задаем порядковый номер строки
