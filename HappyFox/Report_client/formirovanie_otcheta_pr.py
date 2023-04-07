@@ -39,7 +39,7 @@ def info_from_ticket_info(ticket_info):
         status = 'В работе'
     # Время решения тикета + конвертация в минуты fact_resp_time
     setup_script = 'Response_time_2.ps1'
-    result_time = subprocess.run([ "pwsh", "-File", setup_script, str(ticket_info)], capture_output=True, text=True)
+    result_time = subprocess.run([ "pwsh", "-File", setup_script, str(ticket_info['id'])], capture_output=True, text=True)
     fact_resp_time = str(result_time.stdout).rstrip()
     # Приоритет
     priority_eng = ticket_info['priority']['name']
