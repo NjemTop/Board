@@ -163,7 +163,7 @@ def post_tech_information(client_id):
     # Проверяем корректность типов данных для всех ключей
     for key, value in optional_fields.items():
         if value is not None:
-            if key in ['API', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']:
+            if key in ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']:
                 if not isinstance(value, bool):
                     return {'error': f"Поле '{key}' должно быть булевым типом"}, 400
             else:
