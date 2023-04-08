@@ -11,6 +11,13 @@ from logger.log_config import setup_logger, get_abs_log_path
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.date, datetime.datetime)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
+
 def get_all_tech_information():
     try:
         with conn:
@@ -52,7 +59,7 @@ def get_all_tech_information():
                 }
                 result.append(client_data)
 
-        json_data = json.dumps(result, ensure_ascii=False, indent=4)
+        json_data = json.dumps(tech_info_data, ensure_ascii=False, indent=4, default=json_serial)
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
@@ -111,7 +118,7 @@ def get_tech_information(client_id):
                 'skins_ios': tech_info.skins_ios
             }
 
-        json_data = json.dumps(tech_info_data, ensure_ascii=False, indent=4)
+        json_data = json.dumps(tech_info_data, ensure_ascii=False, indent=4, default=json_serial)
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
