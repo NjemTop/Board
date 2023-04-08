@@ -302,15 +302,15 @@ class TechInformation(BaseModel):
     id = peewee.AutoField(primary_key=True)
     tech_information_id = peewee.ForeignKeyField(BMInfo_onClient, column_name='technical_information', backref='tech_information', on_delete='CASCADE')
     server_version = peewee.TextField(column_name='Версия_сервера')
-    update_date = peewee.TextField(column_name='Дата_обновления')
-    api = peewee.TextField(column_name='API', null=True)
-    ipad = peewee.TextField(column_name='iPad', null=True)
-    android = peewee.TextField(column_name='Andriod', null=True)
-    mdm = peewee.TextField(column_name='MDM', null=True)
-    localizable_web = peewee.TextField(column_name='Локализация Web', null=True)
-    localizable_ios = peewee.TextField(column_name='Локализация iOS', null=True)
-    skins_web = peewee.TextField(column_name='Скины Web', null=True)
-    skins_ios = peewee.TextField(column_name='Скины iOS', null=True)
+    update_date = peewee.DateField(column_name='Дата_обновления')
+    api = peewee.BooleanField(column_name='API', null=True)
+    ipad = peewee.BooleanField(column_name='iPad', null=True)
+    android = peewee.BooleanField(column_name='Andriod', null=True)
+    mdm = peewee.BooleanField(column_name='MDM', null=True)
+    localizable_web = peewee.BooleanField(column_name='Локализация Web', null=True)
+    localizable_ios = peewee.BooleanField(column_name='Локализация iOS', null=True)
+    skins_web = peewee.BooleanField(column_name='Скины Web', null=True)
+    skins_ios = peewee.BooleanField(column_name='Скины iOS', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
         'Версия_сервера',
@@ -329,5 +329,4 @@ class TechInformation(BaseModel):
         self.column_names = TechInformation.COLUMN_NAMES
 
     class Meta:
-        table_name = 'tech_information' 
-
+        table_name = 'tech_information'
