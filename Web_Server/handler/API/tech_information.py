@@ -59,7 +59,7 @@ def get_all_tech_information():
                 }
                 result.append(client_data)
 
-        json_data = json.dumps(tech_info_data, ensure_ascii=False, indent=4, default=json_serial)
+        json_data = json.dumps(result, ensure_ascii=False, indent=4, default=json_serial)
         response = Response(json_data, content_type='application/json; charset=utf-8')
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
