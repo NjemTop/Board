@@ -127,6 +127,8 @@ def get_tech_information(client_id):
         message = f"Ошибка сервера: {error}"
         json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
        
 def post_tech_information(client_id):
     # Проверяем существование клиента с указанным client_id
