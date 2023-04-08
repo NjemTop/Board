@@ -146,10 +146,12 @@ def post_service(client_id):
 
     # Создаем новую запись в таблице Servise и сохраняем ее в базе данных
     try:
-        service = Servise.create(service_id=client.technical_information, service_pack=service_pack, manager=manager, loyal=loyal)
+        service = Servise.create(service_id=client.client_info, service_pack=service_pack, manager=manager, loyal=loyal)
         service.save()
+        if service.save() != 1:
+            return {'error': 'Error saving service to the database'}, 500
+        # Возвращаем сообщение об успешном создании записи
+        return {'message': 'Service created successfully'}, 201
+
     except Exception as error_masage:
         return {'error': f'Error creating service: {str(error_masage)}'}, 500
-
-    # Возвращаем сообщение об успешном создании записи
-    return {'message': 'Service created successfully'}, 201
