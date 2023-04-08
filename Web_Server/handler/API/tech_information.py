@@ -30,7 +30,7 @@ def get_all_tech_information():
                 for tech_info in tech_infos:
                     tech_info_data = {
                         'id': tech_info.id,
-                        'tech_information_id': tech_info.tech_information_id.id,
+                        'tech_information_id': tech_info.technical_information,
                         'server_version': tech_info.server_version,
                         'update_date': tech_info.update_date,
                         'api': tech_info.api,
@@ -98,7 +98,7 @@ def get_tech_information(client_id):
             # Возвращаем техническую информацию в виде словаря
             tech_info_data = {
                 'id': tech_info.id,
-                'tech_information_id': tech_info.tech_information_id.id,
+                'tech_information_id': tech_info.technical_information,
                 'server_version': tech_info.server_version,
                 'update_date': tech_info.update_date,
                 'api': tech_info.api,
