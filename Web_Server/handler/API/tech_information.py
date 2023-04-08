@@ -3,7 +3,6 @@ import logging
 import json
 import peewee
 import traceback
-from datetime import datetime
 import datetime
 from DataBase.model_class import BMInfo_onClient, TechInformation, conn
 from logger.log_config import setup_logger, get_abs_log_path
@@ -163,7 +162,7 @@ def post_tech_information(client_id):
 
     # Проверяем, что значение 'update_date' является корректной датой
     try:
-        update_date = datetime.strptime(update_date_str, '%d-%m-%Y').date()
+        update_date = datetime.datetime.strptime(update_date_str, '%d-%m-%Y').date()
     except ValueError:
         return {'error': "Поле 'update_date' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
