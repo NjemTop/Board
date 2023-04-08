@@ -279,10 +279,11 @@ class ConnectionInfo(BaseModel):
 
 class Servise(BaseModel):
     """Класс 'обслуживание' """
-    service_id = peewee.AutoField(column_name='ID_сервис', primary_key=True)
+    id = peewee.AutoField(primary_key=True)
+    service_id = peewee.ForeignKeyField(BMInfo_onClient, column_name='service', backref='service', on_delete='CASCADE')
     service_pack = peewee.TextField(column_name='Пакет_услуг')
     manager = peewee.TextField(column_name='Менеджер')
-    loyal = peewee.TextField(column_name='Лояльность')
+    loyal = peewee.TextField(column_name='Лояльность', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
         'ID_сервис',
@@ -299,17 +300,18 @@ class Servise(BaseModel):
 
 class TechInformation(BaseModel):
     """класс техническая информация"""
-    tech_information_id = peewee.AutoField(column_name='ID_тех_информация', primary_key=True)
+    id = peewee.AutoField(primary_key=True)
+    tech_information_id = peewee.ForeignKeyField(BMInfo_onClient, column_name='technical_information', backref='tech_information', on_delete='CASCADE')
     server_version = peewee.TextField(column_name='Версия_сервера')
     update_date = peewee.TextField(column_name='Дата_обновления')
-    api = peewee.TextField(column_name='API')
-    ipad = peewee.TextField(column_name='iPad')
-    android = peewee.TextField(column_name='Andriod')
-    mdm = peewee.TextField(column_name='MDM')
-    localizable_web = peewee.TextField(column_name='Локализация Web')
-    localizable_ios = peewee.TextField(column_name='Локализация iOS')
-    skins_web = peewee.TextField(column_name='Скины Web')
-    skins_ios = peewee.TextField(column_name='Скины iOS')
+    api = peewee.TextField(column_name='API', null=True)
+    ipad = peewee.TextField(column_name='iPad', null=True)
+    android = peewee.TextField(column_name='Andriod', null=True)
+    mdm = peewee.TextField(column_name='MDM', null=True)
+    localizable_web = peewee.TextField(column_name='Локализация Web', null=True)
+    localizable_ios = peewee.TextField(column_name='Локализация iOS', null=True)
+    skins_web = peewee.TextField(column_name='Скины Web', null=True)
+    skins_ios = peewee.TextField(column_name='Скины iOS', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
         'Версия_сервера',

@@ -5,7 +5,7 @@ from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback
-from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info
+from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service
 from Web_Server.handler.API.connection_info import init_app
 
 # Указываем настройки логов для нашего файла с классами
@@ -93,6 +93,9 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'delete_all_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_all_connection_info), methods=['DELETE'])
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>/<int:connection_info_id>', 'delete_specific_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_specific_connection_info), methods=['DELETE'])
     
+    # Регистрация обработчика для API информация о настройки подключения к клиенту
+    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'get_service', require_basic_auth(USERNAME, PASSWORD)(service.get_service), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'post_service', require_basic_auth(USERNAME, PASSWORD)(service.post_service), methods=['POST'])
     return app
 
 if __name__ == '__main__':
