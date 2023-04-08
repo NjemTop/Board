@@ -313,16 +313,16 @@ class TechInformation(BaseModel):
     skins_ios = peewee.BooleanField(column_name='Скины_iOS', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
-        'Версия_сервера',
-        'Дата_обновления',
-        'API',
+        'server_version',
+        'update_date',
+        'api',
         'iPad',
-        'Andriod',
-        'MDM',
-        'Локализация Web',
-        'Локализация iOS',
-        'Скины Web',
-        'Скины iOS'
+        'android',
+        'mdm',
+        'localizable_web',
+        'localizable_ios',
+        'skins_web',
+        'skins_ios'
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
