@@ -98,6 +98,8 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'get_service', require_basic_auth(USERNAME, PASSWORD)(service.get_service), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'post_service', require_basic_auth(USERNAME, PASSWORD)(service.post_service), methods=['POST'])
 
+    
+    app.add_url_rule('/clients_all_info/api/tech_information/>', 'get_all_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_all_tech_information), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'get_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_tech_information), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'post_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.post_tech_information), methods=['POST'])
 

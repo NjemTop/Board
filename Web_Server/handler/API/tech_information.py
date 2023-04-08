@@ -3,12 +3,73 @@ import logging
 import json
 import peewee
 import traceback
+from datetime import datetime
 from DataBase.model_class import BMInfo_onClient, TechInformation, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
+
+def get_all_tech_information():
+    try:
+        with conn:
+            # Получаем все записи из таблицы BMInfo_onClient
+            clients = BMInfo_onClient.select()
+
+            # Создаем список для хранения результатов
+            result = []
+
+            for client in clients:
+                # Получаем соответствующую техническую информацию из таблицы TechInformation
+                tech_infos = TechInformation.select().where(TechInformation.tech_information_id == client.technical_information)
+
+                # Создаем список для хранения информации о технических данных
+                tech_infos_data = []
+
+                for tech_info in tech_infos:
+                    tech_info_data = {
+                        'id': tech_info.id,
+                        'tech_information_id': tech_info.tech_information_id.id,
+                        'Версия_сервера': tech_info.server_version,
+                        'Дата_обновления': tech_info.update_date,
+                        'API': tech_info.api,
+                        'iPad': tech_info.ipad,
+                        'Andriod': tech_info.android,
+                        'MDM': tech_info.mdm,
+                        'Локализация Web': tech_info.localizable_web,
+                        'Локализация iOS': tech_info.localizable_ios,
+                        'Скины Web': tech_info.skins_web,
+                        'Скины iOS': tech_info.skins_ios
+                    }
+                    tech_infos_data.append(tech_info_data)
+
+                # Добавляем информацию о клиенте и его технических данных в результат
+                client_data = {
+                    'client_id': client.client_info,
+                    'client_name': client.client_name,
+                    'tech_information': tech_infos_data
+                }
+                result.append(client_data)
+
+        json_data = json.dumps(result, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except peewee.OperationalError as error_message:
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        message = f"Ошибка подключения к базе данных SQLite: {error_message}"
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as error:
+        print("Ошибка сервера:", error)
+        message = f"Ошибка сервера: {error}"
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 def get_tech_information(client_id):
     """Функция возвращает информацию о технических данных для клиента с указанным client_id."""
@@ -73,32 +134,48 @@ def post_tech_information(client_id):
         with conn:
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except peewee.DoesNotExist:
-        return {'error': f'Client with client_id {client_id} not found'}, 404
+        return {'error': f'Клиент с client_id {client_id} не найден'}, 404
 
     # Получаем данные из JSON-запроса
     data = request.get_json()
 
     # Проверяем наличие обязательных полей 'Версия_сервера' и 'Дата_обновления' в данных запроса
     if 'Версия_сервера' not in data or 'Дата_обновления' not in data:
-        return {'error': "Fields 'Версия_сервера' and 'Дата_обновления' are required"}, 400
+        return {'error': "Поля 'Версия_сервера' и 'Дата_обновления' обязательны"}, 400
 
     # Извлекаем значения полей из данных запроса
     server_version = data['Версия_сервера']
-    update_date = data['Дата_обновления']
+    update_date_str = data['Дата_обновления']
 
     # Проверяем, что значения 'Версия_сервера' и 'Дата_обновления' являются строками и не пустыми
-    if not (isinstance(server_version, str) and isinstance(update_date, str) and server_version and update_date):
-        return {'error': "Fields 'Версия_сервера' and 'Дата_обновления' must be non-empty strings"}, 400
+    if not (isinstance(server_version, str) and server_version and isinstance(update_date_str, str) and update_date_str):
+        return {'error': "Поля 'Версия_сервера' и 'Дата_обновления' должны быть непустыми строками"}, 400
+
+    # Проверяем, что значение 'Дата_обновления' является корректной датой
+    try:
+        update_date = datetime.strptime(update_date_str, '%d-%m-%Y').date()
+    except ValueError:
+        return {'error': "Поле 'Дата_обновления' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
     # Создаем словарь с необязательными полями
     optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES if key not in ['Версия_сервера', 'Дата_обновления']}
+
+    # Проверяем корректность типов данных для всех ключей
+    for key, value in optional_fields.items():
+        if value is not None:
+            if key in ['API', 'Локализация_Web', 'Локализация_iOS', 'Скины_Web', 'Скины_iOS']:
+                if not isinstance(value, bool):
+                    return {'error': f"Поле '{key}' должно быть булевым типом"}, 400
+            else:
+                if not isinstance(value, str):
+                    return {'error': f"Поле '{key}' должно быть строкой"}, 400
 
     # Создаем новую запись в таблице TechInformation и сохраняем ее в базе данных
     try:
         tech_info = TechInformation.create(tech_information_id=client.technical_information, server_version=server_version, update_date=update_date, **optional_fields)
         tech_info.save()
     except Exception as error_message:
-        return {'error': f'Error creating tech information: {str(error_message)}'}, 500
+        return {'error': f'Ошибка при создании технической информации: {str(error_message)}'}, 500
 
     # Возвращаем сообщение об успешном создании записи
-    return {'message': 'Tech information created successfully'}, 201
+    return {'message': 'Техническая информация успешно создана'}, 201

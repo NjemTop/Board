@@ -304,13 +304,13 @@ class TechInformation(BaseModel):
     server_version = peewee.TextField(column_name='Версия_сервера')
     update_date = peewee.DateField(column_name='Дата_обновления')
     api = peewee.BooleanField(column_name='API', null=True)
-    ipad = peewee.BooleanField(column_name='iPad', null=True)
-    android = peewee.BooleanField(column_name='Andriod', null=True)
-    mdm = peewee.BooleanField(column_name='MDM', null=True)
-    localizable_web = peewee.BooleanField(column_name='Локализация Web', null=True)
-    localizable_ios = peewee.BooleanField(column_name='Локализация iOS', null=True)
-    skins_web = peewee.BooleanField(column_name='Скины Web', null=True)
-    skins_ios = peewee.BooleanField(column_name='Скины iOS', null=True)
+    ipad = peewee.TextField(column_name='iPad', null=True)
+    android = peewee.TextField(column_name='Andriod', null=True)
+    mdm = peewee.TextField(column_name='MDM', null=True)
+    localizable_web = peewee.BooleanField(column_name='Локализация_Web', null=True)
+    localizable_ios = peewee.BooleanField(column_name='Локализация_iOS', null=True)
+    skins_web = peewee.BooleanField(column_name='Скины_Web', null=True)
+    skins_ios = peewee.BooleanField(column_name='Скины_iOS', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
         'Версия_сервера',
