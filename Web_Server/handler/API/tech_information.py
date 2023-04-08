@@ -139,31 +139,31 @@ def post_tech_information(client_id):
     # Получаем данные из JSON-запроса
     data = request.get_json()
 
-    # Проверяем наличие обязательных полей 'Версия_сервера' и 'Дата_обновления' в данных запроса
+    # Проверяем наличие обязательных полей 'server_version' и 'update_date' в данных запроса
     if 'server_version' not in data or 'update_date' not in data:
-        return {'error': "Поля 'server_version' и 'Дата_обновления' обязательны"}, 400
+        return {'error': "Поля 'server_version' и 'update_date' обязательны"}, 400
 
     # Извлекаем значения полей из данных запроса
     server_version = data['server_version']
     update_date_str = data['update_date']
 
-    # Проверяем, что значения 'Версия_сервера' и 'Дата_обновления' являются строками и не пустыми
+    # Проверяем, что значение 'server_version' является строкой и не пустое
     if not (isinstance(server_version, str) and server_version):
-        return {'error': "Поля 'server_version' должны быть непустыми строками"}, 400
+        return {'error': "Поля 'server_version' и 'update_date' должны быть непустыми строками"}, 400
 
-    # Проверяем, что значение 'Дата_обновления' является корректной датой
+    # Проверяем, что значение 'update_date' является корректной датой
     try:
         update_date = datetime.strptime(update_date_str, '%d-%m-%Y').date()
     except ValueError:
         return {'error': "Поле 'update_date' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
     # Создаем словарь с необязательными полями
-    optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES if key not in ['Версия_сервера', 'Дата_обновления']}
+    optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES if key not in ['server_version', 'update_date']}
 
     # Проверяем корректность типов данных для всех ключей
     for key, value in optional_fields.items():
         if value is not None:
-            if key in ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']:
+            if key in ['API', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']:
                 if not isinstance(value, bool):
                     return {'error': f"Поле '{key}' должно быть булевым типом"}, 400
             else:
