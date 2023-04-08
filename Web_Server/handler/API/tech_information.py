@@ -31,16 +31,16 @@ def get_all_tech_information():
                     tech_info_data = {
                         'id': tech_info.id,
                         'tech_information_id': tech_info.tech_information_id.id,
-                        'Версия_сервера': tech_info.server_version,
-                        'Дата_обновления': tech_info.update_date,
-                        'API': tech_info.api,
-                        'iPad': tech_info.ipad,
-                        'Andriod': tech_info.android,
-                        'MDM': tech_info.mdm,
-                        'Локализация Web': tech_info.localizable_web,
-                        'Локализация iOS': tech_info.localizable_ios,
-                        'Скины Web': tech_info.skins_web,
-                        'Скины iOS': tech_info.skins_ios
+                        'server_version': tech_info.server_version,
+                        'update_date': tech_info.update_date,
+                        'api': tech_info.api,
+                        'ipad': tech_info.ipad,
+                        'android': tech_info.android,
+                        'mdm': tech_info.mdm,
+                        'localizable_web': tech_info.localizable_web,
+                        'localizable_ios': tech_info.localizable_ios,
+                        'skins_web': tech_info.skins_web,
+                        'skins_ios': tech_info.skins_ios
                     }
                     tech_infos_data.append(tech_info_data)
 
@@ -99,16 +99,16 @@ def get_tech_information(client_id):
             tech_info_data = {
                 'id': tech_info.id,
                 'tech_information_id': tech_info.tech_information_id.id,
-                'Версия_сервера': tech_info.server_version,
-                'Дата_обновления': tech_info.update_date,
-                'API': tech_info.api,
-                'iPad': tech_info.ipad,
-                'Andriod': tech_info.android,
-                'MDM': tech_info.mdm,
-                'Локализация Web': tech_info.localizable_web,
-                'Локализация iOS': tech_info.localizable_ios,
-                'Скины Web': tech_info.skins_web,
-                'Скины iOS': tech_info.skins_ios
+                'server_version': tech_info.server_version,
+                'update_date': tech_info.update_date,
+                'api': tech_info.api,
+                'ipad': tech_info.ipad,
+                'android': tech_info.android,
+                'mdm': tech_info.mdm,
+                'localizable_web': tech_info.localizable_web,
+                'localizable_ios': tech_info.localizable_ios,
+                'skins_web': tech_info.skins_web,
+                'skins_ios': tech_info.skins_ios
             }
 
         json_data = json.dumps(tech_info_data, ensure_ascii=False, indent=4)
