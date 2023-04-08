@@ -53,7 +53,7 @@ def migrate():
 
         print("Tables migrated successfully")
     except Exception as error_masage:
-        print(f"Error: {error_masage}")
+        print(f"Error: {error_masage}, Table: {model._meta.table_name}")
 
 print("Starting migration...", flush=True)
 migrate()
