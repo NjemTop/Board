@@ -90,7 +90,7 @@ def get_service(client_id):
             # Возвращаем информацию об услуге в виде словаря
             service_data = {
                 'id': service.id,
-                'service_id': service.service_id,
+                'service_id': client.client_info,
                 'service_pack': service.service_pack,
                 'manager': service.manager,
                 'loyal': service.loyal
