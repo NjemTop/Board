@@ -26,7 +26,7 @@ def get_service(client_id):
 
             # Получаем информацию об услуге для данного клиента
             try:
-                service = Servise.get(Servise.service_id == client.client_info)
+                service = Servise.get(Servise.service_id == client.service)
             except peewee.DoesNotExist:
                 message = f"Услуга для клиента с ID {client_id} не найдена"
                 json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
