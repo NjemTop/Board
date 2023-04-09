@@ -18,31 +18,32 @@ def get_all_tech_accounts():
             # Получаем всех активных клиентов
             clients = BMInfo_onClient.select().where(BMInfo_onClient.contact_status == True)
 
-        for client in clients:
-            # Формируем информацию о клиенте
-            client_data = {
-                "client_id": client.client_info,
-                "client_name": client.client_name,
-                "tech_accounts": []
-            }
+            for client in clients:
+                # Формируем информацию о клиенте
+                client_data = {
+                    "client_id": client.client_info,
+                    "client_name": client.client_name,
+                    "tech_accounts": []
+                }
 
-            # Получаем технические аккаунты для текущего клиента
-            tech_account_id = client.technical_information
-            tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+                # Получаем технические аккаунты для текущего клиента
+                client_card = ClientsCard.get(ClientsCard.client_id == client.client_info)
+                tech_account_id = client_card.tech_account
+                tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
 
-            for tech_account in tech_accounts:
-                # Формируем информацию о техническом аккаунте
-                account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
-                client_data["tech_accounts"].append(account_data)
+                for tech_account in tech_accounts:
+                    # Формируем информацию о техническом аккаунте
+                    account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
+                    client_data["tech_accounts"].append(account_data)
 
-            clients_data.append(client_data)
+                clients_data.append(client_data)
 
     except peewee.DoesNotExist as e:
-        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(e)}, ensure_ascii=False), 404
+        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(e)}), 404
     except peewee.OperationalError as e:
-        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}, ensure_ascii=False), 500
+        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}), 500
     except Exception as e:
-        return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}, ensure_ascii=False), 500
+        return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}), 500
 
     # Возвращаем результат в виде JSON-объекта
     response = Response(json.dumps(clients_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
