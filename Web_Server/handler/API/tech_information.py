@@ -200,17 +200,6 @@ def patch_tech_information(client_id):
     # Получаем данные из JSON-запроса
     data = request.get_json()
 
-    # Проверяем наличие обязательного поля 'server_version' в данных запроса
-    if 'server_version' not in data:
-        return {'error': "Поле 'server_version' обязательно"}, 400
-
-    # Извлекаем значения полей из данных запроса
-    server_version = data['server_version']
-
-    # Проверяем, что значение 'server_version' является строкой и не пустое
-    if not (isinstance(server_version, str) and server_version):
-        return {'error': "Поле 'server_version' должно быть непустой строкой"}, 400
-
     # Проверяем, что значение 'update_date' является корректной датой, если оно указано
     if 'update_date' in data:
         update_date_str = data['update_date']
@@ -222,7 +211,7 @@ def patch_tech_information(client_id):
         update_date = datetime.datetime.now().date()  # Если 'update_date' не указано, используем сегодняшнюю дату
 
     # Создаем словарь с необязательными полями
-    optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES if key not in ['server_version', 'update_date']}
+    optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES}
 
     # Проверяем корректность типов данных для всех ключей
     for key, value in optional_fields.items():
@@ -238,7 +227,6 @@ def patch_tech_information(client_id):
     try:
         with conn:
             tech_info = TechInformation.get(TechInformation.tech_information_id == client.technical_information)
-            tech_info.server_version = server_version
             tech_info.update_date = update_date
 
             for key, value in optional_fields.items():
@@ -249,5 +237,5 @@ def patch_tech_information(client_id):
     except Exception as error_message:
         return {'error': f'Ошибка при обновлении технической информации: {str(error_message)}'}, 500
 
-    # Возвращаем сообщение об успешном обновл
-    return {'message': 'Техническая информация успешно обновлена'}, 201
+    # Возвращаем сообщение об успешном обновлении технической информации
+    return {'message': 'Техническая информация успешно обновлена'}, 200

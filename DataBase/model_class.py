@@ -304,7 +304,7 @@ class TechInformation(BaseModel):
         'server_version',
         'update_date',
         'api',
-        'iPad',
+        'ipad',
         'android',
         'mdm',
         'localizable_web',
