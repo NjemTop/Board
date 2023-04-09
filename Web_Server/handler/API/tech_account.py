@@ -3,12 +3,47 @@ import logging
 import json
 import peewee
 import traceback
-from DataBase.model_class import ClientsCard, TechAccount, conn
+from DataBase.model_class import ClientsCard, TechAccount, BMInfo_onClient, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
+
+def get_all_tech_accounts():
+    clients_data = []
+
+    try:
+        with conn:
+            clients = BMInfo_onClient.select().where(BMInfo_onClient.contact_status == True)
+
+        for client in clients:
+            client_data = {
+                "client_id": client.client_info,
+                "client_name": client.client_name,
+                "tech_accounts": []
+            }
+
+            tech_account_id = client.technical_information
+
+            with conn:
+                tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+
+            for tech_account in tech_accounts:
+                account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
+                client_data["tech_accounts"].append(account_data)
+
+            clients_data.append(client_data)
+
+    except peewee.DoesNotExist:
+        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Ошибка сервера: {e}'}), 500
+
+    response = Response(json.dumps(clients_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
+    response.headers.add('Cache-Control', 'no-store')
+    response.headers.add('Pragma', 'no-cache')
+    return response, 200
 
 def get_tech_account_api(client_id):
     try:
