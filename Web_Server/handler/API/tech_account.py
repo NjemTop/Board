@@ -28,9 +28,7 @@ def get_all_tech_accounts():
 
             # Получаем технические аккаунты для текущего клиента
             tech_account_id = client.technical_information
-
-            with conn:
-                tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+            tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
 
             for tech_account in tech_accounts:
                 # Формируем информацию о техническом аккаунте
