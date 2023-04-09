@@ -100,30 +100,22 @@ def patch_tech_account_api(client_id):
     return jsonify({'message': 'Технический аккаунт успешно обновлен'}), 200
 
 def delete_tech_account_api(id):
-    """Функция удаления технологической записи клиента по ID"""
-    # Пытаемся получить клиента с указанным ID
+    """Функция удаления записи с техническим аккаунтом по ID"""
     try:
         with conn:
-            client = ClientsCard.get(ClientsCard.client_id == id)
-    except peewee.DoesNotExist:
-        # Если клиент с указанным ID не найден, возвращаем ошибку 404
-        return jsonify({'error': f'Клиент с ID {id} не найден'}), 404
-
-    # Получаем ID технического аккаунта из найденного клиента
-    tech_account_id = client.id
-
-    # Пытаемся удалить технический аккаунт с указанным ID
-    try:
-        with conn:
-            deleted_rows = TechAccount.delete().where(TechAccount.id == tech_account_id).execute()
-    except Exception as e:
-        # Если возникает ошибка при удалении, возвращаем ошибку 500
-        return jsonify({'error': f'Ошибка при удалении технического аккаунта: {e}'}), 500
+            # Удаляем запись с указанным ID
+            deleted_rows = TechAccount.delete().where(TechAccount.id == id).execute()
+    except peewee.OperationalError as error_message:
+        # Возвращаем ошибку, если возникла проблема с подключением к базе данных
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        # Возвращаем ошибку, если возникла другая ошибка сервера
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
 
     # Проверяем, была ли удалена запись
-    if deleted_rows == 0:
-        # Если технический аккаунт не найден, возвращаем ошибку 404
-        return jsonify({'error': 'Технический аккаунт не найден'}), 404
-
-    # Возвращаем сообщение об успешном удалении технического аккаунта и статус 200
-    return jsonify({'message': 'Технический аккаунт успешно удален'}), 200
+    if deleted_rows > 0:
+        # Возвращаем сообщение об успешном удалении записи
+        return f'Удалено {deleted_rows} записей с ID: {id}', 200
+    else:
+        # Возвращаем ошибку, если запись с указанным ID не найдена
+        return f'Запись с ID {id} не найдена', 404
