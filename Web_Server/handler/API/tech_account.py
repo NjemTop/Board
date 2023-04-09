@@ -50,43 +50,42 @@ def get_all_tech_accounts():
     response.headers.add('Pragma', 'no-cache')
     return response, 200
 
-def get_all_tech_accounts():
-    clients_data = []
-
+def get_tech_account_api(client_id):
     try:
         with conn:
-            # Получаем всех активных клиентов
-            clients = BMInfo_onClient.select().where(BMInfo_onClient.contact_status == True)
+            client = ClientsCard.get(ClientsCard.client_id == client_id)
+    except peewee.DoesNotExist:
+        return jsonify({'error': f'Клиент с ID {client_id} не найден'}), 404
 
-            for client in clients:
-                # Формируем информацию о клиенте
-                client_data = {
-                    "client_id": client.client_info,
-                    "client_name": client.client_name,
-                    "tech_accounts": []
-                }
+    tech_account_id = client.tech_account
 
-                # Получаем технические аккаунты для текущего клиента
-                client_card = ClientsCard.get(ClientsCard.client_id == client.client_info)
-                tech_account_id = client_card.tech_account
-                tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+    # Получаем все записи с указанным tech_account_id
+    try:
+        with conn:
+            tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
+    except peewee.DoesNotExist:
+        return jsonify({'error': 'Нет данных о технических аккаунтах'}), 404
 
-                for tech_account in tech_accounts:
-                    # Формируем информацию о техническом аккаунте
-                    account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
-                    client_data["tech_accounts"].append(account_data)
+    # Создаем список для хранения данных технических аккаунтов
+    tech_accounts_data = []
 
-                clients_data.append(client_data)
+    # Итерируемся по найденным записям и добавляем их данные в список
+    for tech_account in tech_accounts:
+        account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
+        tech_accounts_data.append(account_data)
 
-    except peewee.DoesNotExist as e:
-        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(e)}, ensure_ascii=False), 404
-    except peewee.OperationalError as e:
-        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}, ensure_ascii=False), 500
-    except Exception as e:
-        return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}, ensure_ascii=False), 500
+    # Проверяем, если список результатов пуст
+    if not tech_accounts_data:
+        return jsonify({'message': f'По текущему клиенту с ID {client_id} информации нет'}), 200
 
-    # Возвращаем результат в виде JSON-объекта
-    response = Response(json.dumps(clients_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
+    # Формируем структуру ответа
+    response_data = {
+        'client_id': client_id,
+        'contacts': tech_accounts_data
+    }
+
+    # Возвращаем данные технических аккаунтов в формате JSON с отступами для лучшей читаемости и корректным отображением текста на русском языке
+    response = Response(json.dumps(response_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
     response.headers.add('Cache-Control', 'no-store')
     response.headers.add('Pragma', 'no-cache')
     return response, 200
