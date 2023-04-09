@@ -2,6 +2,7 @@ from flask import request, Response, jsonify
 import logging
 import json
 import peewee
+import traceback
 from DataBase.model_class import ClientsCard, TechAccount, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
