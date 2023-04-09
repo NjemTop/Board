@@ -106,6 +106,7 @@ def delete_tech_account_api(id):
         with conn:
             # Удаляем запись с указанным ID
             deleted_rows = TechAccount.delete().where(TechAccount.id == id).execute()
+
     except peewee.OperationalError as error_message:
         # Возвращаем ошибку, если возникла проблема с подключением к базе данных
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
