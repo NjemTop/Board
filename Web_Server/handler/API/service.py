@@ -142,7 +142,7 @@ def post_service(client_id):
 
     # Если поле 'loyal' присутствует, проверяем, что оно является строкой
     if loyal is not None and not isinstance(loyal, str):
-        return {'error': 'Loyal field must be a string'}, 400
+        return {'error': 'Поле Loyal должно быть непустой строкой'}, 400
 
     # Создаем новую запись в таблице Servise и сохраняем ее в базе данных
     try:
@@ -150,8 +150,9 @@ def post_service(client_id):
         service.save()
         if service.save() != 1:
             return {'error': 'Error saving service to the database'}, 500
-        # Возвращаем сообщение об успешном создании записи
-        return {'message': 'Service created successfully'}, 201
 
     except Exception as error_masage:
-        return {'error': f'Error creating service: {str(error_masage)}'}, 500
+        return {'error': f'Ошибка при создании обслуживания: {str(error_masage)}'}, 500
+
+    # Возвращаем сообщение об успешном создании записи
+    return {'message': 'Обслуживание успешно создано'}, 201

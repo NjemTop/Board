@@ -136,7 +136,7 @@ def get_tech_information(client_id):
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-       
+
 def post_tech_information(client_id):
     # Проверяем существование клиента с указанным client_id
     try:
@@ -188,3 +188,66 @@ def post_tech_information(client_id):
 
     # Возвращаем сообщение об успешном создании записи
     return {'message': 'Техническая информация успешно создана'}, 201
+
+def patch_tech_information(client_id):
+    # Проверяем существование клиента с указанным client_id
+    try:
+        with conn:
+            client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+    except peewee.DoesNotExist:
+        return {'error': f'Клиент с client_id {client_id} не найден'}, 404
+
+    # Получаем данные из JSON-запроса
+    data = request.get_json()
+
+    # Проверяем наличие обязательного поля 'server_version' в данных запроса
+    if 'server_version' not in data:
+        return {'error': "Поле 'server_version' обязательно"}, 400
+
+    # Извлекаем значения полей из данных запроса
+    server_version = data['server_version']
+
+    # Проверяем, что значение 'server_version' является строкой и не пустое
+    if not (isinstance(server_version, str) and server_version):
+        return {'error': "Поле 'server_version' должно быть непустой строкой"}, 400
+
+    # Проверяем, что значение 'update_date' является корректной датой, если оно указано
+    if 'update_date' in data:
+        update_date_str = data['update_date']
+        try:
+            update_date = datetime.datetime.strptime(update_date_str, '%d-%m-%Y').date()
+        except ValueError:
+            return {'error': "Поле 'update_date' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
+    else:
+        update_date = datetime.datetime.now().date()  # Если 'update_date' не указано, используем сегодняшнюю дату
+
+    # Создаем словарь с необязательными полями
+    optional_fields = {key: data.get(key, None) for key in TechInformation.COLUMN_NAMES if key not in ['server_version', 'update_date']}
+
+    # Проверяем корректность типов данных для всех ключей
+    for key, value in optional_fields.items():
+        if value is not None:
+            if key in ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']:
+                if not isinstance(value, bool):
+                    return {'error': f"Поле '{key}' должно быть булевым типом"}, 400
+            else:
+                if not isinstance(value, str):
+                    return {'error': f"Поле '{key}' должно быть строкой"}, 400
+
+    # Обновляем запись в таблице TechInformation и сохраняем ее в базе данных
+    try:
+        with conn:
+            tech_info = TechInformation.get(TechInformation.tech_information_id == client.technical_information)
+            tech_info.server_version = server_version
+            tech_info.update_date = update_date
+
+            for key, value in optional_fields.items():
+                if value is not None:
+                    setattr(tech_info, key, value)
+
+            tech_info.save()
+    except Exception as error_message:
+        return {'error': f'Ошибка при обновлении технической информации: {str(error_message)}'}, 500
+
+    # Возвращаем сообщение об успешном обновл
+    return {'message': 'Техническая информация успешно обновлена'}, 201
