@@ -101,26 +101,29 @@ def patch_tech_account_api(client_id):
 
 def delete_tech_account_api(id):
     """Функция удаления технологической записи клиента по ID"""
-    # Получаем технический аккаунт с указанным ID
+    # Пытаемся получить клиента с указанным ID
     try:
         with conn:
-            tech_account = TechAccount.get(TechAccount.id == id)
+            client = ClientsCard.get(ClientsCard.client_id == id)
     except peewee.DoesNotExist:
-        # Возвращаем ошибку, если технический аккаунт не найден
-        return jsonify({'error': f'Технический аккаунт с ID {id} не найден'}), 404
+        # Если клиент с указанным ID не найден, возвращаем ошибку 404
+        return jsonify({'error': f'Клиент с ID {id} не найден'}), 404
 
-    # Удаляем технический аккаунт с указанным ID
+    # Получаем ID технического аккаунта из найденного клиента
+    tech_account_id = client.id
+
+    # Пытаемся удалить технический аккаунт с указанным ID
     try:
         with conn:
-            deleted_rows = TechAccount.delete().where(TechAccount.id == id).execute()
+            deleted_rows = TechAccount.delete().where(TechAccount.id == tech_account_id).execute()
     except Exception as e:
-        # Возвращаем ошибку, если возникла ошибка при удалении технического аккаунта
+        # Если возникает ошибка при удалении, возвращаем ошибку 500
         return jsonify({'error': f'Ошибка при удалении технического аккаунта: {e}'}), 500
 
-    # Проверяем, был ли удален технический аккаунт
+    # Проверяем, была ли удалена запись
     if deleted_rows == 0:
-        # Возвращаем ошибку, если технический аккаунт не был удален
+        # Если технический аккаунт не найден, возвращаем ошибку 404
         return jsonify({'error': 'Технический аккаунт не найден'}), 404
 
-    # Возвращаем сообщение об успешном удалении технического аккаунта
+    # Возвращаем сообщение об успешном удалении технического аккаунта и статус 200
     return jsonify({'message': 'Технический аккаунт успешно удален'}), 200
