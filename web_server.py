@@ -75,7 +75,7 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'get_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.get_tech_account_api), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'post_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.post_tech_account_api), methods=['POST'])
     app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'patch_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.patch_tech_account_api), methods=['PATCH'])
-    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'delete_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.delete_tech_account_api), methods=['DELETE'])
+    app.add_url_rule('/clients_all_info/api/tech_account/<int:id>>', 'delete_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.delete_tech_account_api), methods=['DELETE'])
 
     # Регистрация обработчика для API информация о серверах клиента
     app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'get_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(bm_servers_card.get_bm_servers_card_api), methods=['GET'])
