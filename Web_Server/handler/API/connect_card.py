@@ -148,23 +148,6 @@ def post_connect_info_api():
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
 
-def delete_connect_info_api(id):
-    """Функция удаления записи с информацией о подключении к клиенту по ID"""
-    try:
-        with conn:
-            # Удаляем запись с указанным ID
-            deleted_rows = СonnectInfoCard.delete().where(СonnectInfoCard.id == id).execute()
-
-        if deleted_rows > 0:
-            return f'Удалено {deleted_rows} записей с ID: {id}', 200
-        else:
-            return f'Запись с ID {id} не найдена', 404
-
-    except peewee.OperationalError as error_message:
-        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
-    except Exception as error:
-        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
-
 def patch_connect_info_api(id):
     """Функция обновления информации о подключении к клиенту по ID"""
     data = request.get_json()
@@ -189,3 +172,26 @@ def patch_connect_info_api(id):
         return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
     except Exception as error:
         return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
+
+def delete_connect_info_api(id):
+    """Функция удаления записи с информацией о подключении к клиенту по ID"""
+    try:
+        with conn:
+            # Удаляем запись с указанным ID
+            deleted_rows = СonnectInfoCard.delete().where(СonnectInfoCard.id == id).execute()
+
+    except peewee.OperationalError as error_message:
+        # Возвращаем ошибку, если возникла проблема с подключением к базе данных
+        return f"Ошибка подключения к базе данных SQLite: {error_message}", 500
+    except Exception as error:
+        # Возвращаем ошибку, если возникла другая ошибка сервера
+        return jsonify({"message": f"Ошибка сервера: {error}", "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}), 500
+
+    # Проверяем, была ли удалена запись
+    if deleted_rows > 0:
+        # Возвращаем сообщение об успешном удалении записи
+        return f'Удалено {deleted_rows} записей с ID: {id}', 200
+    else:
+        # Возвращаем ошибку, если запись с указанным ID не найдена
+        return f'Запись с ID {id} не найдена', 404
+    
