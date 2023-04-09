@@ -39,12 +39,12 @@ def get_all_tech_accounts():
 
             clients_data.append(client_data)
 
-    except peewee.DoesNotExist as error_masage:
-        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(error_masage)}), 404
-    except peewee.OperationalError as error_masage:
-        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(error_masage)}), 500
-    except Exception as error_masage:
-        return jsonify({'error': f'Ошибка сервера: {error_masage}', 'details': str(error_masage)}), 500
+    except peewee.DoesNotExist as e:
+        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(e)}, ensure_ascii=False), 404
+    except peewee.OperationalError as e:
+        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}, ensure_ascii=False), 500
+    except Exception as e:
+        return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}, ensure_ascii=False), 500
 
     # Возвращаем результат в виде JSON-объекта
     response = Response(json.dumps(clients_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
