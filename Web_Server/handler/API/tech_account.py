@@ -15,31 +15,38 @@ def get_all_tech_accounts():
 
     try:
         with conn:
+            # Получаем всех активных клиентов
             clients = BMInfo_onClient.select().where(BMInfo_onClient.contact_status == True)
 
         for client in clients:
+            # Формируем информацию о клиенте
             client_data = {
                 "client_id": client.client_info,
                 "client_name": client.client_name,
                 "tech_accounts": []
             }
 
+            # Получаем технические аккаунты для текущего клиента
             tech_account_id = client.technical_information
 
             with conn:
                 tech_accounts = TechAccount.select().where(TechAccount.tech_account_id == tech_account_id)
 
             for tech_account in tech_accounts:
+                # Формируем информацию о техническом аккаунте
                 account_data = {column_name: getattr(tech_account, column_name) for column_name in TechAccount.COLUMN_NAMES if column_name != 'tech_account_id'}
                 client_data["tech_accounts"].append(account_data)
 
             clients_data.append(client_data)
 
-    except peewee.DoesNotExist:
-        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах'}), 404
-    except Exception as e:
-        return jsonify({'error': f'Ошибка сервера: {e}'}), 500
+    except peewee.DoesNotExist as error_masage:
+        return jsonify({'error': 'Нет данных о клиентах или технических аккаунтах', 'details': str(error_masage)}), 404
+    except peewee.OperationalError as error_masage:
+        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(error_masage)}), 500
+    except Exception as error_masage:
+        return jsonify({'error': f'Ошибка сервера: {error_masage}', 'details': str(error_masage)}), 500
 
+    # Возвращаем результат в виде JSON-объекта
     response = Response(json.dumps(clients_data, indent=2, ensure_ascii=False), content_type='application/json; charset=utf-8')
     response.headers.add('Cache-Control', 'no-store')
     response.headers.add('Pragma', 'no-cache')
