@@ -10,7 +10,7 @@ from logger.log_config import setup_logger, get_abs_log_path
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
-def get_all_services():
+def get_all_services_api():
     try:
         with conn:
             # Получаем все записи из таблицы BMInfo_onClient
@@ -63,7 +63,7 @@ def get_all_services():
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
-def get_service(client_id):
+def get_service_api(client_id):
     """Функция возвращает информацию об услуге для клиента с указанным client_id."""
     try:
         with conn:
@@ -115,7 +115,7 @@ def get_service(client_id):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
-def post_service(client_id):
+def post_service_api(client_id):
     # Проверяем существование клиента с указанным client_id
     try:
         with conn:
@@ -156,3 +156,39 @@ def post_service(client_id):
 
     # Возвращаем сообщение об успешном создании записи
     return {'message': 'Обслуживание успешно создано'}, 201
+
+def update_service_api(client_id):
+    # Проверяем существование клиента с указанным client_id
+    try:
+        with conn:
+            client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
+    except peewee.DoesNotExist:
+        return jsonify({'error': f'Client with client_id {client_id} not found'}), 404
+
+    # Получаем данные из JSON-запроса
+    data = request.get_json()
+
+    field_name = data.get('field_name', None)
+    new_value = data.get('new_value', None)
+
+    if field_name is None or new_value is None:
+        return jsonify({'error': 'Both field_name and new_value should be provided'}), 400
+
+    try:
+        with conn:
+            service_record = Servise.get(Servise.service_id == client.client_info)
+
+            if field_name in Servise.COLUMN_NAMES:
+                setattr(service_record, field_name, new_value)
+                service_record.save()
+            else:
+                return jsonify({'error': f'Некорректное имя поля: {field_name}. Допустимые имена полей: {Servise.COLUMN_NAMES}'}), 400
+
+    except peewee.DoesNotExist:
+        return jsonify({'error': f'Service record for client_id {client_id} not found'}), 404
+    except peewee.OperationalError as e:
+        return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}), 500
+
+    return jsonify({'message': f'Service record for client_id {client_id} успешно обновлена', 'updated_field': field_name, 'new_value': new_value}), 200

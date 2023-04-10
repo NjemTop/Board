@@ -99,9 +99,10 @@ def create_app():
     app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>/<int:connection_info_id>', 'delete_specific_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_specific_connection_info), methods=['DELETE'])
     
     # Регистрация обработчика для API информация о настройки подключения к клиенту
-    app.add_url_rule('/clients_all_info/api/services/', 'get_all_services', require_basic_auth(USERNAME, PASSWORD)(service.get_all_services), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'get_service', require_basic_auth(USERNAME, PASSWORD)(service.get_service), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'post_service', require_basic_auth(USERNAME, PASSWORD)(service.post_service), methods=['POST'])
+    app.add_url_rule('/clients_all_info/api/services/', 'get_all_services_api', require_basic_auth(USERNAME, PASSWORD)(service.get_all_services_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'get_service_api', require_basic_auth(USERNAME, PASSWORD)(service.get_service_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'post_service_api', require_basic_auth(USERNAME, PASSWORD)(service.post_service_api), methods=['POST'])
+    app.route('/clients_all_info/api/service/<int:client_id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(service.update_service_api))
     #app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'patch_service', require_basic_auth(USERNAME, PASSWORD)(service.patch_service), methods=['PATCH'])
 
     # Регистрация обработчика для API
