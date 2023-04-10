@@ -5,7 +5,7 @@ from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback
-from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service, tech_information
+from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service, tech_information, all_clients
 from Web_Server.handler.API.connection_info import init_app
 
 # Указываем настройки логов для нашего файла с классами
@@ -42,6 +42,10 @@ def create_app():
     app.route('/data_release/api/<string:version>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(data_release.api_data_release_number))
     # Регистрация обработчиков для URL спика всех отправленных версиях
     app.add_url_rule('/data_release', 'data_release_html', release_data.data_release_html, methods=['GET'])
+
+    # Регистрация обработчика для API 
+    app.add_url_rule('/clients_all_info/api/all_clients', 'get_all_clients_api', require_basic_auth(USERNAME, PASSWORD)(all_clients.get_all_clients_api), methods=['GET'])
+    app.add_url_rule('/clients_all_info/api/all_clients', 'post_all_clients_api', require_basic_auth(USERNAME, PASSWORD)(all_clients.post_all_clients_api), methods=['POST'])
 
     # Регистрация обработчика для API списка учёта версий клиентов
     app.add_url_rule('/clients_all_info/api/clients', 'get_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(BM_Info_onClient.get_BM_Info_onClient_api), methods=['GET'])
