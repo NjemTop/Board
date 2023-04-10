@@ -8,6 +8,7 @@ import re
 from unicodedata import normalize
 import os
 import base64
+import json
 from DataBase.model_class import ClientsCard, ConnectionInfo, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
@@ -48,12 +49,12 @@ def get_uploaded_conn_files(client_id):
     try:
         client_card = ClientsCard.get(ClientsCard.client_id == client_id)
     except peewee.DoesNotExist:
-        return {'error': f'Client with client_id {client_id} not found'}, 404
+        return jsonify({'error': f'Client with client_id {client_id} not found'}), 404
 
     connection_infos = ConnectionInfo.select().where(ConnectionInfo.client_id == client_card)
 
     if connection_infos.count() == 0:
-        return {'error': f'No uploaded files found for client with client_id {client_id}'}, 404
+        return jsonify({'error': f'No uploaded files found for client with client_id {client_id}'}), 404
 
     files = []
 
@@ -65,7 +66,14 @@ def get_uploaded_conn_files(client_id):
         }
         files.append(file_data)
 
-    return {'client_id': client_id, 'files': files}, 200
+    # Преобразуем список результатов в строку JSON
+    json_data = json.dumps({'client_id': client_id, 'files': files}, ensure_ascii=False, indent=4)
+    # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+    response = Response(json_data, content_type='application/json; charset=utf-8')
+    # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    # Отправляем ответ JSON
+    return response
 
 def get_serve_file(client_id):
     try:
