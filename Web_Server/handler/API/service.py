@@ -157,7 +157,7 @@ def post_service_api(client_id):
     # Возвращаем сообщение об успешном создании записи
     return {'message': 'Обслуживание успешно создано'}, 201
 
-def update_service_api(client_id):
+def patch_service_api(client_id):
     # Проверяем существование клиента с указанным client_id
     try:
         with conn:
@@ -168,21 +168,27 @@ def update_service_api(client_id):
     # Получаем данные из JSON-запроса
     data = request.get_json()
 
-    field_name = data.get('field_name', None)
-    new_value = data.get('new_value', None)
+    service_pack = data.get('service_pack', None)
+    manager = data.get('manager', None)
+    loyal = data.get('loyal', None)
 
-    if field_name is None or new_value is None:
-        return jsonify({'error': 'Both field_name and new_value should be provided'}), 400
+    if service_pack is None and manager is None and loyal is None:
+        return jsonify({'error': 'At least one of the following fields should be provided: service_pack, manager, loyal'}), 400
 
     try:
         with conn:
             service_record = Servise.get(Servise.service_id == client.client_info)
 
-            if field_name in Servise.COLUMN_NAMES:
-                setattr(service_record, field_name, new_value)
-                service_record.save()
-            else:
-                return jsonify({'error': f'Некорректное имя поля: {field_name}. Допустимые имена полей: {Servise.COLUMN_NAMES}'}), 400
+            if service_pack is not None:
+                service_record.service_pack = service_pack
+
+            if manager is not None:
+                service_record.manager = manager
+
+            if loyal is not None:
+                service_record.loyal = loyal
+
+            service_record.save()
 
     except peewee.DoesNotExist:
         return jsonify({'error': f'Service record for client_id {client_id} not found'}), 404
@@ -191,4 +197,4 @@ def update_service_api(client_id):
     except Exception as e:
         return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}), 500
 
-    return jsonify({'message': f'Service record for client_id {client_id} успешно обновлена', 'updated_field': field_name, 'new_value': new_value}), 200
+    return jsonify({'message': f'Service record for client_id {client_id} успешно обновлена', 'updated_data': data}), 200
