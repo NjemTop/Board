@@ -163,7 +163,7 @@ def patch_service_api(client_id):
         with conn:
             client = BMInfo_onClient.get(BMInfo_onClient.client_info == client_id)
     except peewee.DoesNotExist:
-        return jsonify({'error': f'Client with client_id {client_id} not found'}), 404
+        return jsonify({'error': f'Клиент с client_id {client_id} не найден'}), 404
 
     # Получаем данные из JSON-запроса
     data = request.get_json()
@@ -172,29 +172,36 @@ def patch_service_api(client_id):
     manager = data.get('manager', None)
     loyal = data.get('loyal', None)
 
+    # Проверяем, что хотя бы одно из полей предоставлено для обновления
     if service_pack is None and manager is None and loyal is None:
-        return jsonify({'error': 'At least one of the following fields should be provided: service_pack, manager, loyal'}), 400
+        return jsonify({'error': 'Должно быть предоставлено хотя бы одно из следующих полей: service_pack, manager, loyal'}), 400
 
     try:
         with conn:
+            # Получаем запись обслуживания для указанного клиента
             service_record = Servise.get(Servise.service_id == client.client_info)
 
+            # Обновляем поле service_pack, если оно предоставлено
             if service_pack is not None:
                 service_record.service_pack = service_pack
 
+            # Обновляем поле manager, если оно предоставлено
             if manager is not None:
                 service_record.manager = manager
 
+            # Обновляем поле loyal, если оно предоставлено
             if loyal is not None:
                 service_record.loyal = loyal
 
+            # Сохраняем изменения в базе данных
             service_record.save()
 
     except peewee.DoesNotExist:
-        return jsonify({'error': f'Service record for client_id {client_id} not found'}), 404
+        return jsonify({'error': f'Запись обслуживания для client_id {client_id} не найдена'}), 404
     except peewee.OperationalError as e:
         return jsonify({'error': 'Ошибка подключения к базе данных', 'details': str(e)}), 500
     except Exception as e:
         return jsonify({'error': f'Ошибка сервера: {e}', 'details': str(e)}), 500
 
-    return jsonify({'message': f'Service record for client_id {client_id} успешно обновлена', 'updated_data': data}), 200
+    # Возвращаем сообщение об успешном обновлении записи и обновленные данные
+    return jsonify({'message': f'Запись обслуживания для client_id {client_id} успешно обновлена', 'updated_data': data}), 200
