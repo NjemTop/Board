@@ -95,9 +95,16 @@ def post_all_clients_api():
     try:
         # Получаем данные из запроса и создаем объект BMInfo_onClient
         data = json.loads(request.data.decode('utf-8'))
+
+        # Проверяем обязательный ключи
+        required_fields = ['client_name', 'contact_name', 'contact_email', 'contact_info_name', 'contact_info_account', 'contact_info_password']
+        for field in required_fields:
+            if field not in data:
+                return f"Отсутствует обязательное поле: {field}", 400
+            
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard])
+            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
@@ -107,7 +114,7 @@ def post_all_clients_api():
                 # Создаем запись в таблице BMInfo_onClient
                 new_client = BMInfo_onClient.create(
                     client_name=data['client_name'],
-                    contact_status=data['contact_status'],
+                    contact_status=True,
                     notes=data.get('notes')
                 )
                 # Получаем id созданной записи
@@ -128,11 +135,19 @@ def post_all_clients_api():
                         contact_notes=contact_data.get('contact_notes')
                     )
 
+                # Создаем записи в таблице СonnectInfoCard для каждой учётной записи
+                for connect_info_data in data.get('connect_info_cards', []):
+                    СonnectInfoCard.create(
+                        client_id=client_id,
+                        contact_info_name=connect_info_data['contact_info_name'],
+                        contact_info_account=connect_info_data['contact_info_account'],
+                        contact_info_password=connect_info_data['contact_info_password'],
+                    )
+
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
-                print(f"Клиент с именем {data['client_name']} уже существует. Пропускаем...")
-                return f"Клиент с именем {data['client_name']} уже существует. Пропускаем...", 409
+                return f"Клиент с именем {data['client_name']} уже существует.", 409
 
         web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
         return 'Клиент успешно записаны в БД!', 201
@@ -140,7 +155,6 @@ def post_all_clients_api():
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
         return f"Ошибка с БД: {error_message}", 500
     except Exception as error:
         # Обработка остальных исключений
