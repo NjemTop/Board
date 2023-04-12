@@ -12,25 +12,30 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def get_all_clients_api():
     try:
+        # Соединение с базой данных
         with conn:
             client_infos = list(BMInfo_onClient.select())
 
         results = []
-        
+        # Итерация по всем клиентам
         for client_info in client_infos:
             result = {}
+            # Итерация по столбцам таблицы BMInfo_onClient
             for column_name in client_info.column_names:
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные ClientsCard для текущего клиента
             clients_card = ClientsCard.get(ClientsCard.client_id == client_info.client_info)
+            # Получаем поле 'contacts' из связанной таблицы ClientsCard
             contacts_id = clients_card.contacts
 
             # Получаем связанные контакты для текущего клиента
             contacts = ContactsCard.select().where(ContactsCard.contact_id == contacts_id)
             contacts_data = []
+            # Итерация по контактам
             for contact in contacts:
                 contact_dict = {}
+                # Итерация по столбцам таблицы ContactsCard
                 for column_name in contact.column_names:
                     contact_dict[column_name] = getattr(contact, column_name)
                 contacts_data.append(contact_dict)
@@ -38,52 +43,37 @@ def get_all_clients_api():
             # Добавляем список контактов к данным клиента
             result["contacts"] = contacts_data
 
+            # Получаем связанные записи из таблицы СonnectInfoCard
             connect_info_cards = СonnectInfoCard.select().where(СonnectInfoCard.client_id == client_info.client_info)
             connect_info_cards_data = []
+            # Итерация по connect_info_cards
             for card in connect_info_cards:
                 card_dict = {}
+                # Итерация по столбцам таблицы СonnectInfoCard
                 for column_name in card.column_names:
                     card_dict[column_name] = getattr(card, column_name)
                 connect_info_cards_data.append(card_dict)
 
+            # Добавляем список connect_info_cards к данным клиента
             result["connect_info_cards"] = connect_info_cards_data
             results.append(result)
 
-        json_data = json.dumps(results, ensure_ascii=False, indent=4)
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception as error:
-        error_message = {"error": str(error)}
-        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
-        response = Response(json_data, content_type='application/json; charset=utf-8')
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-
-# def get_all_clients_api():
-    try:
-        # Используем контекстный менеджер для выполнения операций с БД
-        with conn:
-            # Получаем все записи из таблицы client_info
-            client_infos = list(BMInfo_onClient.select())
-        # Создаем список для хранения результатов
-        results = []
-        for client_info in client_infos:
-            # Создаем словарь для хранения данных одного клиента
-            result = {}
-            for column_name in client_info.column_names:
-                # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
-                result[column_name] = getattr(client_info, column_name)
-            # Добавляем словарь с данными клиента в список результатов
-            results.append(result)
-        # Преобразуем список результатов в строку JSON
+        # Преобразуем результат в JSON и возвращаем его
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
         # Создаем ответ с заголовком Content-Type и кодировкой utf-8
         response = Response(json_data, content_type='application/json; charset=utf-8')
         # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправляем ответ JSON
-        return response
+        return response, 200
+    except peewee.OperationalError as error_message:
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        print("Ошибка подключения к базе данных SQLite:", error_message)
+        message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
     except Exception as error:
         # Если возникла ошибка, формируем словарь с информацией об ошибке
         error_message = {"error": str(error)}
@@ -94,7 +84,7 @@ def get_all_clients_api():
         # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправляем ответ JSON с информацией об ошибке
-        return response
+        return response, 500
     
 def post_all_clients_api():
     """
