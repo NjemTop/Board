@@ -23,7 +23,7 @@ def get_all_clients_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные контакты для текущего клиента
-            contacts = ContactsCard.select().where(ContactsCard.contact_id == client_info.client_info)
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == client_info.contacts)
             contacts_data = []
             for contact in contacts:
                 contact_dict = {}
