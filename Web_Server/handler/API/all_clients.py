@@ -16,34 +16,34 @@ def get_all_clients_api():
             client_infos = list(BMInfo_onClient.select())
 
         results = []
-
+        
         for client_info in client_infos:
-            client_data = {}
+            result = {}
             for column_name in client_info.column_names:
-                client_data[column_name] = getattr(client_info, column_name)
+                result[column_name] = getattr(client_info, column_name)
 
-            client_id = client_data['client_info']
-
-            contacts = list(ContactsCard.select().where(ContactsCard.contact_id == client_id))
-            contact_list = []
+            # Получаем связанные контакты для текущего клиента
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == client_info.client_info)
+            contacts_data = []
             for contact in contacts:
-                contact_data = {}
+                contact_dict = {}
                 for column_name in contact.column_names:
-                    contact_data[column_name] = getattr(contact, column_name)
-                contact_list.append(contact_data)
+                    contact_dict[column_name] = getattr(contact, column_name)
+                contacts_data.append(contact_dict)
 
-            connect_info_cards = list(СonnectInfoCard.select().where(СonnectInfoCard.client_id == client_id))
-            connect_info_list = []
-            for connect_info_card in connect_info_cards:
-                connect_info_data = {}
-                for column_name in connect_info_card.column_names:
-                    connect_info_data[column_name] = getattr(connect_info_card, column_name)
-                connect_info_list.append(connect_info_data)
+            # Добавляем список контактов к данным клиента
+            result["contacts"] = contacts_data
 
-            client_data['contacts'] = contact_list
-            client_data['connect_info_cards'] = connect_info_list
+            connect_info_cards = СonnectInfoCard.select().where(СonnectInfoCard.client_id == client_info.client_info)
+            connect_info_cards_data = []
+            for card in connect_info_cards:
+                card_dict = {}
+                for column_name in card.column_names:
+                    card_dict[column_name] = getattr(card, column_name)
+                connect_info_cards_data.append(card_dict)
 
-            results.append(client_data)
+            result["connect_info_cards"] = connect_info_cards_data
+            results.append(result)
 
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
         response = Response(json_data, content_type='application/json; charset=utf-8')
