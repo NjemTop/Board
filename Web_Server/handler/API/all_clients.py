@@ -97,7 +97,7 @@ def post_all_clients_api():
         data = json.loads(request.data.decode('utf-8'))
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient, ClientsCard])
+            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
@@ -111,10 +111,22 @@ def post_all_clients_api():
                     notes=data.get('notes')
                 )
                 # Получаем id созданной записи
-                client_id = new_client.id
+                client_id = new_client.client_info
 
                 # Создаем запись в таблице ClientsCard с полученным client_id
                 new_client_card = ClientsCard.create(client_id=client_id)
+
+                # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
+                contacts_data = data.get('contacts', [])
+                for contact_data in contacts_data:
+                    new_contact = ContactsCard.create(
+                        contact_id=client_id,
+                        contact_name=contact_data['contact_name'],
+                        contact_position=contact_data.get('contact_position'),
+                        contact_email=contact_data['contact_email'],
+                        notification_update=contact_data.get('notification_update'),
+                        contact_notes=contact_data.get('contact_notes')
+                    )
 
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
