@@ -255,7 +255,12 @@ class ConnectionInfo(BaseModel):
     file_path = peewee.TextField(column_name='file_path', null=True)
     text = peewee.TextField(column_name='text', null=True)
 
-    COLUMN_NAMES = ["id", "client_id", "file_path", "text"]
+    COLUMN_NAMES = [
+        "id",
+        "client_id",
+        "file_path",
+        "text"
+    ]
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -273,10 +278,10 @@ class Servise(BaseModel):
     loyal = peewee.TextField(column_name='Лояльность', null=True)
     # Список наименований столбцов
     COLUMN_NAMES = [ 
-        'ID_сервис',
-        'Пакет_услуг',
-        'Менеджер',
-        'Лояльность'
+        'service_id',
+        'service_pack',
+        'manager',
+        'loyal'
     ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

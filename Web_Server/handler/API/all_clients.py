@@ -22,8 +22,12 @@ def get_all_clients_api():
             for column_name in client_info.column_names:
                 result[column_name] = getattr(client_info, column_name)
 
+            # Получаем связанные ClientsCard для текущего клиента
+            clients_card = ClientsCard.get(ClientsCard.client_id == client_info.client_info)
+            contacts_id = clients_card.contacts
+
             # Получаем связанные контакты для текущего клиента
-            contacts = ContactsCard.select().where(ContactsCard.contact_id == client_info.contacts)
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == contacts_id)
             contacts_data = []
             for contact in contacts:
                 contact_dict = {}
