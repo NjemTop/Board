@@ -24,8 +24,6 @@ def get_BM_Info_onClient_api():
             for column_name in client_info.column_names:
                 # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
-                #  Используйте русские названия столбцов
-                # result[RU_COLUMN_NAMES[column_name]] = getattr(client_info, column_name.lower())
             # Добавляем словарь с данными клиента в список результатов
             results.append(result)
         # Преобразуем список результатов в строку JSON

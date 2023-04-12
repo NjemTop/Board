@@ -3,7 +3,7 @@ import logging
 import json
 import peewee
 import traceback
-from DataBase.model_class import BMInfo_onClient, ClientsCard, conn
+from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -11,6 +11,52 @@ web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), 
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
 def get_all_clients_api():
+    try:
+        with conn:
+            client_infos = list(BMInfo_onClient.select())
+
+        results = []
+
+        for client_info in client_infos:
+            client_data = {}
+            for column_name in client_info.column_names:
+                client_data[column_name] = getattr(client_info, column_name)
+
+            client_id = client_data['client_info']
+
+            contacts = list(ContactsCard.select().where(ContactsCard.contact_id == client_id))
+            contact_list = []
+            for contact in contacts:
+                contact_data = {}
+                for column_name in contact.column_names:
+                    contact_data[column_name] = getattr(contact, column_name)
+                contact_list.append(contact_data)
+
+            connect_info_cards = list(СonnectInfoCard.select().where(СonnectInfoCard.client_id == client_id))
+            connect_info_list = []
+            for connect_info_card in connect_info_cards:
+                connect_info_data = {}
+                for column_name in connect_info_card.column_names:
+                    connect_info_data[column_name] = getattr(connect_info_card, column_name)
+                connect_info_list.append(connect_info_data)
+
+            client_data['contacts'] = contact_list
+            client_data['connect_info_cards'] = connect_info_list
+
+            results.append(client_data)
+
+        json_data = json.dumps(results, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as error:
+        error_message = {"error": str(error)}
+        json_data = json.dumps(error_message, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+# def get_all_clients_api():
     try:
         # Используем контекстный менеджер для выполнения операций с БД
         with conn:
@@ -24,8 +70,6 @@ def get_all_clients_api():
             for column_name in client_info.column_names:
                 # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
-                #  Используйте русские названия столбцов
-                # result[RU_COLUMN_NAMES[column_name]] = getattr(client_info, column_name.lower())
             # Добавляем словарь с данными клиента в список результатов
             results.append(result)
         # Преобразуем список результатов в строку JSON
