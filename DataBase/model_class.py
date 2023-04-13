@@ -111,7 +111,7 @@ class ClientsCard(BaseModel):
 ######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
 class ContactsCard(BaseModel):
     """Список клиентов (Контакты)"""
-    contact_id = peewee.ForeignKeyField(ClientsCard, column_name='contacts', backref='contacts_card', on_delete='CASCADE')
+    contact_id = peewee.TextField(column_name='ID_Контакта')
     contact_name = peewee.TextField(column_name='ФИО')
     contact_position = peewee.TextField(column_name='Должность', null=True)
     contact_email = peewee.TextField(column_name='Email', primary_key=True)
@@ -251,7 +251,7 @@ class TechAccount(BaseModel):
 class ConnectionInfo(BaseModel):
     """Класс с информацией о настройке подключении по ВПН (Настройки подключения)"""
     id = peewee.AutoField(primary_key=True)
-    client_id = peewee.ForeignKeyField(ClientsCard, column_name='client_id', backref='connection_info', on_delete='CASCADE')
+    client_id = peewee.ForeignKeyField(ClientsCard, column_name='client_id', backref='connection_info', on_delete='CASCADE', null=True)
     file_path = peewee.TextField(column_name='file_path', null=True)
     text = peewee.TextField(column_name='text', null=True)
 
