@@ -24,10 +24,11 @@ def get_contact_by_client_id(id):
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response
             
-            contacts = ContactsCard.select().where(ContactsCard.contact_id == client)
+            contact_id = client.contacts
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == contact_id)
 
             if not contacts.exists():
-                message = "Контакты для клиента с ID {} не найдены".format(id)
+                message = "Контакты для клиента с ID {} не найдены".format(contact_id)
                 json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
                 response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
                 response.headers.add('Access-Control-Allow-Origin', '*')
