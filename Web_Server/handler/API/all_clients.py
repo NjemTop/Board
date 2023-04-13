@@ -97,7 +97,7 @@ def post_all_clients_api():
         data = json.loads(request.data.decode('utf-8'))
 
         # Проверяем обязательный ключи
-        required_fields = ['client_name', 'contact_name', 'contact_email', 'contact_info_name', 'contact_info_account', 'contact_info_password']
+        required_fields = ['client_name']
         for field in required_fields:
             if field not in data:
                 return f"Отсутствует обязательное поле: {field}", 400
@@ -123,6 +123,14 @@ def post_all_clients_api():
                 # Создаем запись в таблице ClientsCard с полученным client_id
                 new_client_card = ClientsCard.create(client_id=client_id)
 
+                # Проверяем обязательные поля для массива с контактами
+                contacts_data = data.get('contacts', [])
+                for contact_data in contacts_data:
+                    required_contact_fields = ['contact_name', 'contact_email']
+                    for field in required_contact_fields:
+                        if field not in contact_data:
+                            return f"Отсутствует обязательное поле: {field}", 400
+
                 # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
                 contacts_data = data.get('contacts', [])
                 for contact_data in contacts_data:
@@ -135,6 +143,13 @@ def post_all_clients_api():
                         contact_notes=contact_data.get('contact_notes')
                     )
 
+                # Проверяем обязательный поля для массива с учётными записями для ВПН
+                for connect_info_data in data.get('connect_info_cards', []):
+                    required_connect_info_fields = ['contact_info_name', 'contact_info_account', 'contact_info_password']
+                    for field in required_connect_info_fields:
+                        if field not in connect_info_data:
+                            return f"Отсутствует обязательное поле: {field}", 400
+                        
                 # Создаем записи в таблице СonnectInfoCard для каждой учётной записи
                 for connect_info_data in data.get('connect_info_cards', []):
                     СonnectInfoCard.create(
