@@ -25,7 +25,13 @@ def get_all_clients_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные ClientsCard для текущего клиента
-            clients_card = ClientsCard.get(ClientsCard.client_id == client_info.client_info)
+            clients_cards = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info)
+            clients_card = clients_cards.first()
+
+            # Если запись clients_card не найдена, пропускаем итерацию
+            if clients_card is None:
+                continue
+
             # Получаем поле 'contacts' из связанной таблицы ClientsCard
             contacts_id = clients_card.contacts
 
