@@ -40,6 +40,7 @@ def get_contact_by_client_id(id):
             for contact in contacts:
                 contacts_data.append({
                     'contact_name': contact.contact_name,
+                    'contact_id': contact.contact_id,
                     'contact_email': contact.contact_email,
                     'contact_position': contact.contact_position,
                     'notification_update': contact.notification_update,
