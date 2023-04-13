@@ -130,10 +130,7 @@ def post_all_clients_api():
                     for field in required_contact_fields:
                         if field not in contact_data:
                             return f"Отсутствует обязательное поле: {field}", 400
-
-                # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
-                contacts_data = data.get('contacts', [])
-                for contact_data in contacts_data:
+                    # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
                     new_contact = ContactsCard.create(
                         contact_id=client_id,
                         contact_name=contact_data['contact_name'],
@@ -148,10 +145,8 @@ def post_all_clients_api():
                     required_connect_info_fields = ['contact_info_name', 'contact_info_account', 'contact_info_password']
                     for field in required_connect_info_fields:
                         if field not in connect_info_data:
-                            return f"Отсутствует обязательное поле: {field}", 400
-                        
-                # Создаем записи в таблице СonnectInfoCard для каждой учётной записи
-                for connect_info_data in data.get('connect_info_cards', []):
+                            return f"Отсутствует обязательное поле: {field}", 400  
+                    # Создаем записи в таблице СonnectInfoCard для каждой учётной записи
                     СonnectInfoCard.create(
                         client_id=client_id,
                         contact_info_name=connect_info_data['contact_info_name'],
