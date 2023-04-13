@@ -25,12 +25,7 @@ def get_all_clients_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные ClientsCard для текущего клиента
-            try:
-                clients_card = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info)
-                #clients_card = ClientsCard.get(ClientsCard.client_id == client_info.client_info)
-                #clients_card = clients_cards.first()
-            except ClientsCard.DoesNotExist:
-                return jsonify({"error": f"No ClientsCard found for client_id: {client_info.client_info}"}), 404
+            clients_card = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info).first()
 
             # Если запись clients_card не найдена, пропускаем итерацию
             if clients_card is None:
