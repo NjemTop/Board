@@ -93,9 +93,6 @@ def post_contact_api_by_id(id):
         if client is None:
             return f"Ошибка: клиент с ID {id} не найден.", 404
 
-        # Добавляем значение contacts в данные
-        data['contact_id'] = client.contacts
-
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Проверяем наличие существующего контакта с тем же email

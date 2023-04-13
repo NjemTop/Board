@@ -132,7 +132,6 @@ def post_all_clients_api():
                             return f"Отсутствует обязательное поле: {field}", 400
                     # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
                     new_contact = ContactsCard.create(
-                        contact_id=client_id,
                         contact_name=contact_data['contact_name'],
                         contact_position=contact_data.get('contact_position'),
                         contact_email=contact_data['contact_email'],
