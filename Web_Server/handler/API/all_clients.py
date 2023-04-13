@@ -85,7 +85,7 @@ def get_all_clients_api():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправляем ответ JSON с информацией об ошибке
         return response, 500
-    
+
 def post_all_clients_api():
     """
     Функция добавления информации о клиентах в БД через API.
@@ -132,6 +132,7 @@ def post_all_clients_api():
                             return f"Отсутствует обязательное поле: {field}", 400
                     # Создаем записи в таблице ContactsCard для каждого контакта в списке контактов
                     new_contact = ContactsCard.create(
+                        contact_id=new_client_card.contacts,
                         contact_name=contact_data['contact_name'],
                         contact_position=contact_data.get('contact_position'),
                         contact_email=contact_data['contact_email'],
