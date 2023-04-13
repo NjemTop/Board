@@ -25,26 +25,23 @@ def get_all_clients_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные ClientsCard для текущего клиента
-            clients_cards = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info)
-            clients_card = clients_cards.first()
+            clients_card = ClientsCard.get(ClientsCard.client_id == client_info.client_info)
+            # Получаем поле 'contacts' из связанной таблицы ClientsCard
+            contacts_id = clients_card.contacts
 
-            if clients_card:
-                # Получаем поле 'contacts' из связанной таблицы ClientsCard
-                contacts_id = clients_card.contacts
+            # Получаем связанные контакты для текущего клиента
+            contacts = ContactsCard.select().where(ContactsCard.contact_id == contacts_id)
+            contacts_data = []
+            # Итерация по контактам
+            for contact in contacts:
+                contact_dict = {}
+                # Итерация по столбцам таблицы ContactsCard
+                for column_name in contact.column_names:
+                    contact_dict[column_name] = getattr(contact, column_name)
+                contacts_data.append(contact_dict)
 
-                # Получаем связанные контакты для текущего клиента
-                contacts = ContactsCard.select().where(ContactsCard.contact_id == contacts_id)
-                contacts_data = []
-                # Итерация по контактам
-                for contact in contacts:
-                    contact_dict = {}
-                    # Итерация по столбцам таблицы ContactsCard
-                    for column_name in contact.column_names:
-                        contact_dict[column_name] = getattr(contact, column_name)
-                    contacts_data.append(contact_dict)
-
-                # Добавляем список контактов к данным клиента
-                result["contacts"] = contacts_data
+            # Добавляем список контактов к данным клиента
+            result["contacts"] = contacts_data
 
             # Получаем связанные записи из таблицы СonnectInfoCard
             connect_info_cards = СonnectInfoCard.select().where(СonnectInfoCard.client_id == client_info.client_info)
@@ -69,7 +66,7 @@ def get_all_clients_api():
         response.headers.add('Access-Control-Allow-Origin', '*')
         # Отправляем ответ JSON
         return response, 200
-
+    
     except peewee.OperationalError as error_message:
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         print("Ошибка подключения к базе данных SQLite:", error_message)
@@ -78,6 +75,7 @@ def get_all_clients_api():
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 500
+    
     except Exception as error:
         # Если возникла ошибка, формируем словарь с информацией об ошибке
         error_message = {"error": str(error)}
