@@ -25,8 +25,11 @@ def get_all_clients_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем связанные ClientsCard для текущего клиента
-            clients_cards = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info)
-            clients_card = clients_cards.first()
+            try:
+                clients_cards = ClientsCard.select().where(ClientsCard.client_id == client_info.client_info)
+                clients_card = clients_cards.first()
+            except ClientsCard.DoesNotExist:
+                return jsonify({"error": f"No ClientsCard found for client_id: {client_info.client_info}"}), 404
 
             # Если запись clients_card не найдена, пропускаем итерацию
             if clients_card is None:
@@ -74,12 +77,17 @@ def get_all_clients_api():
         return response, 200
     
     except peewee.OperationalError as error_message:
+        # Записываем ошибку в лог файл
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        print("Ошибка подключения к базе данных SQLite:", error_message)
+        # Если возникла ошибка, формируем словарь с информацией об ошибке
         message = "Ошибка подключения к базе данных SQLite: {}".format(error_message)
+        # Преобразуем словарь с информацией об ошибке в строку JSON
         json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
         response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON с информацией об ошибке
         return response, 500
     
     except Exception as error:
