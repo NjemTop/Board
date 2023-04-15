@@ -150,31 +150,19 @@ def patch_contact_api_by_id(id):
             # Удаляем contact_email из данных для обновления
             new_email = data.pop('contact_email', None)
 
-            # Обновляем контактные данные (без contact_email)
-            update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
-            update_query.execute()
-
-            web_info_logger.info("Данные обновили! %s", update_query)
-
             # Если указан новый contact_email, обновляем его
             if new_email and new_email != contact.contact_email:
-                web_info_logger.info("Информация 1: %s", new_email)
                 existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
-                web_info_logger.info("Информация 2: %s", existing_contact)
                 if existing_contact is None:
-                    web_info_logger.info("Информация 3: %s", existing_contact)
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
-                    web_info_logger.info("Информация 4: %s", update_email_query)
-                    try:
-                        testtest = update_email_query.execute()
-                        web_info_logger.info("Информация 5: %s", testtest)
-                    except peewee.IntegrityError as error:
-                        web_error_logger.error("Ошибка при обновлении Email: %s", error)
-                        return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
+                    update_email_query.execute()
                 else:
-                    web_info_logger.info("Информация 6")
                     web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
+
+            # Обновляем остальные данные контакта
+            update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
+            update_query.execute()
 
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
