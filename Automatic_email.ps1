@@ -282,7 +282,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                         ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
                                         $CREATE_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_CREATE | ConvertTo-Json -Depth 5))
                                         ### ОТПРАВЛЯЕМ ЗАПРОС НА СОЗДАНИЕ ТИКЕТА
-                                        $CREATE_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/tickets/" -Headers $HEADERS -Body $CREATE_TICKET -ContentType "application/json"
+                                        $CREATE_TICKET_JSON_RESPONSE_REQUEST = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/tickets/" -Headers $HEADERS -Body $CREATE_TICKET -ContentType "application/json"
                                         ### ПРОБУЕМ ОТПРАВИТЬ ОТВЕТ В ТИКЕТЕ (ОТПРАВЛЯЕМ ПИСЬМО КЛИЕНТУ О НОВОЙ ВЕРСИИ)
                                         try {
                                             ### ФОРМИРУЕМ ТЕЛО, КОТОРОЕ УХОДИТ С ЗАПРОСОМ
@@ -304,19 +304,19 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                             ### ПРЕОБРАЗУЕМ В JSON И ПРИВЕДЕМ К БАЙТОВОМУ МАССИВУ
                                             $REPLY_TICKET = [System.Text.Encoding]::UTF8.GetBytes(($BODY_REPLY | ConvertTo-Json -Depth 5))
                                             ### ОТПРАВЛЯЕМ POST ЗАПРОС НА ОТВЕТ В HF
-                                            $REPLY_TICKET_JSON_RESPONSE = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE.id)/staff_update/" -Headers $HEADERS -Body $REPLY_TICKET -ContentType "application/json"
+                                            $REPLY_TICKET_JSON_RESPONSE_REQUEST = Invoke-RestMethod -Method Post -Uri "$HF_ENDPOINT/api/1.1/json/ticket/$($CREATE_TICKET_JSON_RESPONSE_REQUEST.id)/staff_update/" -Headers $HEADERS -Body $REPLY_TICKET -ContentType "application/json"
                                             ### ДОБАВЛЯЕМ ДАННЫЕ В ТАБЛИЦУ
                                             $PS = New-Object PSObject
                                             $PS | Add-Member -Type NoteProperty "Операция" -Value "Рассылка клиенту отправлена"
-                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
-                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE_REQUEST.user.contact_groups.name)"
+                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE_REQUEST.id)"
                                         }
                                         catch {
                                             ### ЕСЛИ ОШИБКА ОТВЕТА В РАНЕЕ СОЗДАННОМ ТИКЕТЕ, ЗАПИШИМ В ТАБЛИЦУ
                                             $PS = New-Object PSObject
                                             $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка отправки письма"
-                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
-                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE.id)"
+                                            $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE_REQUEST.user.contact_groups.name)"
+                                            $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "$($CREATE_TICKET_JSON_RESPONSE_REQUEST.id)"
                                             Write-Host -ForegroundColor Red -Object "ERROR REPLY"
                                         }
                                     }
@@ -324,7 +324,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                         ### ЕСЛИ ОШИБКА СОЗДАНИИ ТИКЕТА, ЗАПИШИМ В ТАБЛИЦУ
                                         $PS = New-Object PSObject
                                         $PS | Add-Member -Type NoteProperty "Операция" -Value "Ошибка создания тикета"
-                                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE.user.contact_groups.name)"
+                                        $PS | Add-Member -Type NoteProperty "Компания" -Value "$($REPLY_TICKET_JSON_RESPONSE_REQUEST.user.contact_groups.name)"
                                         $PS | Add-Member -Type NoteProperty "Номер тикета" -Value "Тикет не был создан"
                                         Write-Host -ForegroundColor Red -Object "ERROR CREATE"
                                     }
