@@ -144,11 +144,15 @@ def patch_contact_api_by_id(id):
             contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
         except ContactsCard.DoesNotExist:
             return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
+        
+        web_info_logger.info("Обновляемый контакт: %s", contact.contact_email)
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
             # Удаляем contact_email из данных для обновления
             new_email = data.pop('contact_email', None)
+
+            web_info_logger.info("Новый адрес электронной почты: %s", new_email)
 
             # Обновляем контактные данные (без contact_email)
             update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
@@ -161,6 +165,7 @@ def patch_contact_api_by_id(id):
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
                     update_email_query.execute()
                 else:
+                    web_info_logger.info("Существующий контакт с Email %s : %s", new_email, existing_contact.contact_email)
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
     except peewee.IntegrityError as error:
