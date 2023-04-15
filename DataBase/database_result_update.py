@@ -21,16 +21,17 @@ def upload_db_result(version_number, result):
         for i in item:
             # Исключаем пустой список
             if i != '':
-                # Делим список по параметрам с пом. разделителя
-                l = i.split('|')
-                if len(l) >= 2:
+                # Проверяем наличие символа '|' в строке
+                if '|' in i:
+                    # Делим список по параметрам с пом. разделителя
+                    l = i.split('|')
                     id += 1
                     # Наименование клиента
                     client_name = l[0]
                     # Основной контакт
                     main_contact = l[1]
                     # Копия
-                    if len(l) == 3:
+                    if len(l) >= 3:
                         copy_contact = l[2].replace(',', ', ')
                     else:
                         copy_contact = None
@@ -43,6 +44,4 @@ def upload_db_result(version_number, result):
                         main_contact=main_contact,
                         copy=copy_contact
                     )
-                else:
-                    print(f"Ошибка: строка '{i}' не содержит достаточное количество разделителей.")
                 continue
