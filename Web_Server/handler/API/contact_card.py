@@ -150,16 +150,16 @@ def patch_contact_api_by_id(id):
             # Удаляем contact_email из данных для обновления
             new_email = data.pop('contact_email', None)
 
-                        # Обновляем контактные данные (без contact_email)
+            # Обновляем контактные данные (без contact_email)
             update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
             update_query.execute()
 
             # Если указан новый contact_email, обновляем его
             if new_email:
-                existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == new_email)
+                existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
                 if existing_contact is None:
-                    existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
-                    existing_contact.execute()
+                    update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
+                    update_email_query.execute()
                 else:
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
