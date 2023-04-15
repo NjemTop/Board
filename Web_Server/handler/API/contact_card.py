@@ -159,18 +159,21 @@ def patch_contact_api_by_id(id):
             # Если указан новый contact_email, обновляем его
             if new_email and new_email != contact.contact_email:
                 web_info_logger.info("Информация 1: %s", new_email)
-                existing_contacts = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
-                web_info_logger.info("Информация 2: %s", existing_contacts)
-                if not existing_contacts:
-                    web_info_logger.info("Информация 3: %s", existing_contacts)
+                existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
+                web_info_logger.info("Информация 2: %s", existing_contact)
+                if existing_contact is None:
+                    web_info_logger.info("Информация 3: %s", existing_contact)
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
                     web_info_logger.info("Информация 4: %s", update_email_query)
-                    testtest = update_email_query.execute()
-                    web_info_logger.info("Информация 5: %s", testtest)
+                    try:
+                        testtest = update_email_query.execute()
+                        web_info_logger.info("Информация 5: %s", testtest)
+                    except peewee.IntegrityError as error:
+                        web_error_logger.error("Ошибка при обновлении Email: %s", error)
+                        return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
                 else:
                     web_info_logger.info("Информация 6")
-                    for existing_contact in existing_contacts:
-                        web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
+                    web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
     except peewee.IntegrityError as error:
