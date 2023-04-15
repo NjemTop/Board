@@ -133,18 +133,16 @@ def patch_contact_api_by_id(id):
         # Получаем данные из запроса
         data = json.loads(request.data.decode('utf-8'))
 
-        # Создаем таблицу, если она не существует
-        with conn:
-            conn.create_tables([ContactsCard, ClientsCard])
-
         # Получаем значение contacts для указанного client_id из таблицы ClientsCard
-        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
-        if client is None:
+        try:
+            client = ClientsCard.get(ClientsCard.client_id == id)
+        except ClientsCard.DoesNotExist:
             return f"Ошибка: клиент с ID {id} не найден.", 404
 
         # Получаем контакт по contact_id
-        contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
-        if contact is None:
+        try:
+            contact = ContactsCard.get(ContactsCard.contact_id == client.contacts)
+        except ContactsCard.DoesNotExist:
             return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
 
         # Создаем транзакцию для сохранения данных в БД
@@ -152,7 +150,7 @@ def patch_contact_api_by_id(id):
             # Удаляем contact_email из данных для обновления
             new_email = data.pop('contact_email', None)
 
-            # Обновляем контактные данные (без contact_email)
+                        # Обновляем контактные данные (без contact_email)
             update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
             update_query.execute()
 
@@ -165,16 +163,15 @@ def patch_contact_api_by_id(id):
                 else:
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
-            # Сохраняем изменения в БД
-            conn.commit()
-
-        web_info_logger.info("Обновлен контакт для клиента с ID: %s", id)
-        return 'Contact data successfully updated in the database!', 200
-
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
         web_error_logger.error("Ошибка целостности данных: %s", error)
         return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
+
+    except peewee.DoesNotExist as error:
+        # Обработка исключения при отсутствии записи в БД
+        web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
+        return f"Ошибка: запись не найдена в БД: {error}", 404
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
