@@ -122,6 +122,7 @@ def post_contact_api_by_id(id):
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        web_error_logger.error("Ошибка подключения к базе данных SQLite:%s", error_message)
         return f"Ошибка с БД: {error_message}", 500
     
     except Exception as error:
@@ -172,45 +173,6 @@ def patch_contact_by_id(id):
         # Обработка исключения при отсутствии записи в БД
         web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
         return f"Ошибка: запись не найдена в БД: {error}", 404
-
-    except peewee.OperationalError as error_message:
-        # Обработка исключения при возникновении ошибки подключения к БД
-        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        return f"Ошибка с БД: {error_message}", 500
-
-    except Exception as error:
-        # Обработка остальных исключений
-        web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}", 500
-
-def delete_contact_api_by_id(id):
-    """Функция удаления контакта из БД с указанным id клиента."""
-    try:
-        # Создаем таблицу, если она не существует
-        with conn:
-            conn.create_tables([ContactsCard, ClientsCard])
-
-        # Получаем значение contacts для указанного client_id из таблицы ClientsCard
-        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
-        if client is None:
-            return f"Ошибка: клиент с ID {id} не найден.", 404
-
-        # Получаем контакт по contact_id
-        contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
-        if contact is None:
-            return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
-
-        # Создаем транзакцию для удаления данных из БД
-        with conn.atomic():
-            # Удаляем контакт
-            delete_query = ContactsCard.delete().where(ContactsCard.contact_id == client.contacts)
-            delete_query.execute()
-
-            # Сохраняем изменения в БД
-            conn.commit()
-
-        web_info_logger.info("Удален контакт для клиента с ID: %s", id)
-        return f'Контакт с client_id {id} успешно удален из базы данных!', 200
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД

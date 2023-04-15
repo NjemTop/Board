@@ -68,7 +68,7 @@ def create_app():
     #app.add_url_rule('/clients_all_info/api/contacts_card', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.post_contact_api_by_id))
     app.route('/clients_all_info/api/contact_card/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.patch_contact_api_by_id))
-    app.route('/clients_all_info/api/contact_card/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.delete_contact_api_by_id))
+    #app.route('/clients_all_info/api/contact_card/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.delete_contact_api_by_id))
     
     # Регистрация обработчика для API информации по подключению к клиенту
     app.add_url_rule('/clients_all_info/api/connect_info', 'get_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(connect_card.get_connect_info_api), methods=['GET'])
