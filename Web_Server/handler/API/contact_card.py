@@ -165,8 +165,10 @@ def patch_contact_api_by_id(id):
                     web_info_logger.info("Информация 3: %s", existing_contacts)
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
                     web_info_logger.info("Информация 4: %s", update_email_query)
-                    update_email_query.execute()
+                    testtest = update_email_query.execute()
+                    web_info_logger.info("Информация 5: %s", testtest)
                 else:
+                    web_info_logger.info("Информация 6")
                     for existing_contact in existing_contacts:
                         web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
