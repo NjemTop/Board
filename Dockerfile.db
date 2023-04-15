@@ -8,7 +8,7 @@ RUN pip install --upgrade pip
 RUN pip install datasette
 RUN pip install peewee
 
-# Добавляем инструкцию USER root
+# Добавляем права USER root
 USER root
 
 # Копируем файл базы данных в новый контейнер
