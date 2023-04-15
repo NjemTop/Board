@@ -210,3 +210,44 @@ def patch_contact_api_by_id(id):
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
+
+def delete_contact_api_by_id(id):
+    """Функция удаления контактных данных в БД с указанным id контакта."""
+    try:
+        # Получаем контакт по id
+        contact = ContactsCard.get(ContactsCard.id == id)
+
+        # Удаляем контакт
+        contact.delete_instance()
+
+        # Отправляем информацию об успешном удалении контакта из БД
+        json_data = json.dumps({"message": "Контакт успешно удалён"}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=200)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+    except ContactsCard.DoesNotExist:
+        # Обработка исключения при отсутствии записи в БД
+        message = f"Ошибка: контакт с ID {id} не найден."
+        json_data = json.dumps({"message": message}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        message = "Ошибка с БД: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        message = "Ошибка сервера: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
