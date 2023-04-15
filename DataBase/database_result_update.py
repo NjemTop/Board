@@ -23,23 +23,26 @@ def upload_db_result(version_number, result):
             if i != '':
                 # Делим список по параметрам с пом. разделителя
                 l = i.split('|')
-                id += 1
-                # Наименование клиента
-                client_name = l[0]
-                # Основной контакт
-                main_contact = l[1]
-                # Копия
-                if len(l) == 3:
-                    copy_contact = l[2].replace(',', ', ')
-                else:
-                    copy_contact = None
+                if len(l) >= 2:
+                    id += 1
+                    # Наименование клиента
+                    client_name = l[0]
+                    # Основной контакт
+                    main_contact = l[1]
+                    # Копия
+                    if len(l) == 3:
+                        copy_contact = l[2].replace(',', ', ')
+                    else:
+                        copy_contact = None
 
-                # Создаем новую запись и сохраняем ее в базе данных
-                new_info = Release_info.create(
-                    date=today,
-                    release_number=version_number,
-                    client_name=client_name,
-                    main_contact=main_contact,
-                    copy=copy_contact
-                )
-            continue
+                    # Создаем новую запись и сохраняем ее в базе данных
+                    new_info = Release_info.create(
+                        date=today,
+                        release_number=version_number,
+                        client_name=client_name,
+                        main_contact=main_contact,
+                        copy=copy_contact
+                    )
+                else:
+                    print(f"Ошибка: строка '{i}' не содержит достаточное количество разделителей.")
+                continue
