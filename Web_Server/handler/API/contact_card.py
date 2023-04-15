@@ -14,7 +14,7 @@ def get_contact_by_client_id(id):
     """Функция возвращает информацию о контактах для клиента с указанным client_id."""
     try:
         with conn:
-            # Получаем контакты клиента по client_id
+            # Получаем клиента по client_id
             client = ClientsCard.get_or_none(ClientsCard.client_id == id)
 
             if client is None:
@@ -36,6 +36,7 @@ def get_contact_by_client_id(id):
 
             client_name = BMInfo_onClient.get(BMInfo_onClient.client_info == id).client_name
 
+            # Формируем список контактов с данными контактов
             contacts_data = []
             for contact in contacts:
                 contacts_data.append({
@@ -74,6 +75,59 @@ def get_contact_by_client_id(id):
         response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
+
+def post_contact_api_by_id(id):
+    """Функция добавления контактов в БД с указанным id клиента."""
+    try:
+        # Получаем данные из запроса
+        data = json.loads(request.data.decode('utf-8'))
+        
+        # Проверяем обязательные поля
+        if 'contact_name' not in data or 'contact_email' not in data:
+            return 'Ошибка: "contact_name" и "contact_email" являются обязательными полями.', 400
+
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([ContactsCard, ClientsCard])
+
+        # Получаем значение contacts для указанного client_id из таблицы ClientsCard
+        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
+        if client is None:
+            return f"Ошибка: клиент с ID {id} не найден.", 404
+
+        # Добавляем значение contacts в данные
+        data['contact_id'] = client.contacts
+
+        # Создаем транзакцию для сохранения данных в БД
+        with conn.atomic():
+            # Проверяем наличие существующего контакта с тем же email
+            existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == data['contact_email'])
+
+            if existing_contact is None:
+                # Сохраняем данные в базе данных, используя insert и execute
+                ContactsCard.insert(**data).execute()
+                # Добавляем вызов commit() для сохранения изменений в БД
+                conn.commit()
+            else:
+                return f"Контакт с email {data['contact_email']} уже существует. Пропускаем...", 409
+
+        web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
+        return 'Contact data successfully saved to the database!', 201
+    
+    except peewee.IntegrityError as error:
+        # Обработка исключения при нарушении ограничений целостности
+        web_error_logger.error("Ошибка целостности данных: %s", error)
+        return f"Ошибка: указанный Email {data['contact_email']} уже есть в БД.", 409
+    
+    except peewee.OperationalError as error_message:
+        # Обработка исключения при возникновении ошибки подключения к БД
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
+        return f"Ошибка с БД: {error_message}", 500
+    
+    except Exception as error:
+        # Обработка остальных исключений
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}", 500
 
 def patch_contact_by_id(id):
     """Функция обновления контактных данных в БД с указанным id контакта."""
@@ -118,53 +172,6 @@ def patch_contact_by_id(id):
         # Обработка исключения при отсутствии записи в БД
         web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
         return f"Ошибка: запись не найдена в БД: {error}", 404
-
-    except peewee.OperationalError as error_message:
-        # Обработка исключения при возникновении ошибки подключения к БД
-        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        return f"Ошибка с БД: {error_message}", 500
-
-    except Exception as error:
-        # Обработка остальных исключений
-        web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}", 500
-
-def patch_contact_api_by_id(id):
-    """Функция обновления контактов в БД у клиента с указанным id."""
-    try:
-        # Получаем данные из запроса
-        data = json.loads(request.data.decode('utf-8'))
-
-        # Создаем таблицу, если она не существует
-        with conn:
-            conn.create_tables([ContactsCard, ClientsCard])
-
-        # Получаем значение contacts для указанного client_id из таблицы ClientsCard
-        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
-        if client is None:
-            return f"Ошибка: клиент с ID {id} не найден.", 404
-
-        # Получаем список контактов для указанного contacts из таблицы ContactsCard
-        contacts = ContactsCard.select().where(ContactsCard.contact_id == client.contacts)
-
-        # Обновляем данные контактов
-        with conn.atomic():
-            for contact in contacts:
-                contact_dict = contact.__dict__['_data']
-                for key, value in data.items():
-                    if key in contact_dict:
-                        contact_dict[key] = value
-                ContactsCard.update(contact_dict).where(ContactsCard.contact_email == contact_dict['contact_email']).execute()
-            # Добавляем вызов commit() для сохранения изменений в БД
-            conn.commit()
-
-        web_info_logger.info("Данные контактов успешно обновлены для клиента с ID: %s", id)
-        return 'Contact data successfully updated in the database!', 200
-
-    except peewee.IntegrityError as error:
-        # Обработка исключения при нарушении ограничений целостности
-        web_error_logger.error("Ошибка целостности данных: %s", error)
-        return f"Ошибка: {error}", 409
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
