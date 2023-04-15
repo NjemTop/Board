@@ -31,7 +31,7 @@ def upload_db_result(version_number, result):
                     # Основной контакт
                     main_contact = l[1]
                     # Копия
-                    if len(l) >= 3:
+                    if len(l) == 3:
                         copy_contact = l[2].replace(',', ', ')
                     else:
                         copy_contact = None
