@@ -11,10 +11,6 @@ def upload_db_result(version_number, result):
         # Определяем дату рассылки = текущая дата запуска скрипта
         today = datetime.now().date().strftime('%d %B %Y')
 
-        # Составляем словарь для сбора данных:
-        map = {}
-        id = 0
-
         # Создаем из построчного вывода общий список
         item = result.split('\n')
         # Перебираем списки внутри общего списка
@@ -25,7 +21,6 @@ def upload_db_result(version_number, result):
                 if '|' in i:
                     # Делим список по параметрам с пом. разделителя
                     l = i.split('|')
-                    id += 1
                     # Наименование клиента
                     client_name = l[0]
                     # Основной контакт
