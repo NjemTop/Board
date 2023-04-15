@@ -11,15 +11,18 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 db_filename = '/var/lib/sqlite/database.db'
 
 def data_release_html():
+    try:
         release_number = request.args.get('release_number', 'all')
         onn = sqlite3.connect(f'file:{db_filename}')
         cur = onn.cursor()
+
         if release_number == 'all':
-            cur.execute('SELECT * FROM release_info')
+            cur.execute('SELECT * FROM release_info1')
         else:
-            cur.execute('SELECT * FROM release_info WHERE "Номер_релиза" = ?', (release_number,))
+            cur.execute('SELECT * FROM release_info1 WHERE "Номер_релиза" = ?', (release_number,))
         rows = cur.fetchall()
         onn.close()
+
         data = []
         for row in rows:
             data.append({
@@ -30,3 +33,13 @@ def data_release_html():
                 'Копия': row[4]
             })
         return render_template('data_release.html', data=data)
+
+    except sqlite3.Error as error:
+        # Обработка ошибок, связанных с базой данных
+        error_message = f"Database error: {error}"
+        return render_template('error.html', error_message=error_message)
+
+    except Exception as error:
+        # Обработка всех остальных ошибок
+        error_message = f"An unexpected error occurred: {error}"
+        return render_template('error.html', error_message=error_message)
