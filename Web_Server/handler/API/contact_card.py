@@ -141,7 +141,7 @@ def patch_contact_api_by_id(id):
 
         # Получаем контакт по contact_id
         try:
-            contact = ContactsCard.get(ContactsCard.contact_id == client.contacts)
+            contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
         except ContactsCard.DoesNotExist:
             return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
 
@@ -158,7 +158,7 @@ def patch_contact_api_by_id(id):
             if new_email:
                 existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == new_email)
                 if existing_contact is None:
-                    update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
+                    existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
                     update_email_query.execute()
                 else:
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
