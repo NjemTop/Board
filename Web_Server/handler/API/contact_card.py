@@ -162,24 +162,51 @@ def patch_contact_api_by_id(id):
                             update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.id == id)
                             update_email_query.execute()
                         else:
-                            return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
+                            web_error_logger.error("Ошибка целостности данных: %s", error)
+                            message = "Ошибка: контакт с Email {} уже существует в БД".format(new_email)
+                            json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+                            response = Response(json_data, content_type='application/json; charset=utf-8', status=409)
+                            response.headers.add('Access-Control-Allow-Origin', '*')
+                            return response
 
             except peewee.IntegrityError as error:
                 # Обработка исключения при нарушении ограничений целостности
                 web_error_logger.error("Ошибка целостности данных: %s", error)
-                return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
+                message = "Ошибка целостности данных: {}".format(error)
+                json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+                response = Response(json_data, content_type='application/json; charset=utf-8', status=409)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
+            
+            # Отправляем информацию об успешном обновлении данных в БД
+            json_data = json.dumps({"message": "Контакт успешно обновлён"}, ensure_ascii=False, indent=4)
+            response = Response(json_data, content_type='application/json; charset=utf-8', status=200)
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
 
     except peewee.DoesNotExist as error:
         # Обработка исключения при отсутствии записи в БД
         web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
-        return f"Ошибка: запись не найдена в БД: {error}", 404
+        message = "Ошибка: запись не найдена в БД: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=404)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
-        return f"Ошибка с БД: {error_message}", 500
+        message = "Ошибка с БД: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     except Exception as error:
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
-        return f"Ошибка сервера: {error}", 500
+        message = "Ошибка сервера: {}".format(error)
+        json_data = json.dumps({"message": message, "error_type": str(type(error).__name__), "error_traceback": traceback.format_exc()}, ensure_ascii=False, indent=4)
+        response = Response(json_data, content_type='application/json; charset=utf-8', status=500)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
