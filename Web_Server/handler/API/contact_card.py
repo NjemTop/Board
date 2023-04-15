@@ -39,6 +39,7 @@ def get_contact_by_client_id(id):
             contacts_data = []
             for contact in contacts:
                 contacts_data.append({
+                    'id': contact.id,
                     'contact_name': contact.contact_name,
                     'contact_email': contact.contact_email,
                     'contact_position': contact.contact_position,
@@ -74,54 +75,55 @@ def get_contact_by_client_id(id):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
-def post_contact_api_by_id(id):
-    """Функция добавления контактов в БД с указанным id клиента."""
+def patch_contact_by_id(id):
+    """Функция обновления контактных данных в БД с указанным id контакта."""
     try:
         # Получаем данные из запроса
         data = json.loads(request.data.decode('utf-8'))
-        
-        # Проверяем обязательные поля
-        if 'contact_name' not in data or 'contact_email' not in data:
-            return 'Ошибка: "contact_name" и "contact_email" являются обязательными полями.', 400
 
-        # Создаем таблицу, если она не существует
-        with conn:
-            conn.create_tables([ContactsCard, ClientsCard])
-
-        # Получаем значение contacts для указанного client_id из таблицы ClientsCard
-        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
-        if client is None:
-            return f"Ошибка: клиент с ID {id} не найден.", 404
-
-        # Добавляем значение contacts в данные
-        data['contact_id'] = client.contacts
+        # Получаем контакт по id
+        try:
+            contact = ContactsCard.get(ContactsCard.id == id)
+        except ContactsCard.DoesNotExist:
+            return f"Ошибка: контакт с ID {id} не найден.", 404
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
-            # Проверяем наличие существующего контакта с тем же email
-            existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == data['contact_email'])
+            # Удаляем contact_email из данных для обновления
+            new_email = data.pop('contact_email', None)
 
-            if existing_contact is None:
-                # Сохраняем данные в базе данных, используя insert и execute
-                ContactsCard.insert(**data).execute()
-                # Добавляем вызов commit() для сохранения изменений в БД
-                conn.commit()
-            else:
-                return f"Контакт с email {data['contact_email']} уже существует. Пропускаем...", 409
+            # Обновляем контактные данные (без contact_email)
+            update_query = ContactsCard.update(**data).where(ContactsCard.id == id)
+            update_query.execute()
 
-        web_info_logger.info("Добавлен контакт для клиента с ID: %s", id)
-        return 'Contact data successfully saved to the database!', 201
-    
-    except peewee.IntegrityError as error:
-        # Обработка исключения при нарушении ограничений целостности
-        web_error_logger.error("Ошибка целостности данных: %s", error)
-        return f"Ошибка: указанный Email {data['contact_email']} уже есть в БД.", 409
-    
+            web_info_logger.info("Данные обновили! %s", update_query)
+
+            try:
+                with conn.atomic():
+                    # Если указан новый contact_email, обновляем его
+                    if new_email and new_email != contact.contact_email:
+                        existing_contact_count = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.id != id)).count()
+                        if existing_contact_count == 0:
+                            update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.id == id)
+                            update_email_query.execute()
+                        else:
+                            return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
+
+            except peewee.IntegrityError as error:
+                # Обработка исключения при нарушении ограничений целостности
+                web_error_logger.error("Ошибка целостности данных: %s", error)
+                return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
+
+    except peewee.DoesNotExist as error:
+        # Обработка исключения при отсутствии записи в БД
+        web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
+        return f"Ошибка: запись не найдена в БД: {error}", 404
+
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
         web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error_message)
         return f"Ошибка с БД: {error_message}", 500
-    
+
     except Exception as error:
         # Обработка остальных исключений
         web_error_logger.error("Ошибка сервера: %s", error)
