@@ -341,7 +341,6 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
                                         $GET_JSON_RESPONSE_UNSUBSCRIBE.name
                                         ### ФОРМИРУЕМ ТАБЛИЦУ С ОТЧЁТОМ
                                         $PS = $TABLE_REPORT.Add($PS)
-                                        Write-Host -ForegroundColor Green -Object "Запрос сервисного окна клиенту $($GET_JSON_RESPONSE_GROUP.name) отправлена.`nОсновной контакт: $MAIN_CONTACT`n"
                                     }
                                 }
                             }
