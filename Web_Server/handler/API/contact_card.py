@@ -144,8 +144,6 @@ def patch_contact_api_by_id(id):
             contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
         except ContactsCard.DoesNotExist:
             return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
-        
-        web_info_logger.info("Обновляемый контакт: %s", contact.contact_email)
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
@@ -160,9 +158,13 @@ def patch_contact_api_by_id(id):
 
             # Если указан новый contact_email, обновляем его
             if new_email and new_email != contact.contact_email:
+                web_info_logger.info("Информация 1: %s", new_email)
                 existing_contacts = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
+                web_info_logger.info("Информация 2: %s", existing_contacts)
                 if not existing_contacts:
+                    web_info_logger.info("Информация 3: %s", existing_contacts)
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
+                    web_info_logger.info("Информация 4: %s", update_email_query)
                     update_email_query.execute()
                 else:
                     for existing_contact in existing_contacts:
