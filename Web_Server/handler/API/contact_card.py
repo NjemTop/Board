@@ -130,7 +130,7 @@ def post_contact_api_by_id(id):
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
 
-def patch_contact_by_id(id):
+def patch_contact_api_by_id(id):
     """Функция обновления контактных данных в БД с указанным id контакта."""
     try:
         # Получаем данные из запроса
