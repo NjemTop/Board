@@ -7,7 +7,7 @@ def upload_db_result(version_number, result):
     # Соеденимся с БД, по завершению закроем соединение
     with conn:
         # Запись месяца в дате по-русски
-        # locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+        locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
         # Определяем дату рассылки = текущая дата запуска скрипта
         today = datetime.now().date().strftime('%d %B %Y')
 
