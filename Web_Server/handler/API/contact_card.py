@@ -152,8 +152,6 @@ def patch_contact_api_by_id(id):
             # Удаляем contact_email из данных для обновления
             new_email = data.pop('contact_email', None)
 
-            web_info_logger.info("Новый адрес электронной почты: %s", new_email)
-
             # Обновляем контактные данные (без contact_email)
             update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
             update_query.execute()
@@ -174,6 +172,7 @@ def patch_contact_api_by_id(id):
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
         web_error_logger.error("Ошибка целостности данных: %s", error)
+        web_error_logger.error("Текущие данные: client_id: %s, contact_id: %s, new_email: %s", client.client_id, client.contacts, new_email)
         return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
 
     except peewee.DoesNotExist as error:
