@@ -174,7 +174,7 @@ def patch_contact_api_by_id(id):
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
         web_error_logger.error("Ошибка целостности данных: %s", error)
-        return f"Ошибка: указанный Email {data['contact_email']} уже есть в БД.", 409
+        return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
