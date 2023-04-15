@@ -165,8 +165,11 @@ def patch_contact_api_by_id(id):
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
                     update_email_query.execute()
                 else:
-                    web_info_logger.info("Существующий контакт с Email %s : %s", new_email, existing_contact.contact_email)
-                    return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
+                    existing_contacts = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
+                    if existing_contacts:
+                        for existing_contact in existing_contacts:
+                            web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
+                        return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
