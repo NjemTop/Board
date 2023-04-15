@@ -159,7 +159,7 @@ def patch_contact_api_by_id(id):
                 existing_contact = ContactsCard.get_or_none(ContactsCard.contact_email == new_email)
                 if existing_contact is None:
                     existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
-                    update_email_query.execute()
+                    existing_contact.execute()
                 else:
                     return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
 
