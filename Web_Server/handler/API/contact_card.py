@@ -152,8 +152,8 @@ def patch_contact_api_by_id(id):
 
             # Если указан новый contact_email, обновляем его
             if new_email and new_email != contact.contact_email:
-                existing_contact = ContactsCard.get_or_none((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts))
-                if existing_contact is None:
+                existing_contact_count = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts)).count()
+                if existing_contact_count == 0:
                     update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
                     update_email_query.execute()
                 else:
