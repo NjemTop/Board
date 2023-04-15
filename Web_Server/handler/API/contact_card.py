@@ -128,52 +128,41 @@ def post_contact_api_by_id(id):
         return f"Ошибка сервера: {error}", 500
 
 def patch_contact_api_by_id(id):
-    """Функция обновления контактных данных в БД с указанным id клиента."""
+    """Функция обновления контактов в БД у клиента с указанным id."""
     try:
         # Получаем данные из запроса
         data = json.loads(request.data.decode('utf-8'))
 
+        # Создаем таблицу, если она не существует
+        with conn:
+            conn.create_tables([ContactsCard, ClientsCard])
+
         # Получаем значение contacts для указанного client_id из таблицы ClientsCard
-        try:
-            client = ClientsCard.get(ClientsCard.client_id == id)
-        except ClientsCard.DoesNotExist:
+        client = ClientsCard.get_or_none(ClientsCard.client_id == id)
+        if client is None:
             return f"Ошибка: клиент с ID {id} не найден.", 404
 
-        # Получаем контакт по contact_id
-        try:
-            contact = ContactsCard.get_or_none(ContactsCard.contact_id == client.contacts)
-        except ContactsCard.DoesNotExist:
-            return f"Ошибка: контакт с contact_id {client.contacts} не найден.", 404
+        # Получаем список контактов для указанного contacts из таблицы ContactsCard
+        contacts = ContactsCard.select().where(ContactsCard.contact_id == client.contacts)
 
-        # Создаем транзакцию для сохранения данных в БД
+        # Обновляем данные контактов
         with conn.atomic():
-            # Удаляем contact_email из данных для обновления
-            new_email = data.pop('contact_email', None)
+            for contact in contacts:
+                contact_dict = contact.__dict__['_data']
+                for key, value in data.items():
+                    if key in contact_dict:
+                        contact_dict[key] = value
+                ContactsCard.update(contact_dict).where(ContactsCard.contact_email == contact_dict['contact_email']).execute()
+            # Добавляем вызов commit() для сохранения изменений в БД
+            conn.commit()
 
-            # Если указан новый contact_email, обновляем его
-            if new_email and new_email != contact.contact_email:
-                existing_contact_count = ContactsCard.select().where((ContactsCard.contact_email == new_email) & (ContactsCard.contact_id != client.contacts)).count()
-                if existing_contact_count == 0:
-                    update_email_query = ContactsCard.update(contact_email=new_email).where(ContactsCard.contact_id == client.contacts)
-                    update_email_query.execute()
-                else:
-                    web_info_logger.info("Существующий контакт с Email %s : %s, %s", new_email, existing_contact.contact_email, existing_contact.contact_id)
-                    return f"Ошибка: контакт с Email {new_email} уже существует в БД.", 409
-
-            # Обновляем остальные данные контакта
-            update_query = ContactsCard.update(**data).where(ContactsCard.contact_id == client.contacts)
-            update_query.execute()
+        web_info_logger.info("Данные контактов успешно обновлены для клиента с ID: %s", id)
+        return 'Contact data successfully updated in the database!', 200
 
     except peewee.IntegrityError as error:
         # Обработка исключения при нарушении ограничений целостности
         web_error_logger.error("Ошибка целостности данных: %s", error)
-        web_error_logger.error("Текущие данные: client_id: %s, contact_id: %s, new_email: %s", client.client_id, client.contacts, new_email)
-        return f"Ошибка: указанный Email {new_email} уже есть в БД.", 409
-
-    except peewee.DoesNotExist as error:
-        # Обработка исключения при отсутствии записи в БД
-        web_error_logger.error("Ошибка: запись не найдена в БД: %s", error)
-        return f"Ошибка: запись не найдена в БД: {error}", 404
+        return f"Ошибка: {error}", 409
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
