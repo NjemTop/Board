@@ -3,7 +3,8 @@ import logging
 import json
 import peewee
 import traceback
-from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, conn
+import datetime
+from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -109,14 +110,14 @@ def post_all_clients_api():
         data = json.loads(request.data.decode('utf-8'))
 
         # Проверяем обязательный ключи
-        required_fields = ['client_name']
+        required_fields = ['client_name', 'service_pack', 'manager']
         for field in required_fields:
             if field not in data:
                 return f"Отсутствует обязательное поле: {field}", 400
-            
+
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard])
+            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
@@ -134,6 +135,14 @@ def post_all_clients_api():
 
                 # Создаем запись в таблице ClientsCard с полученным client_id
                 new_client_card = ClientsCard.create(client_id=client_id)
+
+                # Создаем запись в таблице Servise с полученным client_id и полями 'service_pack', 'manager' и 'loyal'
+                Servise.create(
+                    service_id=client_id,
+                    service_pack=data['service_pack'],
+                    manager=data['manager'],
+                    loyal=data.get('loyal', None)
+                )
 
                 # Проверяем обязательные поля для массива с контактами
                 contacts_data = data.get('contacts', [])
