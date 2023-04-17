@@ -4,7 +4,7 @@ import json
 import peewee
 import traceback
 import datetime
-from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, conn
+from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -110,14 +110,14 @@ def post_all_clients_api():
         data = json.loads(request.data.decode('utf-8'))
 
         # Проверяем обязательный ключи
-        required_fields = ['client_name', 'service_pack', 'manager']
+        required_fields = ['client_name', 'service_pack', 'manager', 'server_version']
         for field in required_fields:
             if field not in data:
                 return f"Отсутствует обязательное поле: {field}", 400
 
         # Создаем таблицу, если она не существует
         with conn:
-            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise])
+            conn.create_tables([BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation])
 
         # Создаем транзакцию для сохранения данных в БД
         with conn.atomic():
@@ -142,6 +142,15 @@ def post_all_clients_api():
                     service_pack=data['service_pack'],
                     manager=data['manager'],
                     loyal=data.get('loyal', None)
+                )
+
+                # Создаем запись в таблице TechInformation с полученным tech_information_id, полем 'server_version' и сегодняшней датой в поле 'update_date'
+                server_version = data['server_version']
+                update_date = datetime.datetime.now().date()
+                TechInformation.create(
+                    tech_information_id=new_client.technical_information,
+                    server_version=server_version,
+                    update_date=update_date
                 )
 
                 # Проверяем обязательные поля для массива с контактами
