@@ -192,7 +192,7 @@ def post_all_clients_api():
                             return f"Отсутствует обязательное поле: {field}", 400
                     # Создаем записи в таблице TechAccount для каждой учётной записи
                     TechAccount.create(
-                        client_id=new_client_card.tech_account,
+                        tech_account_id=new_client_card.tech_account,
                         contact_info_disc=tech_account_data['contact_info_disc'],
                         contact_info_account=tech_account_data['contact_info_account'],
                         contact_info_password=tech_account_data['contact_info_password']
