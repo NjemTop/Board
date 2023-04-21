@@ -158,7 +158,8 @@ class СonnectInfoCard(BaseModel):
 
 class BMServersCard(BaseModel):
     """Серверы ВМ"""
-    bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ', primary_key=True)
+    bm_server_order = peewee.AutoField(column_name='Порядковый_номер_сервера', primary_key=True)
+    bm_servers_id = peewee.IntegerField(column_name='ID_Серверы_ВМ')
     bm_servers_circuit = peewee.TextField(column_name='Контур')
     bm_servers_servers_name = peewee.TextField(column_name='Имя_сервера')
     bm_servers_servers_adress = peewee.TextField(column_name='Адрес_сервера')
@@ -167,6 +168,7 @@ class BMServersCard(BaseModel):
     bm_servers_role = peewee.TextField(column_name='Роль')
     # Список наименований столбцов
     COLUMN_NAMES = [
+        'bm_server_order',
         'bm_servers_id',
         'bm_servers_circuit',
         'bm_servers_servers_name',
@@ -181,6 +183,7 @@ class BMServersCard(BaseModel):
     
     class Meta:
         table_name = 'bm_servers_card'
+        primary_key = peewee.CompositeKey('bm_servers_id', 'bm_server_order')
 
 class Integration(BaseModel):
     """Класс наименований интеграций в БД"""
