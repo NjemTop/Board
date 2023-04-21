@@ -185,17 +185,17 @@ def post_all_clients_api():
                     )
 
                 # Проверяем обязательный поля для массива с технологической учётной записью
-                for bm_server_data in data.get('tech_account', []):
-                    bm_server_data_fields = ['contact_info_disc', 'contact_info_account', 'contact_info_password']
-                    for field in bm_server_data_fields:
-                        if field not in bm_server_data:
+                for tech_account_data in data.get('tech_account', []):
+                    tech_account_data_fields = ['contact_info_disc', 'contact_info_account', 'contact_info_password']
+                    for field in tech_account_data_fields:
+                        if field not in tech_account_data:
                             return f"Отсутствует обязательное поле: {field}", 400
                     # Создаем записи в таблице TechAccount для каждой учётной записи
                     TechAccount.create(
-                        client_id=client_id,
-                        contact_info_disc=data['contact_info_disc'],
-                        contact_info_account=data['contact_info_account'],
-                        contact_info_password=data['contact_info_password']
+                        client_id=new_client_card.tech_account,
+                        contact_info_disc=tech_account_data['contact_info_disc'],
+                        contact_info_account=tech_account_data['contact_info_account'],
+                        contact_info_password=tech_account_data['contact_info_password']
                     )
                 # Проверяем обязательный поля для массива с технологической учётной записью
                 for bm_server_data in data.get('bm_servers_card', []):
@@ -207,12 +207,12 @@ def post_all_clients_api():
                     # Создаем записи в таблице BMServersCard для каждой учётной записи
                     BMServersCard.create(
                         bm_servers_id=client_id,
-                        bm_servers_circuit=data['bm_servers_circuit'],
-                        bm_servers_servers_name=data['bm_servers_servers_name'],
-                        bm_servers_servers_adress=data['bm_servers_servers_adress'],
-                        bm_servers_operation_system=data.get('bm_servers_operation_system', None),
-                        bm_servers_url=data.get('bm_servers_url', None),
-                        bm_servers_role=data['bm_servers_role']
+                        bm_servers_circuit=bm_server_data['bm_servers_circuit'],
+                        bm_servers_servers_name=bm_server_data['bm_servers_servers_name'],
+                        bm_servers_servers_adress=bm_server_data['bm_servers_servers_adress'],
+                        bm_servers_operation_system=bm_server_data.get('bm_servers_operation_system', None),
+                        bm_servers_url=bm_server_data.get('bm_servers_url', None),
+                        bm_servers_role=bm_server_data['bm_servers_role']
                     )
 
                 # Добавляем вызов commit() для сохранения изменений в БД
