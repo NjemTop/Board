@@ -4,7 +4,7 @@ import json
 import peewee
 import traceback
 import datetime
-from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation, conn
+from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation, TechAccount, BMServersCard, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -175,7 +175,7 @@ def post_all_clients_api():
                     required_connect_info_fields = ['contact_info_name', 'contact_info_account', 'contact_info_password']
                     for field in required_connect_info_fields:
                         if field not in connect_info_data:
-                            return f"Отсутствует обязательное поле: {field}", 400  
+                            return f"Отсутствует обязательное поле: {field}", 400
                     # Создаем записи в таблице СonnectInfoCard для каждой учётной записи
                     СonnectInfoCard.create(
                         client_id=client_id,
@@ -184,13 +184,44 @@ def post_all_clients_api():
                         contact_info_password=connect_info_data['contact_info_password'],
                     )
 
+                # Проверяем обязательный поля для массива с технологической учётной записью
+                for bm_server_data in data.get('tech_account', []):
+                    bm_server_data_fields = ['contact_info_disc', 'contact_info_account', 'contact_info_password']
+                    for field in bm_server_data_fields:
+                        if field not in bm_server_data:
+                            return f"Отсутствует обязательное поле: {field}", 400
+                    # Создаем записи в таблице TechAccount для каждой учётной записи
+                    TechAccount.create(
+                        client_id=client_id,
+                        contact_info_disc=data['contact_info_disc'],
+                        contact_info_account=data['contact_info_account'],
+                        contact_info_password=data['contact_info_password']
+                    )
+                # Проверяем обязательный поля для массива с технологической учётной записью
+                for bm_server_data in data.get('bm_servers_card', []):
+                    bm_server_data_fields = ['bm_servers_circuit', 'bm_servers_servers_name', 'bm_servers_servers_adress', 'bm_servers_role']
+                    for field in bm_server_data_fields:
+                        if field not in bm_server_data:
+                            return f"Отсутствует обязательное поле: {field}", 400
+                        
+                    # Создаем записи в таблице BMServersCard для каждой учётной записи
+                    BMServersCard.create(
+                        bm_servers_id=client_id,
+                        bm_servers_circuit=data['bm_servers_circuit'],
+                        bm_servers_servers_name=data['bm_servers_servers_name'],
+                        bm_servers_servers_adress=data['bm_servers_servers_adress'],
+                        bm_servers_operation_system=data.get('bm_servers_operation_system', None),
+                        bm_servers_url=data.get('bm_servers_url', None),
+                        bm_servers_role=data['bm_servers_role']
+                    )
+
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
                 return f"Клиент с именем {data['client_name']} уже существует.", 409
 
         web_info_logger.info("Добавлен клиент в БД: %s", data['client_name'])
-        return 'Клиент успешно записаны в БД!', 201
+        return f"Клиент {data['client_name']} успешно записаны в БД!", 201
 
     except peewee.OperationalError as error_message:
         # Обработка исключения при возникновении ошибки подключения к БД
