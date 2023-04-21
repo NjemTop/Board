@@ -183,7 +183,6 @@ class BMServersCard(BaseModel):
     
     class Meta:
         table_name = 'bm_servers_card'
-        primary_key = peewee.CompositeKey('bm_servers_id', 'bm_server_order')
 
 class Integration(BaseModel):
     """Класс наименований интеграций в БД"""
