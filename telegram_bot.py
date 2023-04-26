@@ -626,7 +626,7 @@ def answer_start_end_date_tele2(answer_id_tele2):
         start_date = two_date[0]
         end_date = two_date[1]
         bot.send_message(answer_id_tele2.from_user.id, text='Пожалуйста, ожидайте. По завершении процесса, в чат будет отправлен файл отчета.')
-        contact_group_id = 6
+        contact_group_id = 37
         template_path = os.path.join(os.getcwd(), 'templates', 'Temp_report_tele2.docx')
         if not os.path.exists(template_path):
             bot.send_message(answer_id_tele2.from_user.id, text=(os.listdir(os.path.join(os.getcwd(), 'templates'))))
