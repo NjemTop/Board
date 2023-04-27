@@ -192,7 +192,7 @@ function Get-TimeWork {
     }
 
 # ТОКЕН ДОСТУПА ДЛЯ API
-$ACCESS_TOKEN = "45357d176a5f4e25b740aebae58f189c:3b9e5c6cc6f34802ad5ae82bafdab3bd"
+$ACCESS_TOKEN = ""
 
 # БАЗОВЫЙ URL ДЛЯ API
 $HF_ENDPOINT = "https://boardmaps.happyfox.com"
