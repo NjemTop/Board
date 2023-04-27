@@ -220,9 +220,6 @@ def post_all_clients_api():
                 for field in boolean_fields:
                     if not isinstance(data[field], bool):
                         return f"Поле {field} должно быть булевым значением (True или False)", 400
-                    else:
-                        if not isinstance(data[field], str):
-                            return {'error': f"Поле '{field}' должно быть строкой"}, 400
 
                 # Создаем словарь с необходимыми полями
                 tech_information_fields = {key: data[key] for key in boolean_fields + ['ipad', 'android', 'mdm']}
@@ -237,6 +234,7 @@ def post_all_clients_api():
 
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
+                
             else:
                 return f"Клиент с именем {data['client_name']} уже существует.", 409
 
