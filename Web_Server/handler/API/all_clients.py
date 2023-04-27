@@ -4,7 +4,7 @@ import json
 import peewee
 import traceback
 import datetime
-from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation, TechAccount, BMServersCard, conn
+from DataBase.model_class import BMInfo_onClient, ClientsCard, ContactsCard, СonnectInfoCard, Servise, TechInformation, TechAccount, BMServersCard, Integration, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -234,10 +234,30 @@ def post_all_clients_api():
                         bm_servers_url=bm_server_data.get('bm_servers_url', None),
                         bm_servers_role=bm_server_data['bm_servers_role']
                     )
+                
+                # Получаем данные из массива integration об интеграции нового клиента
+                integration = data.get('integration')
+
+                # Добавляем проверку на булевые значения для полей в массиве integration
+                integration_boolean_fields = [
+                    'elasticsearch', 'ad', 'adfs', 'oauth_2', 'module_translate', 'ms_oos',
+                    'exchange', 'office_365', 'sfb', 'zoom', 'teams', 'smtp', 'cryptopro_dss',
+                    'cryptopro_scp', 'smpp', 'limesurvey'
+                ]
+
+                for field in integration_boolean_fields:
+                    if not isinstance(integration[field], bool):
+                        return f"Поле {field} должно быть булевым значением (True или False)", 400
+
+                # Добавляем информацию об интеграции в БД
+                Integration.create(
+                    integration_id=new_client.integration,
+                    **integration
+                )
 
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
-                
+
             else:
                 return f"Клиент с именем {data['client_name']} уже существует.", 409
 
