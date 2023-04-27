@@ -224,17 +224,16 @@ def post_all_clients_api():
                         if not isinstance(data[field], str):
                             return {'error': f"Поле '{field}' должно быть строкой"}, 400
 
-                # Создаем запись в таблице TechInformation с полученным технической информации (АПИ, СКИНЫ, ЛОКАЛИЗАЦИЯ)
-                TechInformation.create(
-                    api=data['api'],
-                    localizable_web=data['localizable_web'],
-                    localizable_ios=data['localizable_ios'],
-                    skins_web=data['skins_web'],
-                    skins_ios=data['skins_ios'],
-                    ipad=data['ipad'],
-                    android=data['android'],
-                    mdm=data['mdm']
-                )
+                # Создаем словарь с необходимыми полями
+                tech_information_fields = {key: data[key] for key in boolean_fields + ['ipad', 'android', 'mdm']}
+
+                # Проверяем корректность типов данных для всех ключей
+                for key, value in tech_information_fields.items():
+                    if key not in boolean_fields and not isinstance(value, str):
+                        return {'error': f"Поле '{key}' должно быть строкой"}, 400
+
+                # Создаем запись в таблице TechInformation с полученным технической информации
+                TechInformation.create(tech_information_id=new_client.technical_information, **tech_information_fields)
 
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
