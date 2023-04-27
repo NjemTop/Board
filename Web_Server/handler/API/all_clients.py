@@ -144,13 +144,33 @@ def post_all_clients_api():
                     loyal=data.get('loyal', None)
                 )
 
-                # Создаем запись в таблице TechInformation с полученным tech_information_id, полем 'server_version' и сегодняшней датой в поле 'update_date'
+                # Проверим, что полем 'server_version' указано и укажем сегодняшнюю дату в поле 'update_date'
                 server_version = data['server_version']
+                if not server_version.strip():
+                    return {'error': "Поле 'server_version' должно быть непустой строкой"}, 400
+
                 update_date = datetime.datetime.now().date()
+                
+                # Проверяем обязательные булевы поля и их значения
+                boolean_fields = ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']
+                for field in boolean_fields:
+                    if not isinstance(data[field], bool):
+                        return f"Поле {field} должно быть булевым значением (True или False)", 400
+
+                # Создаем словарь с необходимыми полями
+                tech_information_fields = {key: data[key] for key in boolean_fields + ['ipad', 'android', 'mdm']}
+
+                # Проверяем корректность типов данных для всех ключей
+                for key, value in tech_information_fields.items():
+                    if key not in boolean_fields and not isinstance(value, str):
+                        return {'error': f"Поле '{key}' должно быть строкой"}, 400
+
+                # Записываем всё в таблицу TechInformation с полученным технической информации
                 TechInformation.create(
                     tech_information_id=new_client.technical_information,
                     server_version=server_version,
-                    update_date=update_date
+                    update_date=update_date,
+                    **tech_information_fields
                 )
 
                 # Проверяем обязательные поля для массива с контактами
@@ -214,23 +234,6 @@ def post_all_clients_api():
                         bm_servers_url=bm_server_data.get('bm_servers_url', None),
                         bm_servers_role=bm_server_data['bm_servers_role']
                     )
-
-                # Проверяем обязательные булевы поля и их значения
-                boolean_fields = ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']
-                for field in boolean_fields:
-                    if not isinstance(data[field], bool):
-                        return f"Поле {field} должно быть булевым значением (True или False)", 400
-
-                # Создаем словарь с необходимыми полями
-                tech_information_fields = {key: data[key] for key in boolean_fields + ['ipad', 'android', 'mdm']}
-
-                # Проверяем корректность типов данных для всех ключей
-                for key, value in tech_information_fields.items():
-                    if key not in boolean_fields and not isinstance(value, str):
-                        return {'error': f"Поле '{key}' должно быть строкой"}, 400
-
-                # Создаем запись в таблице TechInformation с полученным технической информации
-                TechInformation.create(tech_information_id=new_client.technical_information, **tech_information_fields)
 
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
