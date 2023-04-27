@@ -328,7 +328,7 @@ class TechInformation(BaseModel):
         table_name = 'tech_information'
 
 class TechNote(BaseModel):
-    """"""
+    """Класс технических заметок клиента"""
     id = peewee.AutoField(primary_key=True)
     tech_notes_id = peewee.ForeignKeyField(ClientsCard, column_name='tech_notes', backref='tech_note', on_delete='CASCADE')
     text = peewee.TextField(column_name='Текст информации')
