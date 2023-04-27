@@ -215,6 +215,21 @@ def post_all_clients_api():
                         bm_servers_role=bm_server_data['bm_servers_role']
                     )
 
+                # Проверяем обязательные булевы поля и их значения
+                boolean_fields = ['api', 'localizable_web', 'localizable_ios', 'skins_web', 'skins_ios']
+                for field in boolean_fields:
+                    if not isinstance(data[field], bool):
+                        return f"Поле {field} должно быть булевым значением (True или False)", 400
+
+                # Создаем запись в таблице TechInformation с полученным технической информации (АПИ, СКИНЫ, ЛОКАЛИЗАЦИЯ)
+                TechInformation.create(
+                    api=data['api'],
+                    localizable_web=data['localizable_web'],
+                    localizable_ios=data['localizable_ios'],
+                    skins_web=data['skins_web'],
+                    skins_ios=data['skins_ios']
+                )
+
                 # Добавляем вызов commit() для сохранения изменений в БД
                 conn.commit()
             else:
