@@ -220,6 +220,9 @@ def post_all_clients_api():
                 for field in boolean_fields:
                     if not isinstance(data[field], bool):
                         return f"Поле {field} должно быть булевым значением (True или False)", 400
+                    else:
+                        if not isinstance(data[field], str):
+                            return {'error': f"Поле '{field}' должно быть строкой"}, 400
 
                 # Создаем запись в таблице TechInformation с полученным технической информации (АПИ, СКИНЫ, ЛОКАЛИЗАЦИЯ)
                 TechInformation.create(
@@ -227,7 +230,10 @@ def post_all_clients_api():
                     localizable_web=data['localizable_web'],
                     localizable_ios=data['localizable_ios'],
                     skins_web=data['skins_web'],
-                    skins_ios=data['skins_ios']
+                    skins_ios=data['skins_ios'],
+                    ipad=data['ipad'],
+                    android=data['android'],
+                    mdm=data['mdm']
                 )
 
                 # Добавляем вызов commit() для сохранения изменений в БД
