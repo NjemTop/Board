@@ -107,8 +107,7 @@ class ClientsCard(BaseModel):
     class Meta:
         table_name = 'clients_card'
 
-######ID_Технические_заметки и ID_Технологическая_учетная_запись - это просто текст. Нужен разве класс и столбцы?
-######ID_Удаленный_доступ - это тоже как текст и картинки. Как сделаем?
+######ID_Технические_заметки и
 class ContactsCard(BaseModel):
     """Список клиентов (Контакты)"""
     id = peewee.AutoField(column_name='ID', primary_key=True)
@@ -327,3 +326,20 @@ class TechInformation(BaseModel):
 
     class Meta:
         table_name = 'tech_information'
+
+class TechNote(BaseModel):
+    """"""
+    id = peewee.AutoField(primary_key=True)
+    tech_notes_id = peewee.ForeignKeyField(ClientsCard, column_name='tech_notes', backref='tech_note', on_delete='CASCADE')
+    text = peewee.TextField(column_name='Текст информации')
+    # Список наименований столбцов
+    COLUMN_NAMES = [ 
+        'tech_notes_id',
+        'text'
+    ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = TechNote.COLUMN_NAMES
+
+    class Meta:
+        table_name = 'tech_note'

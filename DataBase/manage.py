@@ -1,12 +1,12 @@
 from peewee import *
-from model_class import BaseModel, BMInfo_onClient, Release_info, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, TechAccount, ConnectionInfo, Servise, TechInformation, conn
+from model_class import BaseModel, BMInfo_onClient, Release_info, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, TechAccount, ConnectionInfo, Servise, TechInformation, TechNote, conn
 
 def get_model_columns(model):
     return {field.column_name: field for field in model._meta.sorted_fields}
 
 def migrate():
     try:
-        for model in [BMInfo_onClient, Release_info, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, TechAccount, ConnectionInfo, Servise, TechInformation]:
+        for model in [BMInfo_onClient, Release_info, ClientsCard, ContactsCard, СonnectInfoCard, BMServersCard, Integration, TechAccount, ConnectionInfo, Servise, TechInformation, TechNote]:
             if not model.table_exists():
                 with conn:
                     conn.create_tables([model])
