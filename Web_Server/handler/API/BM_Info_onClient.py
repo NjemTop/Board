@@ -27,7 +27,7 @@ def get_BM_Info_onClient_api():
 
             # Получаем информацию об услугах и технической информации для текущего клиента
             service_info = Servise.get(Servise.service_id == client_info)
-            tech_info = TechInformation.get(TechInformation.tech_information_id == client_info)
+            tech_info = TechInformation.get(TechInformation.id == client_info.technical_information)
 
             # Добавляем необходимые поля из таблиц Servise и TechInformation в словарь с данными клиента
             important_info = {
