@@ -3,7 +3,7 @@ import logging
 import json
 import peewee
 import traceback
-from DataBase.model_class import BMInfo_onClient, ClientsCard, Servise, TechInformation, conn
+from DataBase.model_class import BMInfo_onClient, ClientsCard, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов
@@ -24,19 +24,7 @@ def get_BM_Info_onClient_api():
             for column_name in client_info.column_names:
                 # Используем названия столбцов для извлечения данных из объекта BMInfo_onClient
                 result[column_name] = getattr(client_info, column_name)
-
-            # Получаем информацию об услугах и технической информации для текущего клиента
-            service_info = Servise.get(Servise.service_id == client_info)
-            tech_info = TechInformation.get(TechInformation.tech_information_id == client_info.technical_information)
-
-            # Добавляем необходимые поля из таблиц Servise и TechInformation в словарь с данными клиента
-            important_info = {
-                'service_pack': service_info.service_pack,
-                'manager': service_info.manager,
-                'server_version': tech_info.server_version,
-                'update_date': tech_info.update_date.isoformat()
-            }
-            result['important_info'] = important_info
+            # Добавляем словарь с данными клиента в список результатов
             results.append(result)
         # Преобразуем список результатов в строку JSON
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
