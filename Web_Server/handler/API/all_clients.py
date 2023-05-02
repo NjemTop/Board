@@ -13,9 +13,16 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def get_all_clients_api():
     try:
+        # Получаем параметр запроса client_name
+        requested_client_name = request.args.get('client_name')
+
         # Соединение с базой данных
         with conn:
-            client_infos = list(BMInfo_onClient.select())
+            if requested_client_name:
+                # Фильтруем записи клиентов по имени, если задан параметр client_name
+                client_infos = list(BMInfo_onClient.select().where(BMInfo_onClient.Наименование_клиента == requested_client_name))
+            else:
+                client_infos = list(BMInfo_onClient.select())
 
         results = []
         # Итерация по всем клиентам
