@@ -30,12 +30,15 @@ def get_BM_Info_onClient_api():
             tech_info = TechInformation.get(TechInformation.tech_information_id == client_info.technical_information)
 
             # Добавляем необходимые поля из таблиц Servise и TechInformation в словарь с данными клиента
-            important_info = {
-                'service_pack': service_info.service_pack,
-                'manager': service_info.manager,
-                'server_version': tech_info.server_version,
-                'update_date': tech_info.update_date.isoformat()
-            }
+            important_info = {}
+            if service_info.service_pack:
+                important_info['service_pack'] = service_info.service_pack
+            if service_info.manager:
+                important_info['manager'] = service_info.manager
+            if tech_info.server_version:
+                important_info['server_version'] = tech_info.server_version
+            if tech_info.update_date:
+                important_info['update_date'] = tech_info.update_date.isoformat()
             result['important_info'] = important_info
             results.append(result)
         # Преобразуем список результатов в строку JSON
