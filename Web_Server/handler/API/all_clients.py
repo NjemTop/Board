@@ -21,7 +21,7 @@ def get_all_clients_api():
         with conn:
             if requested_client_name:
                 # Фильтруем записи клиентов по имени, если задан параметр client_name
-                client_infos = list(BMInfo_onClient.select().where(BMInfo_onClient.Наименование_клиента == requested_client_name))
+                client_infos = list(BMInfo_onClient.select().where(BMInfo_onClient.client_name == requested_client_name))
             else:
                 client_infos = list(BMInfo_onClient.select())
 
