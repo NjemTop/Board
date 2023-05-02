@@ -13,9 +13,11 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def get_all_clients_api():
     try:
-        # Получаем параметр запроса client_name из JSON-данных в теле запроса
-        json_data = request.json
-        requested_client_name = json_data.get('client_name') if json_data else None
+        # Получаем параметр запроса client_name из JSON-данных в теле запроса, если заголовок Content-Type равен 'application/json'
+        requested_client_name = None
+        if request.content_type == 'application/json':
+            json_data = request.json
+            requested_client_name = json_data.get('client_name') if json_data else None
 
         # Соединение с базой данных
         with conn:
