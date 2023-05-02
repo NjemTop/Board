@@ -12,6 +12,11 @@ web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), 
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
 def get_all_clients_api():
+    """
+    Функция GET-запроса, получения списка всех клиентов с его данными.
+    Можно передать тело запроса в виде JSON: "client_name" : "Тестовый клиент",
+    который выведит информацию об определённом клиенте
+    """
     try:
         # Получаем параметр запроса client_name из JSON-данных в теле запроса, если заголовок Content-Type равен 'application/json'
         requested_client_name = None
