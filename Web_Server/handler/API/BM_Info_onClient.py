@@ -26,18 +26,18 @@ def get_BM_Info_onClient_api():
                 result[column_name] = getattr(client_info, column_name)
 
             # Получаем информацию об услугах и технической информации для текущего клиента
-            service_info = Servise.get(Servise.service_id == client_info)
-            tech_info = TechInformation.get(TechInformation.tech_information_id == client_info.technical_information)
+            service_info = Servise.get_or_none(Servise.service_id == client_info)
+            tech_info = TechInformation.get_or_none(TechInformation.tech_information_id == client_info.technical_information)
 
             # Добавляем необходимые поля из таблиц Servise и TechInformation в словарь с данными клиента
             important_info = {}
-            if service_info.service_pack:
+            if service_info and service_info.service_pack:
                 important_info['service_pack'] = service_info.service_pack
-            if service_info.manager:
+            if service_info and service_info.manager:
                 important_info['manager'] = service_info.manager
-            if tech_info.server_version:
+            if tech_info and tech_info.server_version:
                 important_info['server_version'] = tech_info.server_version
-            if tech_info.update_date:
+            if tech_info and tech_info.update_date:
                 important_info['update_date'] = tech_info.update_date.isoformat()
             result['important_info'] = important_info
             results.append(result)
