@@ -55,22 +55,17 @@ def post_report_tickets():
         input_data = json.loads(request.data.decode('utf-8'))
 
         # Преобразование строк с датами и временем в объекты datetime
-        web_info_logger.info("1")
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
-            web_info_logger.info("2")
             input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y").date()
-            web_info_logger.info("3")
 
         # Преобразование строк с продолжительностью времени в минуты
         for key in ['sla_time', 'response_time']:
-            web_info_logger.info("4")
             hours, minutes = map(int, input_data[key].split(' ')[::2])
-            web_info_logger.info("5")
             input_data[key] = hours * 60 + minutes
-            web_info_logger.info("6")
 
         with conn:
             conn.create_tables([Report_Ticket])
+            web_info_logger.info("Данные: %s", input_data.id)
             new_ticket = Report_Ticket.create(**input_data)
 
         web_info_logger.info("Добавлен новый отчёт о тикете с ID: %s", new_ticket.id)
