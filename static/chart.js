@@ -1,10 +1,4 @@
-const data = [
-    "Доработка",
-    "Консультация",
-    "Консультация",
-    // ... (другие элементы массива)
-    "В работе",
-  ];
+const data = rawData;
   
   const categories = {};
   data.forEach((item) => {
