@@ -12,12 +12,17 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def report_tickets():
     try:
+        report_date = request.args.get('report_date', 'all')
+
         # Получаем значения столбца 'Причина_возникновения'
         query = Report_Ticket.select(Report_Ticket.cause)
         output_data = [entry.cause for entry in query]
 
-        # Получаем все данные из таблицы Report_Ticket
-        results = Report_Ticket.select()
+        # Получаем данные из таблицы Report_Ticket
+        if report_date == 'all':
+            results = Report_Ticket.select()
+        else:
+            results = Report_Ticket.select().where(Report_Ticket.creation_date == report_date)
 
         return render_template('report.html', data=output_data, report_data=results)
 

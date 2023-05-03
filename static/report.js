@@ -11,28 +11,7 @@ uniqueReportDates.forEach(date => {
     reportDateSelect.appendChild(option);
 });
 
-function displayData(selectedDate) {
-    const tableBody = document.querySelector('table tbody');
-    tableBody.innerHTML = '';
-
-    const filteredData = selectedDate === 'all'
-        ? reportData
-        : reportData.filter(entry => entry.report_date === selectedDate);
-
-    filteredData.forEach(entry => {
-        const row = tableBody.insertRow();
-
-        for (const key in entry) {
-            if (key !== 'report_date') {
-                const cell = row.insertCell();
-                cell.textContent = entry[key];
-            }
-        }
-    });
-}
-
 reportDateSelect.addEventListener('change', () => {
-    displayData(reportDateSelect.value);
+    const selectedDate = reportDateSelect.value;
+    window.location.href = `/report_tickets?report_date=${selectedDate}`;
 });
-
-displayData('all');
