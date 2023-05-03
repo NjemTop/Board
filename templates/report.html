@@ -15,10 +15,15 @@
 <body>
     <div class="container" style="max-width: 100%;">
         <h2>Отчет по тикетам</h2>
+        <div class="form-group">
+            <label for="report-date-select">Выберите дату отчета:</label>
+            <select id="report-date-select" class="form-control">
+                <option value="all">Все даты</option>
+            </select>
+        </div>        
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Дата отчета</th>
                     <th>Номер тикета</th>
                     <th>Тема тикета</th>
                     <th>Дата создания</th>
@@ -39,7 +44,6 @@
             <tbody>
                 {% for entry in report_data %}
                     <tr>
-                        <td>{{ entry.report_date }}</td>
                         <td>{{ entry.ticket_id }}</td>
                         <td>{{ entry.subject }}</td>
                         <td>{{ entry.creation_date }}</td>
@@ -68,6 +72,7 @@
     <script>
         const rawData = {{ data|tojson|safe }};
     </script>
-    <script src="{{ url_for('static', filename='report_chart.js') }}"></script>    
+    <script src="{{ url_for('static', filename='report_chart.js') }}"></script>
+    <script src="report.js"></script>
 </body>
 </html>
