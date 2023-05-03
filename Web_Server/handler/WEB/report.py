@@ -54,6 +54,13 @@ def post_report_tickets():
     try:
         input_data = json.loads(request.data.decode('utf-8'))
 
+        # Преобразование строк с датами и временем в объекты datetime.date
+        for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
+            try:
+                input_data[key] = datetime.strptime(input_data[key], "%d-%m-%Y").date()
+            except ValueError:
+                return {'error': f"Поле '{key}' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
+
         # Преобразование строк с продолжительностью времени в минуты
         for key in ['sla_time', 'response_time']:
             hours, minutes = map(int, input_data[key].split(' ')[::2])
