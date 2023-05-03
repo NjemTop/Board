@@ -49,6 +49,54 @@ class Release_info(BaseModel):
     class Meta:
         table_name = 'release_info'
 
+class Report_Ticket(BaseModel):
+    """Класс для таблицы БД информации с отчётами о тикетах"""
+    id = peewee.AutoField(primary_key=True)
+    report_date = peewee.DateField(column_name='Дата_отчёта')
+    ticket_id = peewee.IntegerField(column_name='Номер_тикета')
+    subject = peewee.TextField(column_name='Тема_тикета')
+    create = peewee.DateField(column_name='Создан')
+    status = peewee.TextField(column_name='Статус')
+    client_name = peewee.TextField(column_name='Название_клиента')
+    priority = peewee.TextField(column_name='Приоритет')
+    assignee_name = peewee.TextField(column_name='Исполнитель')
+    updated_at = peewee.DateField(column_name='Дата_обновления')
+    last_reply_at = peewee.DateField(column_name='Дата_последнего_ответа_клиенту')
+    sla = peewee.BooleanField(column_name='SLA')
+    sla_time = peewee.IntegerField(column_name='Общее_время_SLA')
+    response_time = peewee.IntegerField(column_name='Среднее_время_ответа')
+    cause = peewee.TextField(column_name='Причина_возникновения')
+    module_boardmaps = peewee.TextField(column_name='Модуль_BoardMaps')
+    staff_message = peewee.IntegerField(column_name='Сообщений_от_саппорта')
+
+    # Список наименований столбцов
+    COLUMN_NAMES = [
+        'id',
+        'report_date',
+        'ticket_id',
+        'subject',
+        'create',
+        'status',
+        'client_name',
+        'priority',
+        'assignee_name',
+        'updated_at',
+        'last_reply_at',
+        'sla',
+        'sla_time',
+        'response_time',
+        'cause',
+        'module_boardmaps',
+        'staff_message'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.column_names = Report_Ticket.COLUMN_NAMES
+
+    class Meta:
+        table_name = 'report_ticket'
+
 class BMInfo_onClient(BaseModel):
     """Класс для таблицы БД учета клиентов"""
     client_name = peewee.TextField(column_name='Название_клиента', collation='NOCASE')
