@@ -1,5 +1,5 @@
 from peewee_migrate import Router
-from model_class import conn
+from .model_class import conn
 
 router = Router(conn)
 

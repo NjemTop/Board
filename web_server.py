@@ -6,7 +6,7 @@ from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback, report
 from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service, tech_information, all_clients
-from DataBase.migrations import create_migrations
+from DataBase import migrations
 from Web_Server.handler.API.connection_info import init_app
 
 # Указываем настройки логов для нашего файла с классами
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
         # Запуск миграций и логирование
         try:
-            create_migrations()
+            migrations.create_migrations()
             web_info_logger.info("Миграции успешно выполнены")
         except Exception as migration_error:
             web_error_logger.error("Ошибка при выполнении миграций: %s", migration_error)
