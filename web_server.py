@@ -4,7 +4,7 @@ from flask import Flask
 from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
-from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback
+from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback, report
 from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service, tech_information, all_clients
 from Web_Server.handler.API.connection_info import init_app
 
@@ -42,6 +42,9 @@ def create_app():
     app.route('/data_release/api/<string:version>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(data_release.api_data_release_number))
     # Регистрация обработчиков для URL спика всех отправленных версиях
     app.add_url_rule('/data_release', 'data_release_html', release_data.data_release_html, methods=['GET'])
+
+    # Регистрация обработчиков для вывода информации о статистике (диаграммы/пироги)
+    app.add_url_rule('/report', 'report_tickets', report.report_tickets, methods=['GET'])
 
     # Регистрация обработчика для API 
     app.add_url_rule('/clients_all_info/api/all_clients', 'get_all_clients_api', require_basic_auth(USERNAME, PASSWORD)(all_clients.get_all_clients_api), methods=['GET'])
@@ -107,7 +110,7 @@ def create_app():
     app.route('/clients_all_info/api/services/<int:client_id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(service.patch_service_api))
     #app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'patch_service', require_basic_auth(USERNAME, PASSWORD)(service.patch_service), methods=['PATCH'])
 
-    # Регистрация обработчика для API
+    # Регистрация обработчика для API информации о технической стороне клиента (версия, скины, локализация, АПИ)
     app.add_url_rule('/clients_all_info/api/tech_information/', 'get_all_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_all_tech_information), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'get_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_tech_information), methods=['GET'])
     app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'post_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.post_tech_information), methods=['POST'])
