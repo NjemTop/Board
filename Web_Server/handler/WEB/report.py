@@ -56,7 +56,7 @@ def post_report_tickets():
 
         # Преобразование строк с датами и временем в объекты datetime
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
-            input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y")
+            input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y").date
 
         # Преобразование строк с продолжительностью времени в минуты
         for key in ['sla_time', 'response_time']:
