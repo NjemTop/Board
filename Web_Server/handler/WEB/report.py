@@ -74,6 +74,11 @@ def post_report_tickets():
             hours, minutes = map(int, input_data[key].split(' ')[::2])
             input_data[key] = hours * 60 + minutes
 
+        web_info_logger.info("Данные report_date: %s", report_date)
+        web_info_logger.info("Данные create: %s", create)
+        web_info_logger.info("Данные updated_at: %s", updated_at)
+        web_info_logger.info("Данные last_reply_at: %s", last_reply_at)
+
         with conn:
             conn.create_tables([Report_Ticket])
             new_ticket = Report_Ticket.create(
