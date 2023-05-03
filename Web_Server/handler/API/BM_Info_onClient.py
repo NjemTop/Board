@@ -3,6 +3,7 @@ import logging
 import json
 import peewee
 import traceback
+import datetime
 from DataBase.model_class import BMInfo_onClient, ClientsCard, Servise, TechInformation, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
@@ -38,12 +39,12 @@ def get_BM_Info_onClient_api():
             if tech_info and tech_info.server_version:
                 important_info['server_version'] = tech_info.server_version
             if tech_info and tech_info.update_date:
-                important_info['update_date'] = tech_info.update_date
+                update_date = tech_info.update_date
+                if isinstance(update_date, str):
+                    update_date = datetime.datetime.strptime(update_date, '%d-%m-%Y').date()
+                important_info['update_date'] = update_date.strftime('%Y-%m-%d')
             result['important_info'] = important_info
             results.append(result)
-            
-        for result in results:
-            result['important_info']['update_date'] = result['important_info']['update_date'].strftime('%Y-%m-%d')
 
         # Преобразуем список результатов в строку JSON
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
