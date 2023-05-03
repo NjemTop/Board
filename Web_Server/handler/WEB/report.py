@@ -51,15 +51,20 @@ def get_report_tickets():
         return f"Ошибка сервера: {error}", 500
     
 def post_report_tickets():
+    """
+    Функция записи данных о тикете
+    """
     try:
         # Получаем и декодируем данные запроса в формате JSON
         input_data = json.loads(request.data.decode('utf-8'))
 
-        # Получаем строки с датами из входных данных
-        report_date_str = input_data['report_date']
-        creation_date_str = input_data['creation_date']
-        updated_at_str = input_data['updated_at']
-        last_reply_at_str = input_data['last_reply_at']
+        # Проверяем наличие всех необходимых полей во входных данных
+        required_fields = ['report_date', 'ticket_id', 'subject', 'creation_date', 'status', 'client_name', 'priority',
+                           'assignee_name', 'updated_at', 'last_reply_at', 'sla', 'sla_time', 'response_time',
+                           'cause', 'module_boardmaps', 'staff_message']
+        for field in required_fields:
+            if field not in input_data:
+                return {'error': f"Поле '{field}' является обязательным"}, 400
 
         # Преобразование строк с датами в объекты datetime.date
         for key in ['report_date', 'creation_date', 'updated_at', 'last_reply_at']:
@@ -70,8 +75,11 @@ def post_report_tickets():
 
         # Преобразование строк с продолжительностью времени в минуты
         for key in ['sla_time', 'response_time']:
-            hours, minutes = map(int, input_data[key].split(' ')[::2])
-            input_data[key] = hours * 60 + minutes
+            try:
+                hours, minutes = map(int, input_data[key].split(' ')[::2])
+                input_data[key] = hours * 60 + minutes
+            except ValueError:
+                return {'error': f"Поле '{key}' должно быть корректной продолжительностью времени в формате 'Hr, Min'"}, 400
 
         # Создание таблицы, если она не существует
         with conn:
