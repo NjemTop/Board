@@ -2,7 +2,7 @@ from flask import request, Response, render_template
 import logging
 import peewee
 import json
-from datetime import datetime as dt
+import datetime
 from DataBase.model_class import Report_Ticket, conn
 from logger.log_config import setup_logger, get_abs_log_path
 
@@ -57,7 +57,7 @@ def post_report_tickets():
         # Преобразование строк с датами и временем в объекты datetime.date
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
             try:
-                input_data[key] = dt.strptime(input_data[key], "%d-%m-%Y").date()
+                input_data[key] = datetime.datetime.strptime(input_data[key], "%d-%m-%Y").date()
             except ValueError:
                 return {'error': f"Поле '{key}' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
