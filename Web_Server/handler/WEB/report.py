@@ -54,10 +54,18 @@ def post_report_tickets():
     try:
         input_data = json.loads(request.data.decode('utf-8'))
 
+        report_date_str = input_data['report_date']
+        create_str = input_data['create']
+        updated_at_str = input_data['updated_at']
+        last_reply_at_str = input_data['last_reply_at']
+        
         # Преобразование строк с датами и временем в объекты datetime.date
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
             try:
-                input_data[key] = datetime.datetime.strptime(input_data[key], "%d-%m-%Y").date()
+                report_date = datetime.datetime.strptime(report_date_str, "%d-%m-%Y").date()
+                create = datetime.datetime.strptime(create_str, "%d-%m-%Y").date()
+                updated_at = datetime.datetime.strptime(updated_at_str, "%d-%m-%Y").date()
+                last_reply_at = datetime.datetime.strptime(last_reply_at_str, "%d-%m-%Y").date()
             except ValueError:
                 return {'error': f"Поле '{key}' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
@@ -68,7 +76,13 @@ def post_report_tickets():
 
         with conn:
             conn.create_tables([Report_Ticket])
-            new_ticket = Report_Ticket.create(**input_data)
+            new_ticket = Report_Ticket.create(
+                report_date=report_date,
+                create=create,
+                updated_at=updated_at,
+                last_reply_at=last_reply_at,
+                **{key: value for key, value in input_data.items() if key not in ['report_date', 'create', 'updated_at', 'last_reply_at']}
+            )
 
         web_info_logger.info("Добавлен новый отчёт о тикете с ID: %s", new_ticket.id)
         return 'Отчёт о тиете был успешно сохранён в БД', 201
