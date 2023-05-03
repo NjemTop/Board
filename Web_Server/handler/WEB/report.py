@@ -12,8 +12,8 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def report_tickets():
     try:
-        data = ['Консультация', 'Консультация', 'Доработка', 'Проблема в инфраструктуре', 'Шаблоны']
-        return render_template('index.html', data=data)
+        output_data = ['Консультация', 'Консультация', 'Доработка', 'Проблема в инфраструктуре', 'Шаблоны']
+        return render_template('index.html', data=output_data)
 
     except peewee.OperationalError as error:
         # Обработка ошибок, связанных с базой данных
@@ -52,23 +52,23 @@ def get_report_tickets():
     
 def post_report_tickets():
     try:
-        data = json.loads(request.data.decode('utf-8'))
+        input_data = json.loads(request.data.decode('utf-8'))
 
         # Преобразование строк с датами и временем в объекты datetime
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
-            data[key] = datetime.strptime(data[key], "%d.%m.%Y").date()
+            input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y").date()
 
         # Преобразование строк с продолжительностью времени в минуты
         for key in ['sla_time', 'response_time']:
-            hours, minutes = map(int, data[key].split(' ')[::2])
-            data[key] = hours * 60 + minutes
+            hours, minutes = map(int, input_data[key].split(' ')[::2])
+            input_data[key] = hours * 60 + minutes
 
         with conn:
             conn.create_tables([Report_Ticket])
-            new_ticket = Report_Ticket.create(**data)
+            new_ticket = Report_Ticket.create(**input_data)
 
         web_info_logger.info("Добавлен новый отчёт о тикете с ID: %s", new_ticket.id)
-        return 'Report ticket data successfully added to the database!', 201
+        return 'Отчёт о тиете был успешно сохранён в БД', 201
 
     except peewee.IntegrityError as error:
         web_error_logger.error("Ошибка целостности данных: %s", error)
