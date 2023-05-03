@@ -31,6 +31,18 @@ def get_all_clients_api():
                 client_infos = list(BMInfo_onClient.select().where(BMInfo_onClient.client_name == requested_client_name))
             else:
                 client_infos = list(BMInfo_onClient.select())
+            
+        # Если клиент не найден в БД, выведет сообщение об этом
+        if requested_client_name and not client_infos:
+            error_message = f"Клиент с именем '{requested_client_name}' не найден."
+            # Преобразуем словарь с информацией об ошибке в строку JSON
+            json_data = json.dumps({"message": error_message}, ensure_ascii=False, indent=4)
+            # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+            response = Response(json_data, content_type='application/json; charset=utf-8')
+            # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            # Отправляем ответ JSON
+            return response, 404
 
         results = []
         # Итерация по всем клиентам
