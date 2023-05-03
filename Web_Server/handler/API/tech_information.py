@@ -39,7 +39,7 @@ def get_all_tech_information():
                         'id': tech_info.id,
                         'tech_information_id': tech_info.technical_information,
                         'server_version': tech_info.server_version,
-                        'update_date': tech_info.update_date.strftime('%d-%m-%Y'),
+                        'update_date': tech_info.update_date,
                         'api': tech_info.api,
                         'ipad': tech_info.ipad,
                         'android': tech_info.android,
