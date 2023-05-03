@@ -12,8 +12,14 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def report_tickets():
     try:
-        output_data = ['Консультация', 'Консультация', 'Доработка', 'Проблема в инфраструктуре', 'Шаблоны']
-        return render_template('index.html', data=output_data)
+        # Получаем значения столбца 'Причина_возникновения'
+        query = Report_Ticket.select(Report_Ticket.cause)
+        output_data = [entry.cause for entry in query]
+
+        # Получаем все данные из таблицы Report_Ticket
+        results = Report_Ticket.select()
+
+        return render_template('report.html', data=output_data, report_data=results)
 
     except peewee.OperationalError as error:
         # Обработка ошибок, связанных с базой данных
