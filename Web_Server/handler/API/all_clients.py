@@ -26,9 +26,11 @@ def get_all_clients_api():
 
         # Соединение с базой данных
         with conn:
+            # Проверим, было ли отправлено тело с запросом GET
             if requested_client_name:
                 # Фильтруем записи клиентов по имени, если задан параметр client_name
                 client_infos = list(BMInfo_onClient.select().where(BMInfo_onClient.client_name == requested_client_name))
+            # Если тело не было, то выведим весь список клиентов
             else:
                 client_infos = list(BMInfo_onClient.select())
             
@@ -44,9 +46,11 @@ def get_all_clients_api():
             # Отправляем ответ JSON
             return response, 404
 
+        # Создадим пустой список для заполнения данных, который мы потом выведем с запросом GET
         results = []
         # Итерация по всем клиентам
         for client_info in client_infos:
+            # Создадим пустой словарь для заполнения данных о клиенте
             result = {}
             # Итерация по столбцам таблицы BMInfo_onClient
             for column_name in client_info.column_names:
