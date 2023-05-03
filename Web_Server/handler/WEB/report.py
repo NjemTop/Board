@@ -52,20 +52,19 @@ def get_report_tickets():
     
 def post_report_tickets():
     try:
+        # Получаем и декодируем данные запроса в формате JSON
         input_data = json.loads(request.data.decode('utf-8'))
 
+        # Получаем строки с датами из входных данных
         report_date_str = input_data['report_date']
         creation_date_str = input_data['creation_date']
         updated_at_str = input_data['updated_at']
         last_reply_at_str = input_data['last_reply_at']
-        
-        # Преобразование строк с датами и временем в объекты datetime.date
+
+        # Преобразование строк с датами в объекты datetime.date
         for key in ['report_date', 'creation_date', 'updated_at', 'last_reply_at']:
             try:
-                report_date = datetime.datetime.strptime(report_date_str, "%d-%m-%Y").date()
-                creation_date = datetime.datetime.strptime(creation_date_str, "%d-%m-%Y").date()
-                updated_at = datetime.datetime.strptime(updated_at_str, "%d-%m-%Y").date()
-                last_reply_at = datetime.datetime.strptime(last_reply_at_str, "%d-%m-%Y").date()
+                input_data[key] = datetime.datetime.strptime(input_data[key], "%d-%m-%Y").date()
             except ValueError:
                 return {'error': f"Поле '{key}' должно быть корректной датой в формате 'DD-MM-YYYY'"}, 400
 
@@ -74,20 +73,12 @@ def post_report_tickets():
             hours, minutes = map(int, input_data[key].split(' ')[::2])
             input_data[key] = hours * 60 + minutes
 
-        web_info_logger.info("Данные report_date: %s", report_date)
-        web_info_logger.info("Данные create: %s", creation_date)
-        web_info_logger.info("Данные updated_at: %s", updated_at)
-        web_info_logger.info("Данные last_reply_at: %s", last_reply_at)
-
+        # Создание таблицы, если она не существует
         with conn:
             conn.create_tables([Report_Ticket])
-            new_ticket = Report_Ticket.create(
-                report_date=report_date,
-                create=creation_date,
-                updated_at=updated_at,
-                last_reply_at=last_reply_at,
-                **{key: value for key, value in input_data.items() if key not in ['report_date', 'create', 'updated_at', 'last_reply_at']}
-            )
+
+            # Создание и сохранение нового объекта Report_Ticket
+            new_ticket = Report_Ticket.create(**input_data)
 
         web_info_logger.info("Добавлен новый отчёт о тикете с ID: %s", new_ticket.id)
         return 'Отчёт о тиете был успешно сохранён в БД', 201
