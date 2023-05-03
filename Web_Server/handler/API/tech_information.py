@@ -5,11 +5,6 @@ import peewee
 import traceback
 import datetime
 from DataBase.model_class import BMInfo_onClient, TechInformation, conn
-from logger.log_config import setup_logger, get_abs_log_path
-
-# Указываем настройки логов
-web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
-web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
