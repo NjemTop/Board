@@ -58,7 +58,7 @@ def post_report_tickets():
         web_info_logger.info("1")
         for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
             web_info_logger.info("2")
-            input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y").date
+            input_data[key] = datetime.strptime(input_data[key], "%d.%m.%Y").date()
             web_info_logger.info("3")
 
         # Преобразование строк с продолжительностью времени в минуты
