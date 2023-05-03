@@ -10,7 +10,7 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 
 def report_tickets():
     try:
-        data = ['Консультация, Консультация, Доработка, Проблема в инфраструктуре, Шаблоны']
+        data = ['Консультация', 'Консультация', 'Доработка', 'Проблема в инфраструктуре', 'Шаблоны']
         return render_template('index.html', data=data)
 
     except peewee.OperationalError as error:
