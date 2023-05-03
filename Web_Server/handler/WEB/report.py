@@ -65,7 +65,7 @@ def post_report_tickets():
 
         with conn:
             conn.create_tables([Report_Ticket])
-            web_info_logger.info("Данные: %s", input_data.id)
+            web_info_logger.info(": %s", input_data)
             new_ticket = Report_Ticket.create(**input_data)
 
         web_info_logger.info("Добавлен новый отчёт о тикете с ID: %s", new_ticket.id)
