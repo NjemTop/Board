@@ -1,4 +1,5 @@
-const reportData = {{ report_data|tojson|safe }};
+const reportDataTag = document.getElementById('report-data');
+const reportData = JSON.parse(reportDataTag.textContent);
 
 const uniqueReportDates = [...new Set(reportData.map(entry => entry.report_date))];
 
