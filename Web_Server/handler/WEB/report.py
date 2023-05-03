@@ -55,15 +55,15 @@ def post_report_tickets():
         input_data = json.loads(request.data.decode('utf-8'))
 
         report_date_str = input_data['report_date']
-        create_str = input_data['create']
+        creation_date_str = input_data['creation_date']
         updated_at_str = input_data['updated_at']
         last_reply_at_str = input_data['last_reply_at']
         
         # Преобразование строк с датами и временем в объекты datetime.date
-        for key in ['report_date', 'create', 'updated_at', 'last_reply_at']:
+        for key in ['report_date', 'creation_date', 'updated_at', 'last_reply_at']:
             try:
                 report_date = datetime.datetime.strptime(report_date_str, "%d-%m-%Y").date()
-                create = datetime.datetime.strptime(create_str, "%d-%m-%Y").date()
+                creation_date = datetime.datetime.strptime(creation_date_str, "%d-%m-%Y").date()
                 updated_at = datetime.datetime.strptime(updated_at_str, "%d-%m-%Y").date()
                 last_reply_at = datetime.datetime.strptime(last_reply_at_str, "%d-%m-%Y").date()
             except ValueError:
@@ -75,7 +75,7 @@ def post_report_tickets():
             input_data[key] = hours * 60 + minutes
 
         web_info_logger.info("Данные report_date: %s", report_date)
-        web_info_logger.info("Данные create: %s", create)
+        web_info_logger.info("Данные create: %s", creation_date)
         web_info_logger.info("Данные updated_at: %s", updated_at)
         web_info_logger.info("Данные last_reply_at: %s", last_reply_at)
 
@@ -83,7 +83,7 @@ def post_report_tickets():
             conn.create_tables([Report_Ticket])
             new_ticket = Report_Ticket.create(
                 report_date=report_date,
-                create=create,
+                create=creation_date,
                 updated_at=updated_at,
                 last_reply_at=last_reply_at,
                 **{key: value for key, value in input_data.items() if key not in ['report_date', 'create', 'updated_at', 'last_reply_at']}

@@ -55,7 +55,7 @@ class Report_Ticket(BaseModel):
     report_date = peewee.DateField(column_name='Дата_отчёта')
     ticket_id = peewee.IntegerField(column_name='Номер_тикета')
     subject = peewee.TextField(column_name='Тема_тикета')
-    create = peewee.DateField(column_name='Создан')
+    creation_date = peewee.DateField(column_name='Создан')
     status = peewee.TextField(column_name='Статус')
     client_name = peewee.TextField(column_name='Название_клиента')
     priority = peewee.TextField(column_name='Приоритет')
@@ -75,7 +75,7 @@ class Report_Ticket(BaseModel):
         'report_date',
         'ticket_id',
         'subject',
-        'create',
+        'creation_date',
         'status',
         'client_name',
         'priority',

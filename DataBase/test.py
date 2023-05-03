@@ -1,48 +1,50 @@
+from model_class import Report_Ticket, conn
+import json
 import peewee
-import sqlite3
-import shutil
+import datetime
 
-# Имя файла базы данных
-db_filename = './DataBase/database.db'
+request = {
+    "report_date": "03-05-2023",
+    "ticket_id": 1234,
+    "subject": "Тестовая тема",
+    "create": "02-05-2023",
+    "status": "Close",
+    "client_name": "Название клиента",
+    "priority": "Medium",
+    "assignee_name": "Oleg Eliseev",
+    "updated_at": "03-05-2023",
+    "last_reply_at": "03-05-2023",
+    "sla": False,
+    "sla_time": "13 Hr, 52 Min",
+    "response_time": "1 Hr, 15 Min",
+    "cause": "Консультация",
+    "module_boardmaps": "BoardMaps Core",
+    "staff_message": 5
+}
 
-# Подключение к базе данных SQLite
-conn = peewee.SqliteDatabase(f'file:{db_filename}')
+input_data = request
 
-# Соединяемся с базой данных
-connection = sqlite3.connect(f'file:{db_filename}')
+report_date_str = input_data['report_date']
+create_str = input_data['create']
+updated_at_str = input_data['updated_at']
+last_reply_at_str = input_data['last_reply_at']
 
-# Создание резервной копии базы данных
-backup_filename = 'DataBase/app/database_backup.db'
-# connection.backup(sqlite3.connect(backup_filename))
+try:
+    report_date = datetime.datetime.strptime(report_date_str, "%d-%m-%Y").date()
+    create = datetime.datetime.strptime(create_str, "%d-%m-%Y").date()
+    updated_at = datetime.datetime.strptime(updated_at_str, "%d-%m-%Y").date()
+    last_reply_at = datetime.datetime.strptime(last_reply_at_str, "%d-%m-%Y").date()
+except ValueError as e:
+    print('Ошибка:', e)
 
-# Восстановление базы данных из резервной копии
-# shutil.copy(backup_filename, db_filename)
+# Преобразование строк с продолжительностью времени в минуты
+for key in ['sla_time', 'response_time']:
+    hours, minutes = map(int, input_data[key].split(' ')[::2])
+    input_data[key] = hours * 60 + minutes
 
-# Определяем базовую модель о которой будут наследоваться остальные
-class BaseModel(peewee.Model):
-    class Meta:
-        database = conn  # соединение с базой
+# Здесь мы вставляем данные в БД
+with conn:
+    conn.create_tables([Report_Ticket])
+    new_ticket = Report_Ticket.create(**input_data)
 
-# Определяем модель для таблицы "info"
-class Info(BaseModel):
-    date = peewee.DateField(column_name='Дата_рассылки')
-    release_number = peewee.IntegerField(column_name='Номер_релиза', primary_key=True)
-    client_name = peewee.TextField(column_name='Наименование_клиента')
-    main_contact = peewee.TextField(column_name='Основной_контакт')
-    copy = peewee.TextField(column_name='Копия')
-
-    class Meta:
-        table_name = 'info'
-
-# Создаем таблицу, если она не существует
-Info.create_table()
-
-# Получение всех записей из таблицы
-all_info = Info.select()
-
-# Вывод содержимого таблицы
-for info in all_info:
-    print(info.date, info.release_number, info.client_name, info.main_contact, info.copy)
-
-# Закрываем соединение с базой данных
-conn.close()
+print('Отчёт о тиете был успешно сохранён в БД')
