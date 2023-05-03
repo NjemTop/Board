@@ -1,4 +1,5 @@
 import peewee
+from peewee import DateField as PeeweeDateField
 import uuid
 
 # Путь к файлу базы данных
@@ -52,16 +53,16 @@ class Release_info(BaseModel):
 class Report_Ticket(BaseModel):
     """Класс для таблицы БД информации с отчётами о тикетах"""
     id = peewee.AutoField(primary_key=True)
-    report_date = peewee.DateField(column_name='Дата_отчёта')
+    report_date = PeeweeDateField(column_name='Дата_отчёта')
     ticket_id = peewee.IntegerField(column_name='Номер_тикета')
     subject = peewee.TextField(column_name='Тема_тикета')
-    create = peewee.DateField(column_name='Создан')
+    create = PeeweeDateField(column_name='Создан')
     status = peewee.TextField(column_name='Статус')
     client_name = peewee.TextField(column_name='Название_клиента')
     priority = peewee.TextField(column_name='Приоритет')
     assignee_name = peewee.TextField(column_name='Исполнитель')
-    updated_at = peewee.DateField(column_name='Дата_обновления')
-    last_reply_at = peewee.DateField(column_name='Дата_последнего_ответа_клиенту')
+    updated_at = PeeweeDateField(column_name='Дата_обновления')
+    last_reply_at = PeeweeDateField(column_name='Дата_последнего_ответа_клиенту')
     sla = peewee.BooleanField(column_name='SLA')
     sla_time = peewee.IntegerField(column_name='Общее_время_SLA')
     response_time = peewee.IntegerField(column_name='Среднее_время_ответа')
