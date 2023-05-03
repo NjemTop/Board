@@ -38,7 +38,7 @@ def get_BM_Info_onClient_api():
             if tech_info and tech_info.server_version:
                 important_info['server_version'] = tech_info.server_version
             if tech_info and tech_info.update_date:
-                important_info['update_date'] = tech_info.update_date.isoformat()
+                important_info['update_date'] = tech_info.update_date.strftime('%d-%m-%Y')
             result['important_info'] = important_info
             results.append(result)
         # Преобразуем список результатов в строку JSON
