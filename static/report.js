@@ -57,8 +57,7 @@ function displayData(data) {
     updateChartData(data);
 }
 
-function updateChartData(reportDate) {
-    const filteredData = reportDate === 'all' ? chartData : chartData.filter(entry => entry.report_date === reportDate);
+function updateChartData(filteredData) {
     let causeCount = {};
 
     filteredData.forEach(entry => {
