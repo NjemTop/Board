@@ -1,4 +1,4 @@
-const chartDataTag = document.getElementById('chart-data');
+const chartDataTag = document.getElementById('report-data-tag');
 const chartData = JSON.parse(chartDataTag.textContent);
 
 let causeCount = {};
@@ -6,6 +6,7 @@ chartData.forEach(cause => {
     causeCount[cause] = (causeCount[cause] || 0) + 1;
 });
 
+const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'pie',
     data: {
