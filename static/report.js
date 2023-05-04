@@ -9,8 +9,8 @@ $(reportDateRange).daterangepicker({
 
 function displayDataByDateRange(startDate, endDate) {
     // Запрашиваем данные с сервера с переданными параметрами даты
-    fetch('/api/report', {
-        method: 'GET',
+    fetch('/api/web/report', {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -21,8 +21,9 @@ function displayDataByDateRange(startDate, endDate) {
     })
     .then(response => response.json())
     .then(data => {
+        // Отображаем отфильтрованные данные
         displayData(data);
-    });    
+    });
 }
 
 $(reportDateRange).on('apply.daterangepicker', function (ev, picker) {

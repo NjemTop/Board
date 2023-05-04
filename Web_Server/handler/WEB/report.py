@@ -53,8 +53,37 @@ def report_tickets():
         error_message = f"An unexpected error occurred: {error}"
         return render_template('error.html', error_message=error_message)
 
-def get_report_tickets(start_date=None, end_date=None):
+def get_report_tickets():
     try:
+        with conn:
+            conn.create_tables([Report_Ticket])
+            # Получаем все записи из таблицы report_ticket
+            query = Report_Ticket.select()
+            results = [entry.__data__ for entry in query]
+
+        # Преобразуем список результатов в строку JSON
+        json_data = json.dumps(results, ensure_ascii=False, indent=4, default=str)
+        # Создаем ответ с заголовком Content-Type и кодировкой utf-8
+        response = Response(json_data, content_type='application/json; charset=utf-8')
+        # Добавляем заголовок Access-Control-Allow-Origin для поддержки кросс-доменных запросов
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        # Отправляем ответ JSON
+        return response
+
+    except peewee.OperationalError as error:
+        web_error_logger.error("Ошибка подключения к базе данных SQLite: %s", error)
+        return f"Ошибка с БД: {error}", 500
+
+    except Exception as error:
+        web_error_logger.error("Ошибка сервера: %s", error)
+        return f"Ошибка сервера: {error}", 500
+
+def api_report_tickets():
+    try:
+        data = request.get_json()
+        start_date = data.get('start_date', None) if data else None
+        end_date = data.get('end_date', None) if data else None
+
         with conn:
             conn.create_tables([Report_Ticket])
             # Получаем все записи из таблицы report_ticket
@@ -85,12 +114,6 @@ def get_report_tickets(start_date=None, end_date=None):
     except Exception as error:
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
-
-def api_get_report_tickets():
-    data = request.get_json()
-    start_date = data.get('start_date', None) if data else None
-    end_date = data.get('end_date', None) if data else None
-    return get_report_tickets(start_date, end_date)
 
 def post_report_tickets():
     """
