@@ -1,7 +1,4 @@
-import TableCell from './TableCell.js';
-
 Vue.component('vue-good-table', window["vue-good-table"].VueGoodTable);
-Vue.component('table-cell', TableCell);
 
 export const app = new Vue({
     el: '#app',
