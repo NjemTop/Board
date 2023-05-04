@@ -39,18 +39,15 @@
                 >
                 <template #table-row="{ row }">
                     <tr>
-                      <table-cell
+                      <td
                         v-for="(column, index) in columns"
                         :key="index"
-                        :row="row"
-                        :column="column"
-                        :value="row[column.field]"
-                        v-slot:getSLADescription="{ row }"
                       >
-                        {{ getSLADescription(row) }}
-                      </table-cell>
+                        <span v-if="column.field === 'sla'" :title="getSLADescription(row)">{{ row[column.field] }}</span>
+                        <span v-else>{{ row[column.field] }}</span>
+                      </td>
                     </tr>
-                  </template>                  
+                  </template>
             </vue-good-table>
         </div>
         <h2>Причины возникновения</h2>
