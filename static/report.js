@@ -1,7 +1,7 @@
-const reportDatesTag = document.getElementById('report-dates-tag');
-const reportDatesData = JSON.parse(reportDatesTag.textContent);
+const reportDataTag = document.getElementById('report-data-tag');
+const reportData = JSON.parse(reportDataTag.textContent);
 
-const uniqueReportDates = [...new Set(reportDatesData.map(entry => entry.creation_date))];
+const uniqueReportDates = [...new Set(reportData.map(entry => entry.creation_date))];
 
 const reportDateSelect = document.getElementById('report-date-select');
 uniqueReportDates.forEach(date => {

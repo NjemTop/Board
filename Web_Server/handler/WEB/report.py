@@ -24,7 +24,10 @@ def report_tickets():
         else:
             results = Report_Ticket.select().where(Report_Ticket.creation_date == report_date)
 
-        return render_template('report.html', data=output_data, report_data=results)
+        # Получаем уникальные даты
+        unique_dates = list(set([entry.creation_date for entry in results]))
+
+        return render_template('report.html', data=output_data, report_data=results, unique_dates=unique_dates)
 
     except peewee.OperationalError as error:
         # Обработка ошибок, связанных с базой данных
