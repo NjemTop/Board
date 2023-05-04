@@ -36,13 +36,17 @@
                 :line-numbers="true"
                 :search-options="{ enabled: true, placeholder: 'Поиск по таблице' }"
                 :pagination-options="{ enabled: true, mode: 'pages' }"
-            >
+                >
                 <template v-slot:table-row="props">
                     <tr>
-                        <td v-for="(column, index) in columns" :key="index">
-                            <span v-if="column.field === 'sla'" :title="getSLADescription(props.row.sla)">{{ props.row[column.field] }}</span>
-                            <span v-else>{{ props.row[column.field] }}</span>
-                        </td>
+                    <table-cell
+                        v-for="(column, index) in columns"
+                        :key="index"
+                        :row="props.row"
+                        :column="column"
+                        :value="props.row[column.field]"
+                        :getSLADescription="getSLADescription"
+                    ></table-cell>
                     </tr>
                 </template>
             </vue-good-table>
