@@ -44,3 +44,5 @@ new Vue({
         },        
     },
 });
+
+export default app;
