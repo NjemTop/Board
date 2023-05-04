@@ -12,18 +12,31 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <!-- Подключаем Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Подключаем vue2-datepicker -->
+    <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker@4.2.1/lib/index.css">
+    <script src="https://unpkg.com/vue2-datepicker@4.2.1/lib/index.umd.min.js"></script>
 </head>
 <body>
     <div id="app">
         <div class="container" style="max-width: 100%;">
             <h2>Отчет по тикетам</h2>
             <div class="form-group">
-                <label for="report-date-select">Выберите дату отчета:</label>
-                <select id="report-date-select" class="form-control" v-model="selectedDate" @change="displayData(selectedDate)">
-                    <option value="all">Все даты</option>
-                    <option v-for="date in uniqueDates" :value="date">{{ date }}</option>
-                </select>
+                <label for="report-date-range">Выберите диапазон дат отчета:</label>
+                <vue2-datepicker
+                    id="report-date-range"
+                    v-model="dateRange"
+                    range
+                    format="DD-MM-YYYY"
+                    @change="displayData(dateRange)"
+                ></vue2-datepicker>
             </div>
+            <div class="form-group">
+                <label for="report-month-select">Выберите месяц отчета:</label>
+                <select id="report-month-select" class="form-control" v-model="selectedMonth" @change="displayDataByMonth(selectedMonth)">
+                    <option value="all">Все месяцы</option>
+                    <option v-for="month in uniqueMonths" :value="month">{{ month }}</option>
+                </select>
+            </div>            
             <table id="report-table" class="table table-striped">
                 <thead>
                     <tr>

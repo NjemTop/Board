@@ -5,16 +5,59 @@ const app = new Vue({
     el: '#app',
     data: {
         reportData: reportData,
-        selectedDate: 'all',
-        uniqueDates: Array.from(new Set(reportData.map(entry => entry.report_date))).sort(),
+        dateRange: '',
+        selectedMonth: 'all',
+        uniqueMonths: Array.from(new Set(reportData.map(entry => {
+            const [day, month, year] = entry.report_date.split('-');
+            return `${month}-${year}`;
+        }))).sort(),
     },
     methods: {
-        displayData(reportDate) {
+        displayData(dateRange) {
+            // сброс выбранного месяца
+            this.selectedMonth = 'all';
+    
             const tableBody = document.querySelector('#report-table tbody');
             tableBody.innerHTML = '';
-
-            const filteredData = reportDate === 'all' ? reportData : reportData.filter(entry => entry.report_date === reportDate);
-
+    
+            let filteredData;
+            if (dateRange === '') {
+                filteredData = reportData;
+            } else {
+                const [startDate, endDate] = dateRange.split(' ~ ').map(date => new Date(date.split('-').reverse().join('-')));
+                filteredData = reportData.filter(entry => {
+                    const entryDate = new Date(entry.report_date.split('-').reverse().join('-'));
+                    return entryDate >= startDate && entryDate <= endDate;
+                });
+            }
+    
+            this.updateTable(filteredData);
+            this.updateChartData(filteredData);
+        },
+        displayDataByMonth(selectedMonth) {
+            // сброс выбранного диапазона дат
+            this.dateRange = '';
+    
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+    
+            let filteredData;
+            if (selectedMonth === 'all') {
+                filteredData = reportData;
+            } else {
+                filteredData = reportData.filter(entry => {
+                    const [day, month, year] = entry.report_date.split('-');
+                    return `${month}-${year}` === selectedMonth;
+                });
+            }
+    
+            this.updateTable(filteredData);
+            this.updateChartData(filteredData);
+        },
+        updateTable(filteredData) {
+            const tableBody = document.querySelector('#report-table tbody');
+            tableBody.innerHTML = '';
+        
             filteredData.forEach(entry => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -36,25 +79,6 @@ const app = new Vue({
                 `;
                 tableBody.appendChild(row);
             });
-
-            // Обновляем график после фильтрации
-            updateChartData(reportDate);
         },
-        updateChartData(reportDate) {
-            const filteredData = reportDate === 'all' ? chartData : chartData.filter(entry => entry.report_date === reportDate);
-            let causeCount = {};
-
-            filteredData.forEach(entry => {
-                const cause = entry.cause;
-                causeCount[cause] = (causeCount[cause] || 0) + 1;
-            });
-
-            chart.data.labels = Object.keys(causeCount);
-            chart.data.datasets[0].data = Object.values(causeCount);
-            chart.update();
-        },
-    },
-    mounted() {
-        this.displayData('all');
     },
 });
