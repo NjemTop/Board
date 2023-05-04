@@ -1,5 +1,6 @@
 const reportDataTag = document.getElementById('report-data-tag');
 const reportData = JSON.parse(reportDataTag.textContent);
+const reportDateSelect = document.getElementById('report-date-select');
 
 function displayData(reportDate) {
     const tableBody = document.querySelector('#report-table tbody');

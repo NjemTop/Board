@@ -23,6 +23,7 @@ def report_tickets():
         data = []
         for entry in results:
             data.append({
+                'report_date': entry.report_date.strftime('%Y-%m-%d'),
                 'ticket_id': entry.ticket_id,
                 'subject': entry.subject,
                 'creation_date': entry.creation_date,
