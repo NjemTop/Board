@@ -4,17 +4,17 @@ export const app = new Vue({
     el: '#app',
     data: {
         columns: [
-            { label: 'ID', field: 'id' },
-            { label: 'Дата создания', field: 'creation_date' },
+            { label: 'Тикет ID', field: 'ticket_id' },
+            { label: 'Создан', field: 'creation_date' },
             { label: 'Тема тикета', field: 'subject' },
             { label: 'Статус', field: 'status' },
-            { label: 'Название клиента', field: 'client_name' },
+            { label: 'Клиент', field: 'client_name' },
             { label: 'Приоритет', field: 'priority' },
             { label: 'Исполнитель', field: 'assignee_name' },
             { label: 'Дата обновления', field: 'updated_at' },
             { label: 'Дата последнего ответа клиенту', field: 'last_reply_at' },
             { label: 'SLA', field: 'sla' },
-            { label: 'Общее время SLA', field: 'sla_time' },
+            { label: 'Время SLA', field: 'sla_time' },
             { label: 'Среднее время ответа', field: 'response_time' },
             { label: 'Причина возникновения', field: 'cause' },
             { label: 'Модуль BoardMaps', field: 'module_boardmaps' },
@@ -27,7 +27,6 @@ export const app = new Vue({
     },
     methods: {
         fetchData(start_date, end_date) {
-            console.log('Start date:', start_date, 'End date:', end_date);
             fetch('/api/web/report', {
                 method: 'POST',
                 headers: {
@@ -40,7 +39,6 @@ export const app = new Vue({
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log('Data:', data);
                     this.rows = data;
                 });
         },
