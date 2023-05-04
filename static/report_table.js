@@ -1,4 +1,4 @@
-Vue.component('vue-good-table', VueGoodTable.VueGoodTable);
+Vue.component('vue-good-table', window["vue-good-table"].VueGoodTable);
 
 export const app = new Vue({
     el: '#app',

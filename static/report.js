@@ -1,4 +1,4 @@
-import app from './report_table.js';
+import { app } from './report_table.js';
 
 // Устанавливаем daterangepicker
 const reportDateRange = document.getElementById('report-date-range');
