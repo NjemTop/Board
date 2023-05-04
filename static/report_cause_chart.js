@@ -7,19 +7,6 @@ chartData.forEach(entry => {
     causeCount[cause] = (causeCount[cause] || 0) + 1;
 });
 
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-const numCauses = Object.keys(causeCount).length;
-const backgroundColors = Array.from({ length: numCauses }, () => getRandomColor());
-const borderColors = Array.from({ length: numCauses }, () => getRandomColor());
-
 const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'pie',
@@ -27,8 +14,24 @@ const chart = new Chart(ctx, {
         labels: Object.keys(causeCount),
         datasets: [{
             data: Object.values(causeCount),
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40',
+                // добавьте другие цвета для фона, если необходимо
+            ],
+            borderColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40',
+                // добавьте другие цвета для границы, если необходимо
+            ],
             borderWidth: 1
         }]
     },
