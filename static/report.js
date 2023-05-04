@@ -1,5 +1,5 @@
 const reportDataTag = document.getElementById('report-data');
-const reportData = JSON.parse(reportDataTag.textContent);
+const reportData = JSON.parse(reportDataTag.innerHTML);
 
 const uniqueReportDates = [...new Set(reportData.map(entry => entry.report_date))];
 
