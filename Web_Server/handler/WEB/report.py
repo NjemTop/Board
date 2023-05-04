@@ -41,7 +41,7 @@ def report_tickets():
                 'staff_message': entry.staff_message
             })
 
-        return render_template('report.html', reportData=data)
+        return render_template('report.html', data=data)
 
     except peewee.OperationalError as error:
         # Обработка ошибок, связанных с базой данных
