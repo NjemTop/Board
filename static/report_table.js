@@ -1,6 +1,6 @@
 Vue.component('vue-good-table', VueGoodTable.VueGoodTable);
 
-new Vue({
+export const app = new Vue({
     el: '#app',
     data: {
         columns: [
@@ -44,5 +44,3 @@ new Vue({
         },        
     },
 });
-
-export default app;
