@@ -42,5 +42,10 @@ export const app = new Vue({
                     this.rows = data;
                 });
         },
+        getSLADescription(row) {
+            return row.sla
+              ? 'True - просроченный тикет'
+              : 'False - нет просрочки по тикету';
+          },
     },
 });

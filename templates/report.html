@@ -34,10 +34,26 @@
                 :columns="columns"
                 :rows="rows"
                 :line-numbers="true"
+                :style-class="tableStyle"
                 :search-options="{ enabled: true, placeholder: 'Поиск по таблице' }"
                 :pagination-options="{ enabled: true, mode: 'pages' }"
             >
+                <template #table-row="{ row }">
+                    <slot name="table-row" :row="row"></slot>
+                </template>
             </vue-good-table>
+            <template #table-row="{ row }">
+                <tr>
+                  <td v-for="(column, index) in columns" :key="index">
+                    <span v-if="column.field === 'sla'" :title="getSLADescription(row)">
+                      {{ row[column.field] }}
+                    </span>
+                    <span v-else>
+                      {{ row[column.field] }}
+                    </span>
+                  </td>
+                </tr>
+              </template>
         </div>
         <h2>Причины возникновения</h2>
         <div style="width:50%;">
