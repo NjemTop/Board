@@ -7,6 +7,19 @@ chartData.forEach(entry => {
     causeCount[cause] = (causeCount[cause] || 0) + 1;
 });
 
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+const numCauses = Object.keys(causeCount).length;
+const backgroundColors = Array.from({ length: numCauses }, () => getRandomColor());
+const borderColors = Array.from({ length: numCauses }, () => getRandomColor());
+
 const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'pie',
@@ -14,22 +27,8 @@ const chart = new Chart(ctx, {
         labels: Object.keys(causeCount),
         datasets: [{
             data: Object.values(causeCount),
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
             borderWidth: 1
         }]
     },
