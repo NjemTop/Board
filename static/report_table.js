@@ -39,7 +39,7 @@ export const app = new Vue({
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    this.rows = data;
+                    this.rows = reportData;
                 });
         },
         getSLADescription(row) {
