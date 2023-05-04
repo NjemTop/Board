@@ -12,7 +12,7 @@ export const app = new Vue({
             { label: 'Приоритет', field: 'priority' },
             { label: 'Исполнитель', field: 'assignee_name' },
             { label: 'Дата обновления', field: 'updated_at' },
-            { label: 'Дата последнего ответа клиенту', field: 'last_reply_at' },
+            { label: 'Дата ответа', field: 'last_reply_at' },
             { label: 'SLA', field: 'sla' },
             { label: 'Время SLA', field: 'sla_time' },
             { label: 'Среднее время ответа', field: 'response_time' },
