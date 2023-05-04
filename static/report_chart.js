@@ -2,7 +2,8 @@ const chartDataTag = document.getElementById('report-data-tag');
 const chartData = JSON.parse(chartDataTag.textContent);
 
 let causeCount = {};
-chartData.forEach(cause => {
+chartData.forEach(entry => {
+    const cause = entry.cause;
     causeCount[cause] = (causeCount[cause] || 0) + 1;
 });
 
