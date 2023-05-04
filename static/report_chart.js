@@ -37,11 +37,21 @@ const chart = new Chart(ctx, {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b);
+                        const value = context.raw;
+                        const percentage = ((value / total) * 100).toFixed(2);
+                        return `${value} (${percentage}%)`;
+                    }
+                }
+            },
             legend: {
-                position: 'right',
+                position: 'right', // положение легенды: 'top', 'right', 'bottom' или 'left'
                 labels: {
-                    boxWidth: 20,
-                    padding: 10,
+                    boxWidth: 20, // ширина блока метки
+                    padding: 10, // отступ между метками
                 }
             }
         },
