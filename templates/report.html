@@ -63,13 +63,13 @@
                 {% endfor %}
             </tbody>
         </table>
-        <h2>Диаграмма причин возникновения тикетов</h2>
+        <h2>Причины возникновения</h2>
         <div style="width:50%;">
             <script type="application/json" id="report-data-tag">{{ data|tojson|safe }}</script>
             <canvas id="chart"></canvas>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='report_chart.js') }}"></script>
     <script src="{{ url_for('static', filename='report.js') }}"></script>
+    <script src="{{ url_for('static', filename='report_cause_chart.js') }}"></script>
 </body>
 </html>
