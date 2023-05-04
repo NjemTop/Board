@@ -1,8 +1,8 @@
-const ctx = document.getElementById('chart').getContext('2d');
-const data = JSON.parse(document.getElementById('chart-data').textContent);
+const chartDataTag = document.getElementById('chart-data');
+const chartData = JSON.parse(chartDataTag.textContent);
 
 let causeCount = {};
-data.forEach(cause => {
+chartData.forEach(cause => {
     causeCount[cause] = (causeCount[cause] || 0) + 1;
 });
 

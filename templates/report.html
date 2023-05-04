@@ -69,9 +69,6 @@
             <canvas id="chart"></canvas>
         </div>
     </div>
-    <script>
-        const rawData = {{ data|tojson|safe }};
-    </script>
     <script src="{{ url_for('static', filename='report_chart.js') }}"></script>
     <script src="{{ url_for('static', filename='report.js') }}"></script>
 </body>

@@ -5,13 +5,19 @@ const uniqueReportDates = [...new Set(reportData.map(entry => entry.creation_dat
 
 const reportDateSelect = document.getElementById('report-date-select');
 uniqueReportDates.forEach(date => {
-    const option = document.createElement('option');
-    option.value = date;
-    option.textContent = date;
-    reportDateSelect.appendChild(option);
+    if (date) {
+        const option = document.createElement('option');
+        option.value = date;
+        option.textContent = date;
+        reportDateSelect.appendChild(option);
+    }
 });
 
 reportDateSelect.addEventListener('change', () => {
     const selectedDate = reportDateSelect.value;
-    window.location.href = `/report_tickets?report_date=${selectedDate}`;
+    if (selectedDate) {
+        window.location.href = `/report_tickets?report_date=${selectedDate}`;
+    } else {
+        window.location.href = `/report_tickets`;
+    }
 });
