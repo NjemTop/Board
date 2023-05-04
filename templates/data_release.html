@@ -47,17 +47,14 @@
             const jsonData = {{ data | tojson }};
             const releaseSelect = $('#release-select');
             const dataTable = $('#data-table tbody');
-    
             // Заполните выпадающий список номерами релиза
             const releaseNumbers = [...new Set(jsonData.map(item => item['Номер_релиза']))];
             releaseNumbers.forEach(number => {
                 releaseSelect.append(`<option value="${number}">${number}</option>`);
             });
-    
             // Функция для отображения отфильтрованных данных
             function displayData(releaseNumber) {
                 dataTable.empty();
-    
                 jsonData.filter(item => releaseNumber === 'all' || item['Номер_релиза'] == releaseNumber)
                     .forEach(item => {
                         dataTable.append(`
@@ -71,12 +68,10 @@
                         `);
                     });
             }
-    
             // Фильтрация данных при изменении значения выпадающего списка
             releaseSelect.on('change', function () {
                 displayData(this.value);
             });
-    
             // Отображение всех данных по умолчанию
             displayData('all');
         });
