@@ -23,16 +23,16 @@ def report_tickets():
         data = []
         for entry in results:
             data.append({
-                'report_date': entry.report_date.strftime('%Y-%m-%d'),
+                'report_date': entry.report_date.strftime('%d-%m-%Y'),
                 'ticket_id': entry.ticket_id,
                 'subject': entry.subject,
-                'creation_date': entry.creation_date,
+                'creation_date': entry.creation_date.strftime('%d-%m-%Y'),
                 'status': entry.status,
                 'client_name': entry.client_name,
                 'priority': entry.priority,
                 'assignee_name': entry.assignee_name,
-                'updated_at': entry.updated_at,
-                'last_reply_at': entry.last_reply_at,
+                'updated_at': entry.updated_at.strftime('%d-%m-%Y'),
+                'last_reply_at': entry.last_reply_at.strftime('%d-%m-%Y'),
                 'sla': entry.sla,
                 'sla_time': entry.sla_time,
                 'response_time': entry.response_time,
