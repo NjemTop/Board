@@ -38,6 +38,23 @@ function displayData(reportDate) {
         `;
         tableBody.appendChild(row);
     });
+
+    // Обновляем график после фильтрации
+    updateChartData(reportDate);
+}
+
+function updateChartData(reportDate) {
+    const filteredData = reportDate === 'all' ? chartData : chartData.filter(entry => entry.report_date === reportDate);
+    let causeCount = {};
+
+    filteredData.forEach(entry => {
+        const cause = entry.cause;
+        causeCount[cause] = (causeCount[cause] || 0) + 1;
+    });
+
+    chart.data.labels = Object.keys(causeCount);
+    chart.data.datasets[0].data = Object.values(causeCount);
+    chart.update();
 }
 
 reportDateSelect.addEventListener('change', () => {
