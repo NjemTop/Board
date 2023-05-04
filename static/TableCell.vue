@@ -1,4 +1,3 @@
-<!-- TableCell.vue -->
 <template>
     <td>
       <span v-if="isSLAColumn" :title="getSLADescription(row.sla)">{{ value }}</span>
