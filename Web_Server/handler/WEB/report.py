@@ -14,20 +14,33 @@ def report_tickets():
     try:
         report_date = request.args.get('report_date', 'all')
 
-        # Получаем значения столбца 'Причина_возникновения'
-        query = Report_Ticket.select(Report_Ticket.cause)
-        output_data = [entry.cause for entry in query]
-
         # Получаем данные из таблицы Report_Ticket
         if report_date == 'all':
             results = Report_Ticket.select()
         else:
             results = Report_Ticket.select().where(Report_Ticket.creation_date == report_date)
 
-        # Получаем уникальные даты
-        unique_dates = list(set([entry.creation_date for entry in results]))
+        data = []
+        for entry in results:
+            data.append({
+                'ticket_id': entry.ticket_id,
+                'subject': entry.subject,
+                'creation_date': entry.creation_date,
+                'status': entry.status,
+                'client_name': entry.client_name,
+                'priority': entry.priority,
+                'assignee_name': entry.assignee_name,
+                'updated_at': entry.updated_at,
+                'last_reply_at': entry.last_reply_at,
+                'sla': entry.sla,
+                'sla_time': entry.sla_time,
+                'response_time': entry.response_time,
+                'cause': entry.cause,
+                'module_boardmaps': entry.module_boardmaps,
+                'staff_message': entry.staff_message
+            })
 
-        return render_template('report.html', data=output_data, report_data=results, unique_dates=unique_dates)
+        return render_template('report.html', data=data)
 
     except peewee.OperationalError as error:
         # Обработка ошибок, связанных с базой данных
