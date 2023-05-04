@@ -35,6 +35,56 @@ const chart = new Chart(ctx, {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    boxWidth: 20,
+                    padding: 10,
+                }
+            }
+        },
+        layout: {
+            padding: {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0
+            }
+        },
     }
 });
+
+// Функция для сортировки легенды
+function sortLegend() {
+    const dataset = chart.data.datasets[0];
+    const labels = chart.data.labels;
+    const data = dataset.data;
+
+    const dataArray = labels.map((label, index) => ({
+        label: label,
+        data: data[index],
+        backgroundColor: dataset.backgroundColor[index],
+        borderColor: dataset.borderColor[index]
+    }));
+
+    dataArray.sort((a, b) => b.data - a.data);
+
+    labels.length = 0;
+    data.length = 0;
+    dataset.backgroundColor.length = 0;
+    dataset.borderColor.length = 0;
+
+    dataArray.forEach(item => {
+        labels.push(item.label);
+        data.push(item.data);
+        dataset.backgroundColor.push(item.backgroundColor);
+        dataset.borderColor.push(item.borderColor);
+    });
+
+    chart.update();
+}
+
+// Вызовите функцию сортировки легенды после создания графика
+sortLegend();
