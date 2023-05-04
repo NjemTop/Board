@@ -78,7 +78,7 @@ def get_report_tickets():
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
 
-def api_report_tickets():
+def post_api_report_tickets():
     try:
         data = request.get_json()
         start_date = data.get('start_date', None) if data else None
