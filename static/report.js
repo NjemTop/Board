@@ -1,7 +1,6 @@
 const reportDataTag = document.getElementById('report-data-tag');
 const reportData = JSON.parse(reportDataTag.textContent);
 const reportDateSelect = document.getElementById('report-date-select');
-
 const uniqueDates = Array.from(new Set(reportData.map(entry => entry.report_date))).sort();
 
 uniqueDates.forEach(date => {
