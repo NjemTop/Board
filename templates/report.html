@@ -37,18 +37,20 @@
                 :search-options="{ enabled: true, placeholder: 'Поиск по таблице' }"
                 :pagination-options="{ enabled: true, mode: 'pages' }"
                 >
-                <template v-slot:table-row="props">
+                <template #table-row="{ row }">
                     <tr>
-                    <table-cell
+                      <table-cell
                         v-for="(column, index) in columns"
                         :key="index"
-                        :row="props.row"
+                        :row="row"
                         :column="column"
-                        :value="props.row[column.field]"
-                        :getSLADescription="getSLADescription"
-                    ></table-cell>
+                        :value="row[column.field]"
+                        v-slot:getSLADescription="{ row }"
+                      >
+                        {{ getSLADescription(row) }}
+                      </table-cell>
                     </tr>
-                </template>
+                  </template>                  
             </vue-good-table>
         </div>
         <h2>Причины возникновения</h2>
