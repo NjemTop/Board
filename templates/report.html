@@ -37,11 +37,11 @@
                 :search-options="{ enabled: true, placeholder: 'Поиск по таблице' }"
                 :pagination-options="{ enabled: true, mode: 'pages' }"
             >
-                <template #table-row="{ row, column, index }">
+                <template slot="table-row" slot-scope="props">
                     <tr>
                         <td v-for="(column, index) in columns" :key="index">
-                            <span v-if="column.field === 'sla'" :title="getSLADescription(row.sla)">{{ row[column.field] }}</span>
-                            <span v-else>{{ row[column.field] }}</span>
+                            <span v-if="column.field === 'sla'" :title="getSLADescription(props.row.sla)">{{ props.row[column.field] }}</span>
+                            <span v-else>{{ props.row[column.field] }}</span>
                         </td>
                     </tr>
                 </template>
