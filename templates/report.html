@@ -11,9 +11,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
     <!-- Подключаем vue2-datepicker CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker@3.11.1/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker@3.11.1/lib/theme/default.css">
     <!-- Подключаем vue2-datepicker JS -->
-    <script src="https://unpkg.com/vue2-datepicker@3.11.1/index.js"></script>
+    <script src="https://unpkg.com/vue2-datepicker@3.11.1/lib/vue2-datepicker.umd.min.js"></script>
     <!-- Подключаем Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -23,13 +23,13 @@
             <h2>Отчет по тикетам</h2>
             <div class="form-group">
                 <label for="report-date-range">Выберите диапазон дат отчета:</label>
-                <vue2-datepicker
+                <date-picker
                     id="report-date-range"
                     v-model="dateRange"
                     range
                     format="DD-MM-YYYY"
                     @change="displayData(dateRange)"
-                ></vue2-datepicker>
+                ></date-picker>
             </div>
             <div class="form-group">
                 <label for="report-month-select">Выберите месяц отчета:</label>

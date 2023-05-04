@@ -1,6 +1,8 @@
 const reportDataTag = document.getElementById('report-data-tag');
 const reportData = JSON.parse(reportDataTag.textContent);
 
+Vue.component('date-picker', Vue2DatePicker);
+
 const app = new Vue({
     el: '#app',
     data: {
