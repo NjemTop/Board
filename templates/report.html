@@ -9,64 +9,68 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <!-- Подключаем Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container" style="max-width: 100%;">
-        <h2>Отчет по тикетам</h2>
-        <div class="form-group">
-            <label for="report-date-select">Выберите дату отчета:</label>
-            <select id="report-date-select" class="form-control">
-                <option value="all">Все даты</option>
-            </select>
-        </div>        
-        <table id="report-table" class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Номер тикета</th>
-                    <th>Тема тикета</th>
-                    <th>Дата создания</th>
-                    <th>Статус</th>
-                    <th>Название клиента</th>
-                    <th>Приоритет</th>
-                    <th>Исполнитель</th>
-                    <th>Дата обновления</th>
-                    <th>Дата последнего ответа клиенту</th>
-                    <th>SLA</th>
-                    <th>Общее время SLA</th>
-                    <th>Среднее время ответа</th>
-                    <th>Причина возникновения</th>
-                    <th>Модуль BoardMaps</th>
-                    <th>Сообщений от саппорта</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in data %}
+    <div id="app">
+        <div class="container" style="max-width: 100%;">
+            <h2>Отчет по тикетам</h2>
+            <div class="form-group">
+                <label for="report-date-select">Выберите дату отчета:</label>
+                <select id="report-date-select" class="form-control" v-model="selectedDate" @change="displayData(selectedDate)">
+                    <option value="all">Все даты</option>
+                    <option v-for="date in uniqueDates" :value="date">{{ date }}</option>
+                </select>
+            </div>
+            <table id="report-table" class="table table-striped">
+                <thead>
                     <tr>
-                        <td>{{ entry.ticket_id }}</td>
-                        <td>{{ entry.subject }}</td>
-                        <td>{{ entry.creation_date }}</td>
-                        <td>{{ entry.status }}</td>
-                        <td>{{ entry.client_name }}</td>
-                        <td>{{ entry.priority }}</td>
-                        <td>{{ entry.assignee_name }}</td>
-                        <td>{{ entry.updated_at }}</td>
-                        <td>{{ entry.last_reply_at }}</td>
-                        <td>{{ entry.sla }}</td>
-                        <td>{{ entry.sla_time }}</td>
-                        <td>{{ entry.response_time }}</td>
-                        <td>{{ entry.cause }}</td>
-                        <td>{{ entry.module_boardmaps }}</td>
-                        <td>{{ entry.staff_message }}</td>
+                        <th>Номер тикета</th>
+                        <th>Тема тикета</th>
+                        <th>Дата создания</th>
+                        <th>Статус</th>
+                        <th>Название клиента</th>
+                        <th>Приоритет</th>
+                        <th>Исполнитель</th>
+                        <th>Дата обновления</th>
+                        <th>Дата последнего ответа клиенту</th>
+                        <th>SLA</th>
+                        <th>Общее время SLA</th>
+                        <th>Среднее время ответа</th>
+                        <th>Причина возникновения</th>
+                        <th>Модуль BoardMaps</th>
+                        <th>Сообщений от саппорта</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <h2>Причины возникновения</h2>
-        <div style="width:50%;">
-            <script type="application/json" id="report-data-tag">{{ data|tojson|safe }}</script>
-            <canvas id="chart"></canvas>
+                </thead>
+                <tbody>
+                    {% for entry in data %}
+                        <tr>
+                            <td>{{ entry.ticket_id }}</td>
+                            <td>{{ entry.subject }}</td>
+                            <td>{{ entry.creation_date }}</td>
+                            <td>{{ entry.status }}</td>
+                            <td>{{ entry.client_name }}</td>
+                            <td>{{ entry.priority }}</td>
+                            <td>{{ entry.assignee_name }}</td>
+                            <td>{{ entry.updated_at }}</td>
+                            <td>{{ entry.last_reply_at }}</td>
+                            <td>{{ entry.sla }}</td>
+                            <td>{{ entry.sla_time }}</td>
+                            <td>{{ entry.response_time }}</td>
+                            <td>{{ entry.cause }}</td>
+                            <td>{{ entry.module_boardmaps }}</td>
+                            <td>{{ entry.staff_message }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h2>Причины возникновения</h2>
+            <div style="width:50%;">
+                <script type="application/json" id="report-data-tag">{{ data|tojson|safe }}</script>
+                <canvas id="chart"></canvas>
+            </div>
         </div>
     </div>
     <script src="{{ url_for('static', filename='report.js') }}"></script>
