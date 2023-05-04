@@ -5,7 +5,7 @@ const reportData = JSON.parse(reportDataTag.textContent);
 const reportDateRange = document.getElementById('report-date-range');
 $(reportDateRange).daterangepicker({
     locale: {
-        format: 'DD-MM-YYYY'
+        format: 'YYYY-MM-DD'
     },
     opens: 'right'
 });
@@ -15,7 +15,7 @@ function displayDataByDateRange(startDate, endDate) {
     tableBody.innerHTML = '';
 
     const filteredData = reportData.filter(entry => {
-        const entryDate = moment(entry.creation_date, 'DD-MM-YYYY');
+        const entryDate = moment(entry.creation_date, 'YYYY-MM-DD');
         return entryDate.isBetween(startDate, endDate, undefined, '[]');
     });
 
@@ -57,9 +57,10 @@ function displayData(data) {
     updateChartData(data);
 }
 
-// Изначально показываем данные за весь период
-const startDate = moment.min(reportData.map(entry => moment(entry.creation_date, 'DD-MM-YYYY')));
-const endDate = moment.max(reportData.map(entry => moment(entry.creation_date, 'DD-MM-YYYY')));
-$(reportDateRange).data('daterangepicker').setStartDate(startDate);
-$(reportDateRange).data('daterangepicker').setEndDate(endDate);
-displayDataByDateRange(startDate, endDate);
+// Изначально показываем данные за текущую неделю
+const thisMonday = moment().startOf('week').add(1, 'days'); // Начало текущей недели, понедельник
+const today = moment(); // Сегодняшний день
+
+$(reportDateRange).data('daterangepicker').setStartDate(thisMonday);
+$(reportDateRange).data('daterangepicker').setEndDate(today);
+displayDataByDateRange(thisMonday, today);
