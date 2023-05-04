@@ -41,7 +41,7 @@
                 <template #table-row="{ row }">
                     <tr>
                         <td v-for="(column, index) in columns" :key="index">
-                            <span v-if="column.field === 'sla'" :title="getSLADescription(row)">{{ row[column.field] }}</span>
+                            <span v-if="column.field === 'sla'" :title="getSLADescription(row.sla)">{{ row[column.field] }}</span>
                             <span v-else>{{ row[column.field] }}</span>
                         </td>
                     </tr>
