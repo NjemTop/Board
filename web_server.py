@@ -46,7 +46,7 @@ def create_app():
 
     # Регистрация обработчиков для вывода информации о статистике (диаграммы/пироги)
     app.add_url_rule('/report', 'report_tickets', report.report_tickets, methods=['GET'])
-    app.add_url_rule('/api/report', 'get_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.get_report_tickets), methods=['GET'])
+    app.add_url_rule('/api/report', 'api_get_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.api_get_report_tickets), methods=['GET'])
     app.add_url_rule('/api/report', 'post_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.post_report_tickets), methods=['POST'])
 
     # Регистрация обработчика для API 

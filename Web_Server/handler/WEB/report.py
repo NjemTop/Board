@@ -53,12 +53,20 @@ def report_tickets():
         error_message = f"An unexpected error occurred: {error}"
         return render_template('error.html', error_message=error_message)
 
-def get_report_tickets():
+def get_report_tickets(start_date=None, end_date=None):
     try:
         with conn:
             conn.create_tables([Report_Ticket])
             # Получаем все записи из таблицы report_ticket
             query = Report_Ticket.select()
+
+            # Фильтруем данные с помощью переданных параметров даты, если они были переданы
+            if start_date and end_date:
+                query = query.where(
+                    Report_Ticket.creation_date >= start_date,
+                    Report_Ticket.creation_date <= end_date
+                )
+
             results = [entry.__data__ for entry in query]
 
         # Преобразуем список результатов в строку JSON
@@ -77,7 +85,12 @@ def get_report_tickets():
     except Exception as error:
         web_error_logger.error("Ошибка сервера: %s", error)
         return f"Ошибка сервера: {error}", 500
-    
+
+def api_get_report_tickets():
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
+    return get_report_tickets(start_date, end_date)
+
 def post_report_tickets():
     """
     Функция записи данных о тикете

@@ -1,6 +1,3 @@
-const reportDataTag = document.getElementById('report-data-tag');
-const reportData = JSON.parse(reportDataTag.textContent);
-
 // Устанавливаем daterangepicker
 const reportDateRange = document.getElementById('report-date-range');
 $(reportDateRange).daterangepicker({
@@ -11,15 +8,13 @@ $(reportDateRange).daterangepicker({
 });
 
 function displayDataByDateRange(startDate, endDate) {
-    const tableBody = document.querySelector('#report-table tbody');
-    tableBody.innerHTML = '';
-
-    const filteredData = reportData.filter(entry => {
-        const entryDate = moment(entry.creation_date, 'YYYY-MM-DD');
-        return entryDate.isBetween(startDate, endDate, undefined, '[]');
-    });
-
-    displayData(filteredData);
+    // Запрашиваем данные с сервера с переданными параметрами даты
+    fetch(`/api/report/${startDate.format('YYYY-MM-DD')}/${endDate.format('YYYY-MM-DD')}`)
+        .then(response => response.json())
+        .then(data => {
+            // Отображаем отфильтрованные данные
+            displayData(data);
+        });
 }
 
 $(reportDateRange).on('apply.daterangepicker', function (ev, picker) {
