@@ -2,6 +2,15 @@ const reportDataTag = document.getElementById('report-data-tag');
 const reportData = JSON.parse(reportDataTag.textContent);
 const reportDateSelect = document.getElementById('report-date-select');
 
+const uniqueDates = Array.from(new Set(reportData.map(entry => entry.creation_date))).sort();
+
+uniqueDates.forEach(date => {
+    const option = document.createElement('option');
+    option.value = date;
+    option.text = date;
+    reportDateSelect.appendChild(option);
+});
+
 function displayData(reportDate) {
     const tableBody = document.querySelector('#report-table tbody');
     tableBody.innerHTML = '';
