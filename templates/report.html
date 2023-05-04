@@ -11,16 +11,18 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- Подключаем Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Подключаем daterangepicker -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 </head>
 <body>
     <div class="container" style="max-width: 100%;">
         <h2>Отчет по тикетам</h2>
         <div class="form-group">
-            <label for="report-date-select">Выберите дату отчета:</label>
-            <select id="report-date-select" class="form-control">
-                <option value="all">Все даты</option>
-            </select>
-        </div>        
+            <label for="report-date-range">Выберите диапазон дат отчета:</label>
+            <input type="text" id="report-date-range" class="form-control" />
+        </div>
         <table id="report-table" class="table table-striped">
             <thead>
                 <tr>

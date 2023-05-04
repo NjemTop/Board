@@ -1,22 +1,37 @@
 const reportDataTag = document.getElementById('report-data-tag');
 const reportData = JSON.parse(reportDataTag.textContent);
-const reportDateSelect = document.getElementById('report-date-select');
-const uniqueDates = Array.from(new Set(reportData.map(entry => entry.report_date))).sort();
 
-uniqueDates.forEach(date => {
-    const option = document.createElement('option');
-    option.value = date;
-    option.text = date;
-    reportDateSelect.appendChild(option);
+// Устанавливаем daterangepicker
+const reportDateRange = document.getElementById('report-date-range');
+$(reportDateRange).daterangepicker({
+    locale: {
+        format: 'DD-MM-YYYY'
+    },
+    opens: 'right'
 });
 
-function displayData(reportDate) {
+function displayDataByDateRange(startDate, endDate) {
     const tableBody = document.querySelector('#report-table tbody');
     tableBody.innerHTML = '';
 
-    const filteredData = reportDate === 'all' ? reportData : reportData.filter(entry => entry.report_date === reportDate);
+    const filteredData = reportData.filter(entry => {
+        const entryDate = moment(entry.creation_date, 'DD-MM-YYYY');
+        return entryDate.isBetween(startDate, endDate, undefined, '[]');
+    });
 
-    filteredData.forEach(entry => {
+    displayData(filteredData);
+}
+
+$(reportDateRange).on('apply.daterangepicker', function (ev, picker) {
+    displayDataByDateRange(picker.startDate, picker.endDate);
+});
+
+// Функция для отображения данных
+function displayData(data) {
+    const tableBody = document.querySelector('#report-table tbody');
+    tableBody.innerHTML = '';
+
+    data.forEach(entry => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${entry.ticket_id}</td>
@@ -39,26 +54,12 @@ function displayData(reportDate) {
     });
 
     // Обновляем график после фильтрации
-    updateChartData(reportDate);
+    updateChartData(data);
 }
 
-function updateChartData(reportDate) {
-    const filteredData = reportDate === 'all' ? chartData : chartData.filter(entry => entry.report_date === reportDate);
-    let causeCount = {};
-
-    filteredData.forEach(entry => {
-        const cause = entry.cause;
-        causeCount[cause] = (causeCount[cause] || 0) + 1;
-    });
-
-    chart.data.labels = Object.keys(causeCount);
-    chart.data.datasets[0].data = Object.values(causeCount);
-    chart.update();
-}
-
-reportDateSelect.addEventListener('change', () => {
-    const selectedDate = reportDateSelect.value;
-    displayData(selectedDate);
-});
-
-displayData('all');
+// Изначально показываем данные за весь период
+const startDate = moment.min(reportData.map(entry => moment(entry.creation_date, 'DD-MM-YYYY')));
+const endDate = moment.max(reportData.map(entry => moment(entry.creation_date, 'DD-MM-YYYY')));
+$(reportDateRange).data('daterangepicker').setStartDate(startDate);
+$(reportDateRange).data('daterangepicker').setEndDate(endDate);
+displayDataByDateRange(startDate, endDate);
