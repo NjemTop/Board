@@ -28,7 +28,7 @@ export const app = new Vue({
     methods: {
         fetchData(start_date, end_date) {
             console.log('Start date:', start_date, 'End date:', end_date);
-            fetch('/api/report', {
+            fetch('/api/web/report', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,6 +40,7 @@ export const app = new Vue({
             })
                 .then((response) => response.json())
                 .then((data) => {
+                    console.log('Data:', data);
                     this.rows = data;
                 });
         },
