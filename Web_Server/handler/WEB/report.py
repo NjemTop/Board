@@ -87,8 +87,9 @@ def get_report_tickets(start_date=None, end_date=None):
         return f"Ошибка сервера: {error}", 500
 
 def api_get_report_tickets():
-    start_date = request.args.get('start_date', None)
-    end_date = request.args.get('end_date', None)
+    data = request.get_json()
+    start_date = data.get('start_date', None) if data else None
+    end_date = data.get('end_date', None) if data else None
     return get_report_tickets(start_date, end_date)
 
 def post_report_tickets():

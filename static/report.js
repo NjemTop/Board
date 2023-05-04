@@ -9,12 +9,20 @@ $(reportDateRange).daterangepicker({
 
 function displayDataByDateRange(startDate, endDate) {
     // Запрашиваем данные с сервера с переданными параметрами даты
-    fetch(`/api/report/${startDate.format('YYYY-MM-DD')}/${endDate.format('YYYY-MM-DD')}`)
-        .then(response => response.json())
-        .then(data => {
-            // Отображаем отфильтрованные данные
-            displayData(data);
-        });
+    fetch('/api/report', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            start_date: startDate.format('YYYY-MM-DD'),
+            end_date: endDate.format('YYYY-MM-DD')
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayData(data);
+    });    
 }
 
 $(reportDateRange).on('apply.daterangepicker', function (ev, picker) {
