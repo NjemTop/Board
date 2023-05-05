@@ -56,7 +56,7 @@ def handle_client_reply(json_data):
         client_name = json_data['client_details']['name']
         agent_ticket_url = json_data.get("agent_ticket_url")
         # Формируем сообщение в текст отправки
-        ticket_message = (f"Новое сообщение в тикете: {ticket_id} {emoji.emojize(':pinched_fingers:', use_aliases=True)}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+        ticket_message = (f"Новое сообщение в тикете: {ticket_id} {emoji.emojize(':hand_with_fingers_splayed:')}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
         try:
             # Находим все элементы header_footer внутри элемента user
             header_footer_elements = ET.parse('data.xml').getroot().findall('.//user/header_footer')
@@ -208,7 +208,7 @@ def handle_unresponded_info_180(json_data):
                 f"Тема: {subject}\n"
                 f"Имя клиента: {client_name}\n"
                 f"Приоритет: {priority_name}\n"
-                f"Назначен: {assignee_name} {emoji.emojize(':clown_face:', use_aliases=True)}\n"
+                f"Назначен: {assignee_name} {emoji.emojize(':clown_face:')}\n"
                 f"Ссылка: {agent_ticket_url}"
             )
             try:
