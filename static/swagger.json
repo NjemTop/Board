@@ -5,45 +5,186 @@
       "description": "API для всего вэб-сервера.",
       "version": "1.3"
     },
-    "basePath": "/",
+    "basePath": "/clients_all_info/api/",
     "schemes": [
       "http"
     ],
     "paths": {
-      "/data_release/api/versions": {
-        "get": {
-          "summary": "Описание, что это",
-          "description": "Описание, что получаем",
-          "responses": {
-            "200": {
-              "description": "Какой ответ получу при 200"
+        "/clients_all_info/api/clients": {
+          "get": {
+            "summary": "Получить список всех клиентов",
+            "description": "Получить список всех клиентов с их важной информацией.",
+            "security": [
+              {
+                "basicAuth": []
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Успешная операция"
+              },
+              "401": {
+                "description": "Неавторизован"
+              }
             }
-          }
-        }
-      },
-      "/data_release/api/{version}": {
-        "get": {
-          "summary": "Описание, что это",
-          "description": "Описание, что получаем",
-          "parameters": [
-            {
-              "name": "version",
-              "in": "path",
-              "description": "Data release version",
-              "required": true,
-              "type": "string"
+          },
+          "post": {
+            "summary": "Создать нового клиента",
+            "description": "Добавить нового клиента в список.",
+            "security": [
+              {
+                "basicAuth": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "client",
+                "in": "body",
+                "description": "Объект клиента для добавления",
+                "required": true,
+                "schema": {
+                  "$ref": "#/definitions/Client"
+                }
+              }
+            ],
+            "responses": {
+              "201": {
+                "description": "Клиент создан"
+              },
+              "400": {
+                "description": "Неверный ввод"
+              },
+              "401": {
+                "description": "Неавторизован"
+              }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Какой ответ получу при 200"
+          },
+          "patch": {
+            "summary": "Обновить информацию о клиенте",
+            "description": "Обновить информацию об существующем клиенте.",
+            "security": [
+              {
+                "basicAuth": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "client",
+                "in": "body",
+                "description": "Объект клиента с обновленной информацией",
+                "required": true,
+                "schema": {
+                  "$ref": "#/definitions/Client"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Информация о клиенте обновлена"
+              },
+              "400": {
+                "description": "Неверный ввод"
+              },
+              "401": {
+                "description": "Неавторизован"
+              },
+              "404": {
+                "description": "Клиент не найден"
+              }
+            }
+          },
+          "delete": {
+            "summary": "Удалить клиента",
+            "description": "Удалить клиента из базы данных.",
+            "security": [
+              {
+                "basicAuth": []
+              }
+            ],
+            "parameters": [
+              {
+                "name": "client_name",
+                "in": "body",
+                "description": "Имя клиента для удаления",
+                "required": true,
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "client_name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Клиент успешно удален"
             },
             "400": {
-              "description": "Какой ответ получу при 400"
+              "description": "Неверный ввод"
+            },
+            "401": {
+              "description": "Неавторизован"
+            },
+            "404": {
+              "description": "Клиент не найден"
+            },
+            "500": {
+              "description": "Ошибка сервера"
+            }
+          }
+          },
+          "definitions": {
+            "Client": {
+              "type": "object",
+              "properties": {
+                "client_name": {
+                  "type": "string",
+                  "description": "Имя клиента"
+                },
+                "contact_status": {
+                  "type": "string",
+                  "description": "Статус контакта"
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Заметки"
+                },
+                "important_info": {
+                  "type": "object",
+                  "properties": {
+                    "service_pack": {
+                      "type": "string",
+                      "description": "Пакет услуг"
+                    },
+                    "manager": {
+                      "type": "string",
+                      "description": "Менеджер"
+                    },
+                    "server_version": {
+                      "type": "string",
+                      "description": "Версия сервера"
+                    },
+                    "update_date": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "Дата обновления"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "client_name",
+                "contact_status"
+              ]
+            }
+          },
+          "securityDefinitions": {
+            "basicAuth": {
+              "type": "basic"
             }
           }
         }
-      }
     }
-  }
-  
+}
