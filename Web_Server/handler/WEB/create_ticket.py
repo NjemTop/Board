@@ -1,6 +1,7 @@
 import json
 import logging
 from flask import request, Response
+import emoji
 from Web_Server.function import parse_json_message
 from Web_Server.web_config import CONFIG_FILE
 from System_func.send_telegram_message import Alert
@@ -37,7 +38,7 @@ def handler_post_create_ticket():
         client_name = json_data.get("client_details", {}).get("name")
         client_email = json_data.get("client_details", {}).get("email")
         # отправляем сообщение в телеграм-бот
-        ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nАвтор: {client_name}({client_email})\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+        ticket_message = (f"Новый тикет: {ticket_id} {emoji.emojize(':tired_face:')}\nТема: {subject}\nАвтор: {client_name} ({client_email})\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
         # открываем файл и загружаем данные
         with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
             data = json.load(file)
