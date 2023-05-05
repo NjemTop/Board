@@ -34,8 +34,10 @@ def handler_post_create_ticket():
         subject = json_data.get("subject")
         priority_name = json_data.get("priority_name")
         agent_ticket_url = json_data.get("agent_ticket_url")
+        client_name = json_data.get("client_details", {}).get("name")
+        client_email = json_data.get("client_details", {}).get("email")
         # отправляем сообщение в телеграм-бот
-        ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+        ticket_message = (f"Новый тикет: {ticket_id}\nТема: {subject}\nАвтор: {client_name}({client_email})\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
         # открываем файл и загружаем данные
         with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
             data = json.load(file)
