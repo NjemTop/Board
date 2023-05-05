@@ -30,7 +30,7 @@ def create_app():
         SWAGGER_URL,
         API_URL,
         config={
-            'app_name': "Crag"
+            'app_name': "Вэб-сервер"
         }
     )
 

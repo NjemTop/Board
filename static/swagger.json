@@ -119,25 +119,70 @@
               {
                 "name": "client",
                 "in": "body",
-                "description": "Объект клиента с обновленной информацией",
+                "description": "Обновленная информация о клиенте",
                 "required": true,
                 "schema": {
-                  "$ref": "#/definitions/Client"
+                  "type": "object",
+                  "properties": {
+                    "client_name": {
+                      "type": "string",
+                      "description": "Имя клиента"
+                    },
+                    "contact_status": {
+                      "type": "boolean",
+                      "description": "Статус контакта"
+                    },
+                    "notes": {
+                      "type": "string",
+                      "description": "Заметки"
+                    }
+                  },
+                  "required": [
+                    "client_name"
+                  ]
                 }
               }
             ],
             "responses": {
               "200": {
-                "description": "Информация о клиенте обновлена"
+                "description": "Информация о клиенте обновлена",
+                "examples": {
+                  "application/json": {
+                    "message": "Обновлено 1 записей с именем клиента: Иван"
+                  }
+                }
               },
               "400": {
-                "description": "Неверный ввод"
+                "description": "Неверный ввод",
+                "examples": {
+                  "application/json": {
+                    "message": "Необходимо указать имя клиента для обновления"
+                  }
+                }
               },
               "401": {
-                "description": "Неавторизован"
+                "description": "Неавторизован",
+                "examples": {
+                  "application/json": {
+                    "message": "Доступ запрещен. Требуется аутентификация."
+                  }
+                }
               },
               "404": {
-                "description": "Клиент не найден"
+                "description": "Клиент не найден",
+                "examples": {
+                  "application/json": {
+                    "message": "Клиент с именем Иван не найден"
+                  }
+                }
+              },
+              "500": {
+                "description": "Ошибка сервера",
+                "examples": {
+                  "application/json": {
+                    "message": "Ошибка сервера: Ошибка при выполнении операции с базой данных"
+                  }
+                }
               }
             }
           },
@@ -192,7 +237,7 @@
                   "description": "Имя клиента"
                 },
                 "contact_status": {
-                  "type": "string",
+                  "type": "boolean",
                   "description": "Статус контакта"
                 },
                 "notes": {
