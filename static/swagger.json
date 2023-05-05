@@ -37,27 +37,75 @@
               }
             ],
             "parameters": [
-              {
-                "name": "client",
-                "in": "body",
-                "description": "Объект клиента для добавления",
-                "required": true,
-                "schema": {
-                  "$ref": "#/definitions/Client"
+                {
+                  "name": "client",
+                  "in": "body",
+                  "description": "Информация о клиенте",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "client_name": {
+                        "type": "string",
+                        "description": "Имя клиента"
+                      },
+                      "contact_status": {
+                        "type": "boolean",
+                        "description": "Статус контакта"
+                      },
+                      "notes": {
+                        "type": "string",
+                        "description": "Заметки"
+                      }
+                    },
+                    "required": [
+                      "client_name"
+                    ]
+                  }
                 }
-              }
-            ],
-            "responses": {
-              "201": {
-                "description": "Клиент создан"
-              },
-              "400": {
-                "description": "Неверный ввод"
-              },
-              "401": {
-                "description": "Неавторизован"
-              }
-            }
+              ],              
+              "responses": {
+                "201": {
+                  "description": "Клиент создан",
+                  "examples": {
+                    "application/json": {
+                      "message": "Клиент успешно записаны в БД!"
+                    }
+                  }
+                },
+                "400": {
+                  "description": "Неверный ввод",
+                  "examples": {
+                    "application/json": {
+                      "message": "Необходимо указать имя клиента для удаления"
+                    }
+                  }
+                },
+                "401": {
+                  "description": "Неавторизован",
+                  "examples": {
+                    "application/json": {
+                      "message": "Доступ запрещен. Требуется аутентификация."
+                    }
+                  }
+                },
+                "409": {
+                  "description": "Конфликт",
+                  "examples": {
+                    "application/json": {
+                      "message": "Клиент с именем Иван уже существует. Пропускаем..."
+                    }
+                  }
+                },
+                "500": {
+                  "description": "Ошибка сервера",
+                  "examples": {
+                    "application/json": {
+                      "message": "Ошибка сервера: Ошибка при выполнении операции с базой данных"
+                    }
+                  }
+                }
+              }              
           },
           "patch": {
             "summary": "Обновить информацию о клиенте",
