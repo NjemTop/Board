@@ -459,28 +459,28 @@
                                             },
                                             "bm_servers_servers_name": {
                                                 "type": "string",
-                                                "description": "Наименование серверов",
+                                                "description": "Имя сервера",
                                                 "example": "Сервер 1"
                                             },
                                             "bm_servers_servers_adress": {
                                                 "type": "string",
                                                 "description": "Адрес серверов",
-                                                "example": "http://bm_server1.example.com"
+                                                "example": "192.168.88.12"
                                             },
                                             "bm_servers_operation_system": {
                                                 "type": "string",
-                                                "description": "Операционная система сервера",
+                                                "description": "Операционная система",
                                                 "example": "Windows Server 2019"
                                             },
                                             "bm_servers_url": {
                                                 "type": "string",
                                                 "description": "URL",
-                                                "example": "https://example.com"
+                                                "example": "https://bm.example.com"
                                             },
                                             "bm_servers_role": {
                                                 "type": "string",
                                                 "description": "Роль",
-                                                "example": "Роль 1"
+                                                "example": "Вэб"
                                             }
                                         }
                                     }
