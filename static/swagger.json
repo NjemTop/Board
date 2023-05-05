@@ -1,9 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-      "title": "Описание API",
-      "description": "API для всего вэб-сервера.",
-      "version": "1.3"
+        "title": "Описание API",
+        "description": "API для всего вэб-сервера.",
+        "version": "1.3"
     },
     "basePath": "/clients_all_info/api/",
     "schemes": [
@@ -11,8 +11,12 @@
     ],
     "tags": [
         {
-          "name": "Clients",
-          "description": "Описание вывод базовой таблицы о клиентах"
+            "name": "Clients",
+            "description": "Описание вывод базовой таблицы о клиентах"
+        },
+        {
+            "name": "All_clients",
+            "description": "Добавление клиента"
         }
     ],
     "paths": {
@@ -325,6 +329,167 @@
               "type": "basic"
             }
           }
+        },
+        "/all_clients": {
+            "get": {
+                "tags": [
+                  "All_clients"
+                ],
+                "summary": "Получить список всех клиентов со всей информацией",
+                "description": "Получить список всех клиентов со всей информацией включая контакты, техническую информацию, информацию об интеграции и др.",
+                "security": [
+                  {
+                    "basicAuth": []
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Успешная операция"
+                  },
+                  "401": {
+                    "description": "Не авторизован"
+                  }
+                }
+            },
+            "post": {
+                "tags": [
+                    "All_clients"
+                ],
+                "summary": "Добавить нового клиента",
+                "description": "Добавить нового клиента со всей необходимой информацией в БД.",
+                "security": [
+                    {
+                        "basicAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Информация о клиенте",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "client_name": {
+                                    "type": "string",
+                                    "description": "Название клиента",
+                                    "example": "Клиент 1"
+                                },
+                                "service_pack": {
+                                    "type": "string",
+                                    "description": "Название сервисного пакета",
+                                    "example": "Сервисный пакет 1"
+                                },
+                                "manager": {
+                                    "type": "string",
+                                    "description": "Имя менеджера",
+                                    "example": "Иванов Иван"
+                                },
+                                "server_version": {
+                                    "type": "string",
+                                    "description": "Версия сервера",
+                                    "example": "1.0"
+                                },
+                                "loyal": {
+                                    "type": "boolean",
+                                    "description": "Лояльность клиента",
+                                    "example": true
+                                },
+                                "notes": {
+                                    "type": "string",
+                                    "description": "Примечания",
+                                    "example": "Примечания"
+                                },
+                                "contacts": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "contact_name": {
+                                                "type": "string",
+                                                "description": "Имя контакта",
+                                                "example": "Контакт 1"
+                                            },
+                                            "contact_position": {
+                                                "type": "string",
+                                                "description": "Должность контакта",
+                                                "example": "Администратор"
+                                            },
+                                            "contact_email": {
+                                                "type": "string",
+                                                "description": "Email контакта",
+                                                "example": "contact1@example.com"
+                                            }
+                                        }
+                                    }
+                                },
+                                "tech_account": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "contact_info_disc": {
+                                                "type": "string",
+                                                "description": "Описание технической учётной записи",
+                                                "example": "Техническая учётная запись 1"
+                                            },
+                                            "contact_info_account": {
+                                                "type": "string",
+                                                "description": "Имя учётной записи",
+                                                "example": "tech_account_1"
+                                            },
+                                            "contact_info_password": {
+                                                "type": "string",
+                                                "description": "Пароль учётной записи",
+                                                "example": "password_1"
+                                            }
+                                        }
+                                    }
+                                },
+                                "bm_servers_card": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "bm_servers_circuit": {
+                                                "type": "string",
+                                                "description": "Наименование цепочки БМ-серверов",
+                                                "example": "Цепочка БМ-серверов 1"
+                                            },
+                                            "bm_servers_servers_name": {
+                                                "type": "string",
+                                                "description": "Наименование серверов",
+                                                "example": "Сервер 1"
+                                            },
+                                            "bm_servers_servers_adress": {
+                                                "type": "string",
+                                                "description": "Адрес серверов",
+                                                "example": "http://bm_server1.example.com"
+                                            },
+                                            "bm_servers_operation_system": {
+                                                "type": "string",
+                                                "description": "Операционная система сервера",
+                                                "example": "Windows Server 2019"
+                                            },
+                                            "bm_servers_url": {
+                                                "type": "string",
+                                                "description": "URL",
+                                                "example": "https://example.com"
+                                            },
+                                            "bm_servers_role": {
+                                                "type": "string",
+                                                "description": "Роль",
+                                                "example": "Роль 1"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
         }
     }
 }
