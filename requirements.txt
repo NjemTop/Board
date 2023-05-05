@@ -14,3 +14,4 @@ docxtpl==0.16.5
 peewee==3.16.0
 gunicorn==20.1.0
 peewee_migrate==1.7.1
+flask-swagger-ui==4.11.1

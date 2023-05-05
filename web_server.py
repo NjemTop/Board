@@ -1,6 +1,7 @@
 ﻿# coding: utf-8
 import logging
 from flask import Flask
+from flask_swagger_ui import get_swaggerui_blueprint
 from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
@@ -19,6 +20,21 @@ def create_app():
     init_app(app)
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
+
+    # Настройка конфигурации Swagger
+    SWAGGER_URL = '/swagger'
+    API_URL = '/static/swagger.json'
+
+    # Регистрация схемы Swagger
+    swaggerui_blueprint = get_swaggerui_blueprint(
+        SWAGGER_URL,
+        API_URL,
+        config={
+            'app_name': "Crag"
+        }
+    )
+
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
     # Регистрация обработчиков для URL 
     app.add_url_rule('/', 'handler_get', get.handler_get, methods=['GET'])
