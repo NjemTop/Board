@@ -379,7 +379,7 @@
                                 "service_pack": {
                                     "type": "string",
                                     "description": "Название сервисного пакета",
-                                    "example": "Сервисный пакет 1"
+                                    "example": "Silver"
                                 },
                                 "manager": {
                                     "type": "string",
@@ -389,7 +389,7 @@
                                 "server_version": {
                                     "type": "string",
                                     "description": "Версия сервера",
-                                    "example": "1.0"
+                                    "example": "2.45.35302.26202"
                                 },
                                 "loyal": {
                                     "type": "boolean",
