@@ -1,4 +1,5 @@
 import json
+import emoji
 import logging
 import xml.etree.ElementTree as ET
 from Web_Server.web_config import CONFIG_FILE
@@ -202,7 +203,14 @@ def handle_unresponded_info_180(json_data):
         unresponded_info = json_data.get("update", {}).get("by", {})
         if unresponded_info.get("name") == "Unresponded for 180 min":
             # Формируем сообщение в текст отправки
-            ping_ticket_message = (f"Тикет без ответа ТРИ часа: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+            ping_ticket_message = (
+                f"Тикет без ответа ТРИ часа: {ticket_id}\n"
+                f"Тема: {subject}\n"
+                f"Имя клиента: {client_name}\n"
+                f"Приоритет: {priority_name}\n"
+                f"Назначен: {assignee_name} {emoji.emojize(':clown_face:', use_aliases=True)}\n"
+                f"Ссылка: {agent_ticket_url}"
+            )
             try:
                 # открываем файл и загружаем данные
                 with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
