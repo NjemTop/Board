@@ -12,19 +12,19 @@
     "paths": {
       "/data_release/api/versions": {
         "get": {
-          "summary": "Get API data release versions",
-          "description": "Get all available data release versions.",
+          "summary": "Описание, что это",
+          "description": "Описание, что получаем",
           "responses": {
             "200": {
-              "description": "Successful operation"
+              "description": "Какой ответ получу при 200"
             }
           }
         }
       },
       "/data_release/api/{version}": {
         "get": {
-          "summary": "Get API data release number",
-          "description": "Get data release information for the specified version.",
+          "summary": "Описание, что это",
+          "description": "Описание, что получаем",
           "parameters": [
             {
               "name": "version",
@@ -36,10 +36,10 @@
           ],
           "responses": {
             "200": {
-              "description": "Successful operation"
+              "description": "Какой ответ получу при 200"
             },
-            "404": {
-              "description": "Version not found"
+            "400": {
+              "description": "Какой ответ получу при 400"
             }
           }
         }
