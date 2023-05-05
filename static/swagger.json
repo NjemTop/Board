@@ -10,7 +10,7 @@
       "http"
     ],
     "paths": {
-        "/clients_all_info/api/clients": {
+        "/clients": {
           "get": {
             "summary": "Получить список всех клиентов",
             "description": "Получить список всех клиентов с их важной информацией.",
@@ -24,7 +24,7 @@
                 "description": "Успешная операция"
               },
               "401": {
-                "description": "Неавторизован"
+                "description": "Не авторизован"
               }
             }
           },
@@ -82,7 +82,7 @@
                   }
                 },
                 "401": {
-                  "description": "Неавторизован",
+                  "description": "Не авторизован",
                   "examples": {
                     "application/json": {
                       "message": "Доступ запрещен. Требуется аутентификация."
@@ -161,7 +161,7 @@
                 }
               },
               "401": {
-                "description": "Неавторизован",
+                "description": "Не авторизован",
                 "examples": {
                   "application/json": {
                     "message": "Доступ запрещен. Требуется аутентификация."
@@ -232,7 +232,7 @@
                 }
               },
               "401": {
-                "description": "Неавторизован",
+                "description": "Не авторизован",
                 "examples": {
                   "application/json": {
                     "message": "Доступ запрещен. Требуется аутентификация."
