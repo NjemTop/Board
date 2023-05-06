@@ -51,8 +51,18 @@ $TO = "oleg.eliseev@boardmaps.ru"
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА С ОШИБКАМИ
 $ERROR_TO = "oleg.eliseev@boardmaps.ru"
 
+### УКАЗЫВАЕМ ПУТЬ К ФАЙЛУ С КРЕДИТАМИ
+$CONFIG_FILE = "./Main.config"
+
+### ЧТЕНИЕ СОДЕРЖИМОГО ФАЙЛА И ПРЕОБРАЗОВАНИЕ ЕГО В ОБЪЕКТ
+$CONFIG = Get-Content $CONFIG_FILE | ConvertFrom-Json
+
+### ИЗВЛЕКАЕМ ЗНАЧЕНИЕ API_KEY и API_SECRET
+$API_KEY = $CONFIG.HAPPYFOX_SETTINGS.API_KEY
+$API_SECRET = $CONFIG.HAPPYFOX_SETTINGS.API_SECRET
+
 ### ТОКЕН ДОСТУПА ДЛЯ API К HAPPYFOX
-$ACCESS_TOKEN = ""
+$ACCESS_TOKEN = "$($API_KEY):$($API_SECRET)"
 
 ### БАЗОВЫЙ URL ДЛЯ API HAPPYFOX
 $HF_ENDPOINT = "https://boardmaps.happyfox.com"
