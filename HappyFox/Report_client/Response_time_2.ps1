@@ -191,8 +191,18 @@ function Get-TimeWork {
         return $time
     }
 
-# ТОКЕН ДОСТУПА ДЛЯ API
-$ACCESS_TOKEN = ""
+### УКАЗЫВАЕМ ПУТЬ К ФАЙЛУ С КРЕДИТАМИ
+$CONFIG_FILE = "./Main.config"
+
+### ЧТЕНИЕ СОДЕРЖИМОГО ФАЙЛА И ПРЕОБРАЗОВАНИЕ ЕГО В ОБЪЕКТ
+$CONFIG = Get-Content $CONFIG_FILE | ConvertFrom-Json
+
+### ИЗВЛЕКАЕМ ЗНАЧЕНИЕ API_KEY и API_SECRET
+$API_KEY = $CONFIG.HAPPYFOX_SETTINGS.API_KEY
+$API_SECRET = $CONFIG.HAPPYFOX_SETTINGS.API_SECRET
+
+### ТОКЕН ДОСТУПА ДЛЯ API К HAPPYFOX
+$ACCESS_TOKEN = "$($API_KEY):$($API_SECRET)"
 
 # БАЗОВЫЙ URL ДЛЯ API
 $HF_ENDPOINT = "https://boardmaps.happyfox.com"
@@ -242,7 +252,6 @@ $FIRST_RESPONSE_TIME = Get-TimeWork -stt $START_TIME_TICKET -ett $END_TIME_TICKE
 $AVERAGE_RESPONSE_TIME = $null
 $SCORE_TICKET_RESPONSE = $null
 $FULL_AVERAGE_RESPONSE_TIME = $null
-$FINAL_FULL_AVERAGE_RESPONSE_TIME = $null
 $SLA_TICKET_TIME = $null
 $FINAL_STAFF_RESPONSE_TIME = $null
 
@@ -350,6 +359,5 @@ if (($GET_JSON_RESPONSE_TICKET.status.name -cmatch "In Progress") -or ($GET_JSON
 $SLA_TICKET_TIME += $FIRST_RESPONSE_TIME
 $FULL_AVERAGE_RESPONSE_TIME += $FIRST_RESPONSE_TIME
 $FULL_AVERAGE_RESPONSE_TIME += $AVERAGE_RESPONSE_TIME
-$FINAL_FULL_AVERAGE_RESPONSE_TIME = $FULL_AVERAGE_RESPONSE_TIME/$SCORE_TICKET_RESPONSE
 
 Write-Host -ForegroundColor Red $SLA_TICKET_TIME
