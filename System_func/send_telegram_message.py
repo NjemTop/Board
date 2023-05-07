@@ -19,11 +19,24 @@ BOT_TOKEN = DATA['TELEGRAM_SETTINGS']['BOT_TOKEN']
 
 class Alert():
     # ФУНКЦИЯ ОТПРАВКИ АЛЕРТА В ЧАТ
-    def send_telegram_message(self, alert_chat_id, alert_text):
-        """Отправляет сообщение в телеграм-бот"""
+    def send_telegram_message(alert_chat_id, alert_text):
+        """
+        Отправляет сообщение в телеграм-бот.
+        На себя принимает два аргумента:
+        alert_chat_id - чат айди, куда мы будем отправлять сообщение,
+        alert_text - текст сообщения, которое мы хотим отправить.
+        """
+        # Адрес для отправи сообщение напрямую через API Telegram
         url = f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage'
+        # Задаём стандартный заголовок отправки
         headers_server = {'Content-type': 'application/json'}
-        data = {'chat_id': alert_chat_id, 'text': f'{alert_text}'}
+        # Создаём тело запроса, которое мы отправляем
+        data = {
+            'chat_id': alert_chat_id,
+            'text': f'{alert_text}',
+            'parse_mode': 'Markdown'
+        }
+        # Отправляем запрос через наш бот
         response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)
         # Добавляем логгирование для отладки
         print(response)

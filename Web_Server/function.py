@@ -56,7 +56,14 @@ def handle_client_reply(json_data):
         client_name = json_data['client_details']['name']
         agent_ticket_url = json_data.get("agent_ticket_url")
         # Формируем сообщение в текст отправки
-        ticket_message = (f"Новое сообщение в тикете: {ticket_id} {emoji.emojize(':hand_with_fingers_splayed:')}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+        ticket_message = (
+            f"{emoji.emojize(':hand_with_fingers_splayed:')}Новое сообщение в тикете "
+            f"[{ticket_id}]({agent_ticket_url})\n"
+            f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
+            f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
+            f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+            f"{emoji.emojize(':man_technologist:')}Назначен: {assignee_name}\n"
+        )
         try:
             # Находим все элементы header_footer внутри элемента user
             header_footer_elements = ET.parse('data.xml').getroot().findall('.//user/header_footer')
@@ -130,7 +137,13 @@ def handle_unresponded_info_60(json_data):
         unresponded_info = json_data.get("update", {}).get("by", {})
         if unresponded_info.get("name") == "Unresponded for 60 min":
             # Формируем сообщение в текст отправки
-            ping_ticket_message = (f"Тикет без ответа час: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+            ping_ticket_message = (
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) *час* без ответа.\n"
+                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':man_raising_hand:')} Назначен: {assignee_name}\n"
+            )
             try:
                 # Находим все элементы header_footer внутри элемента user
                 header_footer_elements = ET.parse('data.xml').getroot().findall('.//user/header_footer')
@@ -166,7 +179,13 @@ def handle_unresponded_info_120(json_data):
         unresponded_info = json_data.get("update", {}).get("by", {})
         if unresponded_info.get("name") == "Unresponded for 120 min":
             # Формируем сообщение в текст отправки
-            ping_ticket_message = (f"Тикет без ответа два часа: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nНазначен: {assignee_name}\nСсылка: {agent_ticket_url}")
+            ping_ticket_message = (
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *два* часа.\n"
+                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':man_facepalming:')} Назначен: {assignee_name}\n"
+            )
             try:
                 # открываем файл и загружаем данные
                 with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
@@ -204,12 +223,11 @@ def handle_unresponded_info_180(json_data):
         if unresponded_info.get("name") == "Unresponded for 180 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"Тикет без ответа ТРИ часа: {ticket_id}\n"
-                f"Тема: {subject}\n"
-                f"Имя клиента: {client_name}\n"
-                f"Приоритет: {priority_name}\n"
-                f"Назначен: {assignee_name} {emoji.emojize(':clown_face:')}\n"
-                f"Ссылка: {agent_ticket_url}"
+                f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *три* часа.\n"
+                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':clown_face:')} Назначен: {assignee_name}\n"
             )
             try:
                 # открываем файл и загружаем данные

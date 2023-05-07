@@ -38,13 +38,19 @@ def handler_post_create_ticket():
         client_name = json_data.get("client_details", {}).get("name")
         client_email = json_data.get("client_details", {}).get("email")
         # отправляем сообщение в телеграм-бот
-        ticket_message = (f"Новый тикет: {ticket_id} {emoji.emojize(':tired_face:')}\nТема: {subject}\nАвтор: {client_name} ({client_email})\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+        new_ticket_message = (
+            f"{emoji.emojize(':tired_face:')}Новый тикет: "
+            f"[{ticket_id}]({agent_ticket_url})\n"
+            f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
+            f"{emoji.emojize(':man_mechanic:')}Автор: {client_name} ({client_email})\n"
+            f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+        )
         # открываем файл и загружаем данные
         with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
             data = json.load(file)
         # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
         alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
-        alert.send_telegram_message(alert_chat_id, ticket_message)
+        alert.send_telegram_message(alert_chat_id, new_ticket_message)
         web_info_logger.info('Направлена информация в группу о созданном тикете %s', ticket_id)
         # Отправляем ответ о том, что всё принято и всё хорошо
         return "OK", 201
