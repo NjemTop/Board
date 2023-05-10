@@ -49,7 +49,7 @@ def handle_client_reply(json_data):
     """Функция обработки сообщения клиента"""
     try:
         # находим значения для ключей
-        ticket_id = json_data.get("ticket_id")
+        display_id = json_data.get("display_id")
         subject = json_data.get("subject")
         priority_name = json_data.get("priority_name")
         assignee_name = json_data.get("assignee_name")
@@ -58,7 +58,7 @@ def handle_client_reply(json_data):
         # Формируем сообщение в текст отправки
         ticket_message = (
             f"{emoji.emojize(':hand_with_fingers_splayed:')}Новое сообщение в тикете "
-            f"[{ticket_id}]({agent_ticket_url})\n"
+            f"[{display_id}]({agent_ticket_url})\n"
             f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
             f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
             f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -79,7 +79,7 @@ def handle_client_reply(json_data):
             return None, 'Не удалось найти файл data.xml.'
         # Отправляем сообщение в телеграм-бот
         alert.send_telegram_message(alert_chat_id, ticket_message)
-        web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, ticket_id)
+        web_info_logger.info('В чат: %s, направлена информация о новом сообщении в тикете: %s', assignee_name, display_id)
         # Отправляем ответ о том, что всё принято и всё хорошо (201)
         return "OK", None
     except ValueError as error_message:
@@ -92,17 +92,17 @@ def handle_assignee_change(json_data):
         # находим значения для ключей
         who_change = json_data["update"]["by"]["name"]
         new_assignee_name = json_data["update"]["assignee_change"]["new"]
-        ticket_id = json_data.get("ticket_id")
+        display_id = json_data.get("display_id")
         subject = json_data.get("subject")
         client_name = json_data['client_details']['name']
         priority_name = json_data.get("priority_name")
         agent_ticket_url = json_data.get("agent_ticket_url")
         if who_change == new_assignee_name:
-            web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', who_change, ticket_id)
+            web_info_logger.info('Сотрудник: %s, сам себе назначил тикет %s, поэтому алерт не нужен', who_change, display_id)
             # Отправляем ответ о том, что приняли файлы, однако не нашли полезной информации, но приняли же (200)
             return "OK", None
         # Формируем сообщение в текст отправки
-        new_assignee_name_message = (f"Сотрудником: {who_change}\nИзменил назначенного в тикете: {ticket_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
+        new_assignee_name_message = (f"Сотрудником: {who_change}\nИзменил назначенного в тикете: {display_id}\nТема: {subject}\nИмя клиента: {client_name}\nПриоритет: {priority_name}\nСсылка: {agent_ticket_url}")
         try:
             # Находим все элементы header_footer внутри элемента user
             header_footer_elements = ET.parse('data.xml').getroot().findall('.//user/header_footer')
@@ -115,7 +115,7 @@ def handle_assignee_change(json_data):
                 return "OK", None
             # Отправляем сообщение в телеграм-бот
             alert.send_telegram_message(alert_chat_id, new_assignee_name_message)
-            web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, ticket_id)
+            web_info_logger.info('В чат %s, отправлена информация об изменении отвественного, номер тикета: %s', new_assignee_name, display_id)
             # Отправляем ответ о том, что всё принято и всё хорошо (201)
             return "OK", None
         except FileNotFoundError as error_message:
@@ -129,7 +129,7 @@ def handle_unresponded_info_60(json_data):
     """Находит информацию о "Unresponded for 60 min" в блоке массива update"""
     try:
         assignee_name = json_data.get("assignee_name")
-        ticket_id = json_data.get("ticket_id")
+        display_id = json_data.get("display_id")
         subject = json_data.get("subject")
         client_name = json_data['client_details']['name']
         priority_name = json_data.get("priority_name")
@@ -138,7 +138,7 @@ def handle_unresponded_info_60(json_data):
         if unresponded_info.get("name") == "Unresponded for 60 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) *час* без ответа.\n"
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) *час* без ответа.\n"
                 f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -156,7 +156,7 @@ def handle_unresponded_info_60(json_data):
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
                 alert.send_telegram_message(alert_chat_id, ping_ticket_message)
-                web_info_logger.info('В чат %s, повторно отправлена информация о новом сообщении без ответа час в тикете: %s', assignee_name, ticket_id)
+                web_info_logger.info('В чат %s, повторно отправлена информация о новом сообщении без ответа час в тикете: %s', assignee_name, display_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
             except FileNotFoundError as error_message:
@@ -171,7 +171,7 @@ def handle_unresponded_info_120(json_data):
     """Находит информацию о "Unresponded for 120 min" в блоке массива update"""
     try:
         assignee_name = json_data.get("assignee_name")
-        ticket_id = json_data.get("ticket_id")
+        display_id = json_data.get("display_id")
         subject = json_data.get("subject")
         client_name = json_data['client_details']['name']
         priority_name = json_data.get("priority_name")
@@ -180,7 +180,7 @@ def handle_unresponded_info_120(json_data):
         if unresponded_info.get("name") == "Unresponded for 120 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *два* часа.\n"
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *два* часа.\n"
                 f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -199,7 +199,7 @@ def handle_unresponded_info_120(json_data):
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
                 alert.send_telegram_message(alert_chat_id, ping_ticket_message)
-                web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s два часа в тикете: %s', assignee_name, ticket_id)
+                web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s два часа в тикете: %s', assignee_name, display_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
             except FileNotFoundError as error_message:
@@ -214,7 +214,7 @@ def handle_unresponded_info_180(json_data):
     """Находит информацию о "Unresponded for 180 min" в блоке массива update"""
     try:
         assignee_name = json_data.get("assignee_name")
-        ticket_id = json_data.get("ticket_id")
+        display_id = json_data.get("display_id")
         subject = json_data.get("subject")
         client_name = json_data['client_details']['name']
         priority_name = json_data.get("priority_name")
@@ -223,7 +223,7 @@ def handle_unresponded_info_180(json_data):
         if unresponded_info.get("name") == "Unresponded for 180 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *три* часа.\n"
+                f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *три* часа.\n"
                 f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -242,7 +242,7 @@ def handle_unresponded_info_180(json_data):
                     return "OK", None
                 # Отправляем сообщение в телеграм-бот
                 alert.send_telegram_message(alert_chat_id, ping_ticket_message)
-                web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s три часа в тикете: %s', assignee_name, ticket_id)
+                web_info_logger.info('В группу отправлена информация о новом сообщении без ответа %s три часа в тикете: %s', assignee_name, display_id)
                 # Отправляем ответ о том, что всё принято и всё хорошо (201)
                 return "OK", None
             except FileNotFoundError as error_message:
