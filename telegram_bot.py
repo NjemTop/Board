@@ -469,7 +469,6 @@ def inline_button_SD_update(call):
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             # Запускаем скрипт по отправке рассылки клиентам
             send_notification(version_release)
-            upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
