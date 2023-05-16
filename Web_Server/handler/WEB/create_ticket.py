@@ -39,11 +39,11 @@ def handler_post_create_ticket():
         client_email = json_data.get("client_details", {}).get("email")
         # отправляем сообщение в телеграм-бот
         new_ticket_message = (
-            f"{emoji.emojize(':tired_face:')}Новый тикет: "
+            f"{emoji.emojize(':tired_face:')} Новый тикет: "
             f"[{display_id}]({agent_ticket_url})\n"
-            f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
-            f"{emoji.emojize(':man_mechanic:')}Автор: {client_name} ({client_email})\n"
-            f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+            f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
+            f"{emoji.emojize(':man_mechanic:')} Автор: {client_name} ({client_email})\n"
+            f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
         )
         # открываем файл и загружаем данные
         with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:

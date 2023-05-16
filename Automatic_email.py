@@ -1,33 +1,32 @@
-import json
 import requests
+import json
+import os
+import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
 from email.header import Header
-import smtplib
-import os
+from email.mime.image import MIMEImage
+from email.mime.base import MIMEBase
+from email import encoders
 
 def send_notification(version):
-    # Загрузка конфигураций
-    with open('Main.config', 'r') as f:
-        config = json.load(f)
-    
-    mail_settings = config['MAIL_SETTINGS']
+    try:
+        # Загрузка настроек почты
+        with open('Main.config') as json_file:
+            data = json.load(json_file)
+            mail_settings = data['MAIL_SETTINGS']
+            
+        # Авторизация
+        auth = ('admin', 'ekSkaaiWnK')
+        response = requests.get('http://127.0.0.1:8000/api/clients_list', auth=auth)
 
-    # Авторизация
-    auth = ('admin', 'ekSkaaiWnK')
-    response = requests.get('http://195.2.80.251:8137/api/clients_list', auth=auth)
+        # Проверка статуса ответа
+        if response.status_code == 200:
+            clients_data = response.json()
 
-    # Проверка статуса ответа
-    if response.status_code == 200:
-        clients_data = response.json()
-        
-        # Открытие и чтение шаблона HTML
-        with open('HTML/index.html', 'r') as f:
-            html_template = f.read()
-
-        # Замена NUMBER_VERSION на заданную версию
-        html_template = html_template.replace('NUMBER_VERSION', str(version))
+        # Загрузка и обработка HTML шаблона
+        with open('HTML/index.html', 'r') as file:
+            html = file.read().replace('NUMBER_VERSION', str(version))
 
         # Перебор клиентов
         for client in clients_data:
@@ -41,23 +40,34 @@ def send_notification(version):
                         to.append(contact['contact_email'])
                     elif contact['notification_update'] == "Копия":
                         cc.append(contact['contact_email'])
-
+                
                 # Подготовка письма
-                msg = MIMEMultipart('related')
-                msg['Subject'] = Header('Notification', 'utf-8')
+                msg = MIMEMultipart()
                 msg['From'] = mail_settings['FROM']
                 msg['To'] = ', '.join(to)
                 msg['Cc'] = ', '.join(cc)
+                msg['Subject'] = Header(f'Обновление BoardMaps {version}', 'utf-8')
 
-                # Добавление HTML
-                msg.attach(MIMEText(html_template, 'html'))
+                # Добавление HTML шаблона
+                msg.attach(MIMEText(html, 'html'))
 
-                # Добавление изображений
-                for image_file in ["bm_logo.png", "done.png", "download.png", "gear.png", "mail_alert.png", "mail.png"]:
-                    with open(f'HTML/Images/{image_file}', 'rb') as f:
-                        msg_image = MIMEImage(f.read())
-                        msg_image.add_header('Content-ID', f'<{image_file}>')
-                        msg.attach(msg_image)
+                # Добавление изображений для CID картинок в шаблоне HTML
+                images_dir = 'HTML/Images'
+                for image in os.listdir(images_dir):
+                    with open(os.path.join(images_dir, image), 'rb') as f:
+                        img = MIMEImage(f.read(), name=os.path.basename(image))
+                        img.add_header('Content-ID', '<{}>'.format(image))
+                        msg.attach(img)
+
+                # Вложение PDF файлов
+                attachments_dir = 'HTML/attachment'
+                for attachment in os.listdir(attachments_dir):
+                    with open(os.path.join(attachments_dir, attachment), 'rb') as f:
+                        part = MIMEBase('application', 'octet-stream')
+                        part.set_payload(f.read())
+                        encoders.encode_base64(part)
+                        part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment))
+                        msg.attach(part)
 
                 # Отправка письма
                 with smtplib.SMTP(mail_settings['SMTP'], 587) as server:
@@ -65,5 +75,9 @@ def send_notification(version):
                     server.login(mail_settings['USER'], mail_settings['PASSWORD'])
                     server.send_message(msg)
                     print(f"Mail has been sent to {', '.join(to)} with CC to {', '.join(cc)}")
+
+    except Exception as error_message:
+        print(f"Произошла общая ошибка: {error_message}")
+
 
 send_notification(2.63)

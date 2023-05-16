@@ -139,9 +139,9 @@ def handle_unresponded_info_60(json_data):
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
                 f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) *час* без ответа.\n"
-                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
-                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
-                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
                 f"{emoji.emojize(':man_raising_hand:')} Назначен: {assignee_name}\n"
             )
             try:
@@ -181,9 +181,9 @@ def handle_unresponded_info_120(json_data):
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
                 f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *два* часа.\n"
-                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
-                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
-                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
                 f"{emoji.emojize(':man_facepalming:')} Назначен: {assignee_name}\n"
             )
             try:
@@ -224,9 +224,9 @@ def handle_unresponded_info_180(json_data):
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
                 f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *три* часа.\n"
-                f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
-                f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
-                f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
+                f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
+                f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
                 f"{emoji.emojize(':clown_face:')} Назначен: {assignee_name}\n"
             )
             try:
