@@ -24,6 +24,8 @@ def send_notification(version):
         # Проверка статуса ответа
         if response.status_code == 200:
             clients_data = response.json()
+        else:
+            print(f"Сервер с данными о клиентах недоступен. Код ошибки:", response.status_code)
 
         # Загрузка и обработка HTML шаблона
         with open('HTML/index.html', 'r') as file:
