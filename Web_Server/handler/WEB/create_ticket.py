@@ -56,5 +56,5 @@ def handler_post_create_ticket():
             # Отправляем ответ о том, что всё принято и всё хорошо
             return "OK", 201
         except Exception as error_message:
-            web_error_logger.error("Ошибка при обработке нового тикета: %s", str(error_message))
+            web_error_logger.error("Ошибка при обработке создания тикета: %s", str(error_message))
             return Response("Ошибка на сервере", status=500)

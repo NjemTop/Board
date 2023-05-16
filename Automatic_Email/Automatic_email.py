@@ -43,10 +43,6 @@ def send_notification(version):
             print(f"Сервер с данными о клиентах недоступен. Код ошибки:", response.status_code)
             bot_error_logger.error("Сервер с данными о клиентах недоступен. Код ошибки: %s", response.status_code)
 
-        # Загрузка и обработка HTML шаблона
-        with open('HTML/index.html', 'r') as file:
-            html = file.read().replace('NUMBER_VERSION', str(version))
-
         # Перебор клиентов
         for client in clients_data:
             if client['contact_status']:
@@ -66,6 +62,11 @@ def send_notification(version):
                 msg['To'] = ', '.join(to)
                 msg['Cc'] = ', '.join(cc)
                 msg['Subject'] = Header(f'Обновление BoardMaps {version}', 'utf-8')
+
+                # Загрузка и обработка HTML шаблона
+                with open('HTML/index.html', 'r') as file:
+                    html = file.read().replace('NUMBER_VERSION', str(version))
+                    html = html.replace('COPY_EMAIL', ', '.join(cc))
 
                 # Добавление HTML шаблона
                 msg.attach(MIMEText(html, 'html'))
