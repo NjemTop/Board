@@ -17,6 +17,14 @@ bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), l
 bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 def send_notification(version):
+    """
+    Функция по отправке рассылки клиентам.
+    Информация берёться из сервиса Краг, в котором есть перечень клиентов,
+    кому отправлять рассылку. Перебираються клиенты и перебираются контакты,
+    находиться "Основной" и "Копия" кому отправляется письмо с рассылкой.
+    На себя принимает параметр version, который подставляеться в HTML шаблон,
+    вместо аргумента "NUMBER_VERSION".
+    """
     try:
         # Загрузка настроек почты
         with open('Main.config') as json_file:
@@ -25,7 +33,7 @@ def send_notification(version):
             
         # Авторизация
         auth = ('admin', 'ekSkaaiWnK')
-        response = requests.get('http://127.0.0.1:8000/api/clients_list', auth=auth)
+        response = requests.get('http://194.37.1.214:3030/api/clients_list', auth=auth)
 
         # Проверка статуса ответа
         if response.status_code == 200:
@@ -106,7 +114,7 @@ def send_notification(version):
                     "main_contact": ', '.join(to), # основной контакт
                     "copy_contact": ', '.join(cc) # копия контакта
                 }
-                post_response = requests.post('http://127.0.0.1:8000/api/data_release/', json=post_data, auth=auth)
+                post_response = requests.post('http://194.37.1.214:3030/api/data_release/', json=post_data, auth=auth)
                 if post_response.status_code != 201:
                     print(f"Ошибка при отправке POST-запроса. Код ошибки:", post_response.status_code)
                     bot_error_logger.error("Ошибка при отправке POST-запроса. Код ошибки: %s", post_response.status_cod)
@@ -118,4 +126,4 @@ def send_notification(version):
         bot_error_logger.error("Произошла общая ошибка: %s", error_message)
 
 # временном запускаем функцию из файла
-send_notification(2.63)
+# send_notification(2.63)

@@ -22,6 +22,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
+import Automatic_email
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
@@ -455,7 +456,6 @@ def inline_button_SD_update(call):
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
         bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        setup_script = Path('Automatic_email.ps1')
         try:
             name_who_run_script = get_name_by_chat_id(call.message.chat.id)
             # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
@@ -467,7 +467,8 @@ def inline_button_SD_update(call):
             bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             # !!! move_distr_and_manage_share(version_release)
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            release_result = subprocess.run(["pwsh", "-File", setup_script, str(version_release), str(support_response_id)], stdout=subprocess.PIPE, check=True).stdout.decode('utf-8')
+            # Запускаем скрипт по отправке рассылки клиентам
+            Automatic_email.send_notification(version_release)
             upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
