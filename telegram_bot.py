@@ -22,7 +22,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
-import Automatic_email
+from Automatic_Email.Automatic_email import send_notification
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
@@ -468,7 +468,7 @@ def inline_button_SD_update(call):
             # !!! move_distr_and_manage_share(version_release)
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             # Запускаем скрипт по отправке рассылки клиентам
-            Automatic_email.send_notification(version_release)
+            send_notification(version_release)
             upload_db_result(version_release, release_result)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
