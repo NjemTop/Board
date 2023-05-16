@@ -25,33 +25,36 @@ def handler_get_create_ticket():
 
 def handler_post_create_ticket():
         """Функция обработки создания тикета из HappyFox"""
-        message = request.data.decode('utf-8')
-        # парсим JSON-строку
-        json_data, error = parse_json_message(message)
-        if error:
-            return error, 400
-        # находим значения для ключей
-        display_id = json_data.get("display_id")
-        subject = json_data.get("subject")
-        priority_name = json_data.get("priority_name")
-        agent_ticket_url = json_data.get("agent_ticket_url")
-        client_name = json_data.get("client_details", {}).get("name")
-        client_email = json_data.get("client_details", {}).get("email")
-        # отправляем сообщение в телеграм-бот
-        new_ticket_message = (
-            f"{emoji.emojize(':tired_face:')} Новый тикет: "
-            f"[{display_id}]({agent_ticket_url})\n"
-            f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
-            f"{emoji.emojize(':man_mechanic:')} Автор: {client_name} ({client_email})\n"
-            f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
-        )
-        # открываем файл и загружаем данные
-        with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
-            data = json.load(file)
-        # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
-        alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
-        alert.send_telegram_message(alert_chat_id, new_ticket_message)
-        web_info_logger.info('Направлена информация в группу о созданном тикете %s', display_id)
-        # Отправляем ответ о том, что всё принято и всё хорошо
-        return "OK", 201
-
+        try:
+            message = request.data.decode('utf-8')
+            # парсим JSON-строку
+            json_data, error = parse_json_message(message)
+            if error:
+                return error, 400
+            # находим значения для ключей
+            display_id = json_data.get("display_id")
+            subject = json_data.get("subject")
+            priority_name = json_data.get("priority_name")
+            agent_ticket_url = json_data.get("agent_ticket_url")
+            client_name = json_data.get("client_details", {}).get("name")
+            client_email = json_data.get("client_details", {}).get("email")
+            # отправляем сообщение в телеграм-бот
+            new_ticket_message = (
+                f"{emoji.emojize(':tired_face:')} Новый тикет: "
+                f"[{display_id}]({agent_ticket_url})\n"
+                f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
+                f"{emoji.emojize(':man_mechanic:')} Автор: {client_name} ({client_email})\n"
+                f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
+            )
+            # открываем файл и загружаем данные
+            with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+                data = json.load(file)
+            # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+            alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
+            alert.send_telegram_message(alert_chat_id, new_ticket_message)
+            web_info_logger.info('Направлена информация в группу о созданном тикете %s', display_id)
+            # Отправляем ответ о том, что всё принято и всё хорошо
+            return "OK", 201
+        except Exception as error_message:
+            web_error_logger.error("Ошибка при обработке нового тикета: %s", str(error_message))
+            return Response("Ошибка на сервере", status=500)
