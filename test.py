@@ -1,20 +1,39 @@
-from DataBase.model_class import Release_info, BMInfo_onClient
-import sqlite3
+import requests
+import json
 
-# # Создаем таблицу, если она не существует
-# Release_info.create_table()
+# Параметры авторизации
+source_auth = ('Njem', 'Rfnzkj123123')
+target_auth = ('admin', 'ekSkaaiWnK')
 
-# # Получение всех записей из таблицы
-# all_info = Release_info.select()
+# URL-адреса
+source_url = 'http://195.2.80.251:3030/data_release/api/2.62'
+target_url = 'http://195.2.80.251:8137/api/data_release/'
 
-# # Вывод содержимого таблицы
-# for info in all_info:
-#     print(info.date, info.release_number, info.client_name, info.main_contact, info.copy)
+# Получение данных с исходного сервера
+response = requests.get(source_url, auth=source_auth)
 
-if __name__ == '__main__':
-    # Подключение к базе данных SQLite
-    db_filename = './DataBase/database.db'
-    conn = sqlite3.connect(f'file:{db_filename}?mode=rw', uri=True)
-    
-    # Переименовываем таблицу clients_info в BM_info_on_clients
-    BMInfo_onClient.rename_table('clients_info', 'BM_info_on_clients')
+# Проверка статуса ответа
+if response.status_code == 200:
+    source_data = response.json()
+else:
+    print(f"Не удалось получить данные с исходного сервера. Код ошибки: {response.status_code}")
+    exit(1)
+
+# Преобразование данных в требуемый формат и отправка на целевой сервер
+for item in source_data:
+    transformed_item = {
+        'date': '2023-03-23',  # Замена даты
+        'release_number': item['Number'],
+        'client_name': item['Client'],
+        'main_contact': item['Contacts']['Main'],
+        'copy_contact': ', '.join([list(copy.values())[0] for copy in item['Contacts']['Copy']])  # Преобразование контактов копии
+    }
+
+    # Отправка каждого объекта данных на целевой сервер по отдельности
+    response = requests.post(target_url, json=transformed_item, auth=target_auth)
+
+    # Проверка статуса ответа
+    if response.status_code == 200 or response.status_code == 201:
+        print(f"Данные по клиенту {item['Client']} успешно отправлены на целевой сервер.")
+    else:
+        print(f"Не удалось отправить данные по клиенту {item['Client']} на целевой сервер. Код ошибки: {response.text}")
