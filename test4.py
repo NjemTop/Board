@@ -67,4 +67,15 @@ new_ticket_message = (
     f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
 )
 
-send_telegram_message(320851571, new_ticket_message)
+version_release = 2.63
+
+alert_message_for_release = (
+    f"{emoji.emojize(':check_mark_button:')} "
+    f"{emoji.emojize(':check_mark_button:')} "
+    f"{emoji.emojize(':check_mark_button:')}\n\n"
+    f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
+    f"Отчёт по рассылки можно посмотреть здесь:\n"
+    f"Пока в работе :)\n\n"
+    f"Всем спасибо!"
+)
+send_telegram_message(320851571, alert_message_for_release)

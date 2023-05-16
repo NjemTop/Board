@@ -5,6 +5,7 @@ from telebot import types
 import requests
 import pandas as pd
 import json
+import emoji
 from bs4 import BeautifulSoup
 import subprocess, sys
 import pathlib
@@ -23,6 +24,7 @@ from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
 from Automatic_Email.Automatic_email import send_notification
+from System_func.send_telegram_message import Alert
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
 from DataBase.database_result_update import upload_db_result
@@ -35,6 +37,9 @@ from logger.log_config import setup_logger, get_abs_log_path
 # Указываем настройки логов для нашего файла с классами
 bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
 bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
+
+# Создаем объект класса Alert
+alert = Alert()
 
 # Проверяем систему, где запускается скрипт
 if platform.system() == 'Windows':
@@ -469,6 +474,20 @@ def inline_button_SD_update(call):
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             # Запускаем скрипт по отправке рассылки клиентам
             send_notification(version_release)
+            # извлекаем значения GROUP_ALERT_NEW_TICKET из SEND_ALERT
+            alert_chat_id = data['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
+            # Формируем сообщение для отправки в группу
+            alert_message_for_release = (
+                f"{emoji.emojize(':check_mark_button:')} "
+                f"{emoji.emojize(':check_mark_button:')} "
+                f"{emoji.emojize(':check_mark_button:')}\n\n"
+                f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
+                f"Отчёт по рассылки можно посмотреть здесь:\n"
+                f"Пока в работе :)\n\n"
+                f"Всем спасибо!"
+            )
+            # Отправляем сообщение в телеграм-бот
+            alert.send_telegram_message(320851571, alert_message_for_release)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
