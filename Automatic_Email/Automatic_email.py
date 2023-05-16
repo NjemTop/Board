@@ -10,7 +10,7 @@ from email.header import Header
 from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
-from logger.log_config import setup_logger, get_abs_log_path
+from .log_config import setup_logger, get_abs_log_path
 
 # Указываем настройки логов для нашего файла с классами
 bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
