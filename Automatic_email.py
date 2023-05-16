@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import imghdr
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -54,30 +55,39 @@ def send_notification(version):
                 # Добавление изображений для CID картинок в шаблоне HTML
                 images_dir = 'HTML/Images'
                 for image in os.listdir(images_dir):
-                    with open(os.path.join(images_dir, image), 'rb') as f:
-                        img = MIMEImage(f.read(), name=os.path.basename(image))
-                        img.add_header('Content-ID', '<{}>'.format(image))
-                        msg.attach(img)
+                    image_path = os.path.join(images_dir, image)
+                    if imghdr.what(image_path):
+                        with open(image_path, 'rb') as f:
+                            img = MIMEImage(f.read(), name=os.path.basename(image))
+                            img.add_header('Content-ID', '<{}>'.format(image))
+                            msg.attach(img)
+                    else:
+                        print(f"Файл '{image}' в каталоге «Изображения» не является файлом изображения.")
+                        break
 
                 # Вложение PDF файлов
                 attachments_dir = 'HTML/attachment'
-                for attachment in os.listdir(attachments_dir):
-                    with open(os.path.join(attachments_dir, attachment), 'rb') as f:
-                        part = MIMEBase('application', 'octet-stream')
-                        part.set_payload(f.read())
-                        encoders.encode_base64(part)
-                        part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment))
-                        msg.attach(part)
+                if os.listdir(attachments_dir): # Проверка на наличие файлов в папке
+                    for attachment in os.listdir(attachments_dir):
+                        with open(os.path.join(attachments_dir, attachment), 'rb') as f:
+                            part = MIMEBase('application', 'octet-stream')
+                            part.set_payload(f.read())
+                            encoders.encode_base64(part)
+                            part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment))
+                            msg.attach(part)
+                else:
+                    print("Файлы в папке «вложения» не найдены.")
+                    break
 
                 # Отправка письма
                 with smtplib.SMTP(mail_settings['SMTP'], 587) as server:
                     server.starttls()
                     server.login(mail_settings['USER'], mail_settings['PASSWORD'])
                     server.send_message(msg)
-                    print(f"Mail has been sent to {', '.join(to)} with CC to {', '.join(cc)}")
+                    print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
 
     except Exception as error_message:
         print(f"Произошла общая ошибка: {error_message}")
 
-
+# временном запускаем функцию из файла
 send_notification(2.63)
