@@ -3,12 +3,18 @@ import json
 import os
 import imghdr
 import smtplib
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
 from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
+from logger.log_config import setup_logger, get_abs_log_path
+
+# Указываем настройки логов для нашего файла с классами
+bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
+bot_info_logger = setup_logger('TeleBot', get_abs_log_path('bot-info.log'), logging.INFO)
 
 def send_notification(version):
     try:
@@ -26,6 +32,7 @@ def send_notification(version):
             clients_data = response.json()
         else:
             print(f"Сервер с данными о клиентах недоступен. Код ошибки:", response.status_code)
+            bot_error_logger.error("Сервер с данными о клиентах недоступен. Код ошибки: %s", response.status_code)
 
         # Загрузка и обработка HTML шаблона
         with open('HTML/index.html', 'r') as file:
@@ -65,6 +72,7 @@ def send_notification(version):
                             msg.attach(img)
                     else:
                         print(f"Файл '{image}' в каталоге «Изображения» не является файлом изображения.")
+                        bot_error_logger.error("Файл %s в каталоге «Изображения» не является файлом изображения.", response.status_code)
                         break
 
                 # Вложение PDF файлов
@@ -79,6 +87,7 @@ def send_notification(version):
                             msg.attach(part)
                 else:
                     print("Файлы в папке «вложения» не найдены.")
+                    bot_error_logger.error("Файлы в папке «вложения» не найдены.")
                     break
 
                 # Отправка письма
@@ -88,8 +97,25 @@ def send_notification(version):
                     server.send_message(msg)
                     print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
 
+
+                # Отправка POST-запроса
+                post_data = {
+                    "date": datetime.now().strftime('%Y-%m-%d'), # сегодняшняя дата
+                    "release_number": version, # номер релиза
+                    "client_name": client['client_name'], # имя клиента
+                    "main_contact": ', '.join(to), # основной контакт
+                    "copy_contact": ', '.join(cc) # копия контакта
+                }
+                post_response = requests.post('http://127.0.0.1:8000/api/data_release/', json=post_data, auth=auth)
+                if post_response.status_code != 201:
+                    print(f"Ошибка при отправке POST-запроса. Код ошибки:", post_response.status_code)
+                    bot_error_logger.error("Ошибка при отправке POST-запроса. Код ошибки: %s", post_response.status_cod)
+                else:
+                    print(f"POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
+
     except Exception as error_message:
         print(f"Произошла общая ошибка: {error_message}")
+        bot_error_logger.error("Произошла общая ошибка: %s", error_message)
 
 # временном запускаем функцию из файла
 send_notification(2.63)
