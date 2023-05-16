@@ -473,12 +473,6 @@ def inline_button_SD_update(call):
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
-        # Записываем вывод из терминала PowerShell, чтобы потом сформировать в файл и отправить в телегу
-        with open(f'/app/logs/report_send({version_release}).log', 'a+', encoding='utf-8-sig') as file_send:
-            file_send.write(release_result)
-            file_send.seek(0)  # перематываем указатель в начало файла
-            # Отправляем вывод всего результата в телеграмм бота
-            bot.send_document(call.message.chat.id, file_send)
         button_choise_yes = types.InlineKeyboardMarkup()
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes.add(main_menu, row_width=2)
