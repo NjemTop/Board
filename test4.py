@@ -75,7 +75,7 @@ alert_message_for_release = (
     f"{emoji.emojize(':check_mark_button:')}\n\n"
     f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
     f"Отчёт по рассылки можно посмотреть здесь:\n"
-    f"http://195.2.80.251:3030/\n\n"
+    f"https://creg.boardmaps.ru/release_info/\n\n"
     f"Всем спасибо!"
 )
 send_telegram_message(320851571, alert_message_for_release)
