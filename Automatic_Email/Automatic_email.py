@@ -30,7 +30,7 @@ def send_notification(version):
         # Загрузка настроек почты
         with open('Main.config') as json_file:
             data = json.load(json_file)
-            mail_settings = data['MAIL_SETTINGS']
+            mail_settings = data['MAIL_SETTINGS_SUPPORT']
             
         # Авторизация
         auth = ('admin', 'ekSkaaiWnK')
