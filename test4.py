@@ -67,6 +67,17 @@ new_ticket_message = (
     f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
 )
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+
+# Читаем данные из файла
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    DATA = json.load(file)
+
+alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
+
+print(alert_chat_id)
+
 version_release = 2.63
 
 alert_message_for_release = (
@@ -75,7 +86,7 @@ alert_message_for_release = (
     f"{emoji.emojize(':check_mark_button:')}\n\n"
     f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
     f"Отчёт по рассылки можно посмотреть здесь:\n"
-    f"http://195.2.80.251:3030/\n\n"
+    f"https://creg.boardmaps.ru/release_info/\n\n"
     f"Всем спасибо!"
 )
 send_telegram_message(320851571, alert_message_for_release)

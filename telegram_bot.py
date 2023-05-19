@@ -487,7 +487,7 @@ def inline_button_SD_update(call):
                 f"Всем спасибо!"
             )
             # Отправляем сообщение в телеграм-бот
-            alert.send_telegram_message(320851571, alert_message_for_release)
+            alert.send_telegram_message(alert_chat_id, alert_message_for_release)
         except subprocess.CalledProcessError as error_message:
             bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
             print("Ошибка запуска скрипта по отправке рассылки:", error_message)
