@@ -67,6 +67,17 @@ new_ticket_message = (
     f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
 )
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+
+# Читаем данные из файла
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    DATA = json.load(file)
+
+alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
+
+print(alert_chat_id)
+
 version_release = 2.63
 
 alert_message_for_release = (
