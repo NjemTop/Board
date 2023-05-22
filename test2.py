@@ -1,19 +1,36 @@
-from HappyFox.happyfox_connector import get_happyfox_credentials, get_filtered_tickets
+import requests
 
-### Авторизация в HappyFox
-# Указываем путь к файлу с данными
-CONFIG_FILE = "Main.config"
-# Определяем все важные данные для запросов
-API_ENDPOINT, API_KEY, API_SECRET, HEADERS = get_happyfox_credentials(CONFIG_FILE)
+def transfer_data(old_endpoint, new_endpoint, auth):
+    response = requests.get(old_endpoint, auth=auth)
 
-contact_group_id = 9
-start_date = "2023-03-09"
-end_date = "2023-03-31"
+    if response.status_code == 200:
+        clients_data = response.json()
 
-filtered_tickets = get_filtered_tickets(API_ENDPOINT, API_KEY, API_SECRET, HEADERS, contact_group_id, start_date, end_date)
+        for client_data in clients_data:
+            # Удаление поля id из основного объекта клиента
+            if "id" in client_data:
+                del client_data["id"]
 
-for ticket in filtered_tickets:
-    ticket_id = ticket['display_id']
-    subject = ticket['subject']
-    last_modified = ticket['last_updated_at']
-    print(f"Ticket {ticket_id}: {subject} (last modified on {last_modified})")
+            # Удаление полей id из всех подобъектов клиента
+            for subfield in client_data:
+                if type(client_data[subfield]) is list:  # Проверка, является ли поле списком объектов
+                    for item in client_data[subfield]:
+                        if "id" in item:
+                            del item["id"]
+                        
+            post_response = requests.post(new_endpoint, json=client_data, auth=auth)
+            
+            if post_response.status_code != 201:
+                print(f"Failed to transfer client {client_data.get('client_name')}. Error: {post_response.text}")
+            else:
+                print(f"Successfully migrated client {client_data.get('client_name')}.")
+
+    else:
+        print(f"Failed to get data from old server. Error: {response.text}")
+
+
+old_endpoint = "http://195.2.80.251:8137/api/clients/"
+new_endpoint = "http://10.6.75.81:8137/api/add_client"
+auth = ('admin', 'ekSkaaiWnK')
+
+transfer_data(old_endpoint, new_endpoint, auth)

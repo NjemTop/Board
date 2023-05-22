@@ -6,8 +6,8 @@ source_auth = ('Njem', 'Rfnzkj123123')
 target_auth = ('admin', 'ekSkaaiWnK')
 
 # URL-адреса
-source_url = 'http://195.2.80.251:3030/data_release/api/2.62'
-target_url = 'http://195.2.80.251:8137/api/data_release/'
+source_url = 'http://195.2.80.251:3030/data_release/api/2.63'
+target_url = 'http://10.6.75.81:8137/api/data_release/'
 
 # Получение данных с исходного сервера
 response = requests.get(source_url, auth=source_auth)

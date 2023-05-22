@@ -475,7 +475,7 @@ def inline_button_SD_update(call):
             # Запускаем скрипт по отправке рассылки клиентам
             send_notification(version_release)
             # извлекаем значения GROUP_RELEASE из SEND_ALERT
-            alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
+            alert_chat_id = DATA['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
             # Формируем сообщение для отправки в группу
             alert_message_for_release = (
                 f"{emoji.emojize(':check_mark_button:')} "
@@ -483,7 +483,7 @@ def inline_button_SD_update(call):
                 f"{emoji.emojize(':check_mark_button:')}\n\n"
                 f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
                 f"Отчёт по рассылки можно посмотреть здесь:\n"
-                f"Пока в работе :)\n\n"
+                f"Пока в работе, чуть позже будет :)\n\n"
                 f"Всем спасибо!"
             )
             # Отправляем сообщение в телеграм-бот
