@@ -12,6 +12,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 import logging
 from logger.log_config import setup_logger, get_abs_log_path
+import time
 
 # Указываем настройки логов для нашего файла с классами
 bot_error_logger = setup_logger('TeleBot', get_abs_log_path('bot-errors.log'), logging.ERROR)
@@ -111,6 +112,7 @@ def send_notification(version):
                     server.starttls()
                     server.login(mail_settings['USER'], mail_settings['PASSWORD'])
                     server.send_message(msg)
+                    time.sleep(3) # Задержка в 3 секунду после каждого отправленного письма
                     print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
                     bot_info_logger.info("Почта была отправлена ​​на %s с копией на %s", {', '.join(to)}, {', '.join(cc)})
 
