@@ -34,7 +34,7 @@ def send_notification(version):
             
         # Авторизация
         auth = ('admin', 'ekSkaaiWnK')
-        response = requests.get('http://194.37.1.214:3030/api/clients_list', auth=auth)
+        response = requests.get('http://195.2.80.251:8137/api/clients_list', auth=auth)
 
         # Проверка статуса ответа
         if response.status_code == 200:
@@ -123,7 +123,7 @@ def send_notification(version):
                     "main_contact": ', '.join(to), # основной контакт
                     "copy_contact": ', '.join(cc) # копия контакта
                 }
-                post_response = requests.post('http://194.37.1.214:3030/api/data_release/', json=post_data, auth=auth)
+                post_response = requests.post('http://195.2.80.251:8137/api/data_release/', json=post_data, auth=auth)
                 if post_response.status_code != 201:
                     print(f"Ошибка при отправке POST-запроса. Код ошибки:", post_response.status_code)
                     bot_error_logger.error("Ошибка при отправке POST-запроса. Код ошибки: %s", post_response.status_cod)

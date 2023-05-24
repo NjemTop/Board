@@ -483,7 +483,7 @@ def inline_button_SD_update(call):
                 f"{emoji.emojize(':check_mark_button:')}\n\n"
                 f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
                 f"Отчёт по рассылки можно посмотреть здесь:\n"
-                f"Пока в работе, чуть позже будет :)\n\n"
+                f"TBD\n\n"
                 f"Всем спасибо!"
             )
             # Отправляем сообщение в телеграм-бот
