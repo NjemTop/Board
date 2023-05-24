@@ -125,8 +125,8 @@ def send_notification(version):
                 }
                 post_response = requests.post('http://195.2.80.251:8137/api/data_release/', json=post_data, auth=auth)
                 if post_response.status_code != 201:
-                    print(f"Ошибка при отправке POST-запроса. Код ошибки:", post_response.status_code)
-                    bot_error_logger.error("Ошибка при отправке POST-запроса. Код ошибки: %s", post_response.status_cod)
+                    print(f"Ошибка при отправке POST-запроса. Сообщение об ошибке:", post_response.text)
+                    bot_error_logger.error("Ошибка при отправке POST-запроса. Сообщение об ошибке: %s", post_response.text)
                 else:
                     print(f"POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
                     bot_info_logger.info("POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
