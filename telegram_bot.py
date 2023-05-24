@@ -475,7 +475,7 @@ def inline_button_SD_update(call):
             # Запускаем скрипт по отправке рассылки клиентам
             send_notification(version_release)
             # извлекаем значения GROUP_RELEASE из SEND_ALERT
-            alert_chat_id = DATA['SEND_ALERT']['GROUP_ALERT_NEW_TICKET']
+            alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
             # Формируем сообщение для отправки в группу
             alert_message_for_release = (
                 f"{emoji.emojize(':check_mark_button:')} "
