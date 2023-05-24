@@ -91,7 +91,7 @@ def send_notification(version):
                         print(f"Файл '{image}' в каталоге «Изображения» не является файлом изображения.")
                         bot_error_logger.error("Файл %s в каталоге «Изображения» не является файлом изображения.", response.status_code)
                         break
-
+                """
                 # Вложение PDF файлов
                 attachments_dir = 'HTML/attachment'
                 if os.listdir(attachments_dir): # Проверка на наличие файлов в папке
@@ -106,7 +106,7 @@ def send_notification(version):
                     print("Файлы в папке «вложения» не найдены.")
                     bot_error_logger.error("Файлы в папке «вложения» не найдены.")
                     break
-
+                """
                 # Отправка письма
                 with smtplib.SMTP(mail_settings['SMTP'], 587) as server:
                     server.starttls()
