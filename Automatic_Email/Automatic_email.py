@@ -55,7 +55,13 @@ def send_notification(version):
                         to.append(contact['contact_email'])
                     elif contact['notification_update'] == "Копия":
                         cc.append(contact['contact_email'])
-                
+
+                # Если список "to" и "cc" пустые, пропускаем эту итерацию цикла
+                if not to and not cc:
+                    print(f"Нет контактов для клиента {client['client_name']}. Пропускаем.")
+                    bot_info_logger.info("Нет контактов для клиента %s. Пропускаем.", {client['client_name']})
+                    continue
+
                 # Подготовка письма
                 msg = MIMEMultipart()
                 msg['From'] = mail_settings['FROM']
@@ -106,6 +112,7 @@ def send_notification(version):
                     server.login(mail_settings['USER'], mail_settings['PASSWORD'])
                     server.send_message(msg)
                     print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
+                    bot_info_logger.info("Почта была отправлена ​​на %s с копией на %s", {', '.join(to)}, {', '.join(cc)})
 
 
                 # Отправка POST-запроса
@@ -122,6 +129,7 @@ def send_notification(version):
                     bot_error_logger.error("Ошибка при отправке POST-запроса. Код ошибки: %s", post_response.status_cod)
                 else:
                     print(f"POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
+                    bot_info_logger.info("POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
 
     except Exception as error_message:
         print(f"Произошла общая ошибка: {error_message}")
