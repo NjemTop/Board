@@ -467,10 +467,10 @@ def inline_button_SD_update(call):
             updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
             # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
             bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            # !!! download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
+            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
             bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            # !!! move_distr_and_manage_share(version_release)
+            move_distr_and_manage_share(version_release)
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
             # Запускаем скрипт по отправке рассылки клиентам
             send_notification(version_release)
