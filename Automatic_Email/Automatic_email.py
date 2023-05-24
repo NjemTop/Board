@@ -112,9 +112,9 @@ def send_notification(version):
                     server.starttls()
                     server.login(mail_settings['USER'], mail_settings['PASSWORD'])
                     server.send_message(msg)
-                    time.sleep(60) # Задержка в 60 секунду после каждого отправленного письма
                     print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
                     bot_info_logger.info("Почта была отправлена ​​на %s с копией на %s", {', '.join(to)}, {', '.join(cc)})
+                    time.sleep(30) # Задержка в 30 секунду после каждого отправленного письма
 
                 # Отправка POST-запроса
                 post_data = {
