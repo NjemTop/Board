@@ -78,15 +78,16 @@ alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
 
 print(alert_chat_id)
 
-version_release = 2.63
+version_release = 2.65
 
 alert_message_for_release = (
     f"{emoji.emojize(':check_mark_button:')} "
     f"{emoji.emojize(':check_mark_button:')} "
     f"{emoji.emojize(':check_mark_button:')}\n\n"
     f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
-    f"Отчёт по рассылки можно посмотреть здесь:\n"
-    f"https://creg.boardmaps.ru/release_info/\n\n"
+    f"Отчёт по рассылки можно посмотреть в разделе\n"
+    f'"Информация об отправке релиза" здесь:\n'
+    f"https://creg.boardmaps.ru/\n\n"
     f"Всем спасибо!"
 )
 send_telegram_message(320851571, alert_message_for_release)

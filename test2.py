@@ -21,12 +21,12 @@ def transfer_data(old_endpoint, new_endpoint, auth):
             post_response = requests.post(new_endpoint, json=client_data, auth=auth)
             
             if post_response.status_code != 201:
-                print(f"Failed to transfer client {client_data.get('client_name')}. Error: {post_response.text}")
+                print(f"Ошибка трансфера клиента {client_data.get('client_name')}. Ошибка: {post_response.text}")
             else:
-                print(f"Successfully migrated client {client_data.get('client_name')}.")
+                print(f"Миграция клиента {client_data.get('client_name')} успешно завершена.")
 
     else:
-        print(f"Failed to get data from old server. Error: {response.text}")
+        print(f"Ошибка получения данных с сервера. Ошибка: {response.text}")
 
 
 old_endpoint = "http://195.2.80.251:8137/api/clients/"

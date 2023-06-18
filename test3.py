@@ -12,4 +12,4 @@ for ticket in filtered_tickets:
     ticket_id = ticket['display_id']
     subject = ticket['subject']
     last_modified = ticket['last_updated_at']
-    print(f"Ticket {ticket_id}: {subject} (last modified on {last_modified})")
+    print(f"Тикет {ticket_id}: {subject} (Последнее изменение: {last_modified})")

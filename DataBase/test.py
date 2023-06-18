@@ -34,8 +34,8 @@ try:
     create = datetime.datetime.strptime(create_str, "%d-%m-%Y").date()
     updated_at = datetime.datetime.strptime(updated_at_str, "%d-%m-%Y").date()
     last_reply_at = datetime.datetime.strptime(last_reply_at_str, "%d-%m-%Y").date()
-except ValueError as e:
-    print('Ошибка:', e)
+except ValueError as error_message:
+    print('Ошибка:', error_message)
 
 # Преобразование строк с продолжительностью времени в минуты
 for key in ['sla_time', 'response_time']:
@@ -47,4 +47,4 @@ with conn:
     conn.create_tables([Report_Ticket])
     new_ticket = Report_Ticket.create(**input_data)
 
-print('Отчёт о тиете был успешно сохранён в БД')
+print('Отчёт о тикете был успешно сохранён в БД')
