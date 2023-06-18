@@ -19,10 +19,10 @@ class HappyFoxConnector:
             with open(config_file, 'r', encoding='utf-8-sig') as f:
                 data_config = json.load(f)
         except FileNotFoundError as error_message:
-            hf_class_error_logger.error(f"Config file not found: {config_file}. Error: {error_message}")
+            hf_class_error_logger.error(f"Конфигурационный файл не найден: {config_file}. Error: {error_message}")
             raise
         except json.JSONDecodeError as error_message:
-            hf_class_error_logger.error(f"Error decoding JSON from config file: {config_file}. Error: {error_message}")
+            hf_class_error_logger.error(f"Ошибка декодирования JSON файла из конфигурации: {config_file}. Error: {error_message}")
             raise
         self.api_endpoint = data_config['HAPPYFOX_SETTINGS']['API_ENDPOINT']
         self.api_key = data_config['HAPPYFOX_SETTINGS']['API_KEY']
@@ -51,13 +51,13 @@ class HappyFoxConnector:
                 response = requests.get(url, params=params, auth=(self.api_key, self.api_secret), headers=self.headers, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.HTTPError as error_message:
-                hf_class_error_logger.error(f"Error occurred: {error_message}")
+                hf_class_error_logger.error(f"Ошиба HTTP запроса: {error_message}")
                 break
             except requests.exceptions.Timeout as error_message:
-                hf_class_error_logger.error(f"Timeout error: request timed out: {error_message}")
+                hf_class_error_logger.error(f"Ошибка тайм-аута: {error_message}")
                 break
             except requests.exceptions.RequestException as error_message:
-                hf_class_error_logger.error(f"Error occurred: {error_message}")
+                hf_class_error_logger.error(f"Общая ошибка: {error_message}")
                 break
 
             data = response.json()
@@ -90,18 +90,18 @@ class HappyFoxConnector:
             try:
                 response.raise_for_status()
             except requests.exceptions.HTTPError as error_message:
-                hf_class_error_logger.error("Error occurred: %s", error_message)
+                hf_class_error_logger.error("Ошибка HTTP запроса: %s", error_message)
                 return
         except requests.exceptions.Timeout as error_message:
-            hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
+            hf_class_error_logger.error("Ошибка тайм-аута: %s", error_message)
         except requests.exceptions.RequestException as error_message:
-            hf_class_error_logger.error("Error occurred: %s", error_message)
+            hf_class_error_logger.error("Общая ошибка: %s", error_message)
             
         data_res = response.json()
         page_info = data_res.get('page_info')
         last_index = page_info.get('last_index')
         if last_index == 0:
-            print('No tickets')
+            print('Нет тикетов')
         else:
             for page in range(last_index):
                 url = self.api_endpoint + f'/tickets/?size=1&page={page + 1}'
@@ -111,12 +111,12 @@ class HappyFoxConnector:
                     try:
                         response.raise_for_status()
                     except requests.exceptions.HTTPError as error_message:
-                        hf_class_error_logger.error("Error occurred: %s", error_message)
+                        hf_class_error_logger.error("Ошибка HTTP запроса: %s", error_message)
                         return
                 except requests.exceptions.Timeout as error_message:
-                    hf_class_error_logger.error("Timeout error: request timed out: %s", error_message)
+                    hf_class_error_logger.error("Ошибка тайм-аута: %s", error_message)
                 except requests.exceptions.RequestException as error_message:
-                    hf_class_error_logger.error("Error occurred: %s", error_message)
+                    hf_class_error_logger.error("Общая ошибка: %s", error_message)
                 data = response.json()
                 for ticket_data in data.get('data'):
                     self.process_ticket(ticket_data)

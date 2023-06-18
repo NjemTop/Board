@@ -10,12 +10,21 @@ client_report_id = 12
 ## Создаем файл и делаем русскую локализацию для даты
 docx = DocxTemplate("./templates/Temp_report_REC.docx")
 locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
-## Авторизация в HappyFox и нахождение кол-ва страниц по url первой страницы
-auth = ('45357d176a5f4e25b740aebae58f189c','3b9e5c6cc6f34802ad5ae82bafdab3bd')
+### Авторизация в HappyFox
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+# Открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+    data_config = json.load(f)
+# Извлекаем значения API_KEY и API_SECRET
+API_ENDPOINT = data_config['HAPPYFOX_SETTINGS']['API_ENDPOINT']
+API_KEY = data_config['HAPPYFOX_SETTINGS']['API_KEY']
+API_SECRET = data_config['HAPPYFOX_SETTINGS']['API_SECRET']
+# Прохождение кол-ва страниц по url первой страницы
 headers = {'Content-Type': 'application/json'}
 param = {'period_type' : 'srp'}
 url_0 = f"https://boardmaps.happyfox.com/api/1.1/json/report/{client_report_id}/tabulardata/?size=50&page=1"
-res_0 = requests.get(url_0,auth=auth, headers=headers, params=param).json()
+res_0 = requests.get(url_0, auth=(API_KEY, API_SECRET), headers=headers, params=param).json()
 #находим кол-во страниц
 pages_len = res_0.get('page_count')
 ### ЗАПОЛНЯЕМ ШАПКУ

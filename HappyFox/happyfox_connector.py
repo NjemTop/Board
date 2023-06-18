@@ -70,7 +70,7 @@ def get_filtered_tickets(api_endpoint, api_key, api_secret, headers, contact_gro
             if has_more_pages:
                 params['page'] += 1
         else:
-            print('Error:', response.status_code)
+            print('Ошибка:', response.status_code)
             break
 
     # Возвращаем список отфильтрованных тикетов

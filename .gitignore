@@ -133,3 +133,4 @@ database.db
 .DS_Store
 Main.config
 config.py
+data.xml

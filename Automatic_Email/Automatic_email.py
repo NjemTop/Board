@@ -28,13 +28,18 @@ def send_notification(version):
     вместо аргумента "NUMBER_VERSION".
     """
     try:
-        # Загрузка настроек почты
-        with open('Main.config') as json_file:
-            data = json.load(json_file)
-            mail_settings = data['MAIL_SETTINGS_SUPPORT']
+        # Указываем путь к файлу с данными
+        CONFIG_FILE = "./Main.config"
+        # Открываем файл и загружаем данные
+        with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as json_file:
+            data_config = json.load(json_file)
+            mail_settings = data_config['MAIL_SETTINGS_SUPPORT']
+            CREG_USERNAME = data_config['CREG']['USERNAME']
+            CREG_PASSWORD = data_config['CREG']['PASSWORD']
             
-        # Авторизация
-        auth = ('admin', 'ekSkaaiWnK')
+        # Авторизация в систему крег
+        auth = (CREG_USERNAME, CREG_PASSWORD)
+        # Получаем данные для определения информации кому отправлять рассылку
         response = requests.get('http://195.2.80.251:8137/api/clients_list', auth=auth)
 
         # Проверка статуса ответа

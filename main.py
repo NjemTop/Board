@@ -20,7 +20,7 @@ if __name__ == '__main__':
         p1.start()
         app_info_logger.info("Планировщик задач по проверку 3х дневных тикетов запущен")
     except Exception as error_message:
-        app_error_logger.error("Error in Schedule_ticket_check: %s", error_message)
+        app_error_logger.error("Ошибка в файле 'Schedule_ticket_check': %s", error_message)
     # Запускаем телеграм бота
     try:
         p2 = threading.Thread(target=start_telegram_bot)
@@ -28,12 +28,10 @@ if __name__ == '__main__':
         app_info_logger.info("Телебот запущен")
         p2.join()
     except requests.exceptions.ConnectionError as error_message:
-        app_error_logger.error("Error in Telegram bot: %s", error_message)
+        app_error_logger.error("Ошибка подключения к Telegram bot: %s", error_message)
     except telegram.error.TelegramError as error_message:
-        app_error_logger.error("Error in Telegram bot: %s", error_message)
+        app_error_logger.error("Ошибка в Telegram bot: %s", error_message)
     except Exception as error_message:
         app_error_logger.error(str(error_message))
     else:
-        app_info_logger.info("The program has finished running without errors.")
-        app_error_logger.warning('This is a warning message')
-        app_error_logger.critical('This is a critical message')
+        app_error_logger.critical('Неизветная ошибка')

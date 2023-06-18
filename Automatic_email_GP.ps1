@@ -26,8 +26,12 @@ $CSS_STYLE = @"
 $TO = "oleg.eliseev@boardmaps.ru"
 #, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
 
+### ИЗВЛЕКАЕМ ЗНАЧЕНИЕ API_KEY и API_SECRET
+$API_KEY = $CONFIG.HAPPYFOX_SETTINGS.API_KEY
+$API_SECRET = $CONFIG.HAPPYFOX_SETTINGS.API_SECRET
+
 ### ТОКЕН ДОСТУПА ДЛЯ API К HAPPYFOX
-$ACCESS_TOKEN = "45357d176a5f4e25b740aebae58f189c:3b9e5c6cc6f34802ad5ae82bafdab3bd"
+$ACCESS_TOKEN = "$($API_KEY):$($API_SECRET)"
 
 ### БАЗОВЫЙ URL ДЛЯ API HAPPYFOX
 $HF_ENDPOINT = "https://boardmaps.happyfox.com"
