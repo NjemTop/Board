@@ -31,6 +31,17 @@ def transfer_data(old_endpoint, new_endpoint, auth):
 
 old_endpoint = "http://195.2.80.251:8137/api/clients/"
 new_endpoint = "http://10.6.75.81:8137/api/add_client"
-auth = ('admin', 'ekSkaaiWnK')
+
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+# Открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    data = json.load(file)
+
+# Получаем учётные данные из конфиг-файла
+CREG_USERNAME = data["CREG"]["USERNAME"]
+CREG_PASSWORD = data["CREG"]["PASSWORD"]
+
+auth = (CREG_USERNAME, CREG_PASSWORD)
 
 transfer_data(old_endpoint, new_endpoint, auth)

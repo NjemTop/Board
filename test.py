@@ -1,9 +1,19 @@
 import requests
 import json
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+# Открываем файл и загружаем данные
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    data = json.load(file)
+
+# Получаем учётные данные из конфиг-файла
+CREG_USERNAME = data["CREG"]["USERNAME"]
+CREG_PASSWORD = data["CREG"]["PASSWORD"]
+
 # Параметры авторизации
 source_auth = ('Njem', 'Rfnzkj123123')
-target_auth = ('admin', 'ekSkaaiWnK')
+target_auth = (CREG_USERNAME, CREG_PASSWORD)
 
 # URL-адреса
 source_url = 'http://195.2.80.251:3030/data_release/api/2.63'

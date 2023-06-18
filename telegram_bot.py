@@ -728,19 +728,19 @@ def start_telegram_bot():
     """"Функция запуска телебота"""
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     try:
-        print("Starting Telegram bot...")
-        bot_info_logger.info("Starting Telegram bot...")
+        print("Старт Telegram bot...")
+        bot_info_logger.info("Старт Telegram bot...")
         # запуск бота
         bot.infinity_polling()
     except requests.exceptions.ConnectionError as error_message:
-        print(f"Error in Telegram bot: {error_message}")
-        bot_error_logger.error("Error in Telegram bot: %s", error_message)
+        print(f"Ошибка подключения к Telegram bot: {error_message}")
+        bot_error_logger.error("Ошибка подключения к Telegram bot: %s", error_message)
     except telegram.error.TelegramError as error_message:
-        print(f"Error in Telegram bot: {error_message}")
-        bot_error_logger.error("Error in Telegram bot: %s", error_message)
+        print(f"Ошибка в Telegram bot: {error_message}")
+        bot_error_logger.error("Ошибка в Telegram bot: %s", error_message)
     except telebot.apihelper.ApiTelegramException as error_message:
-        print(f"Error in Telegram bot: {error_message}")
-        bot_error_logger.error("Error in Telegram bot: %s", error_message)
+        print(f"Ошибка API Telegram bot: {error_message}")
+        bot_error_logger.error("Ошибка API Telegram bot: %s", error_message)
     except Exception as error_message:
-        print(f"Error in Telegram bot: {error_message}")
-        bot_error_logger.error("Error in Telegram bot: %s", error_message)
+        print(f"Общая ошибка в Telegram bot: {error_message}")
+        bot_error_logger.error("Общая ошибка в Telegram bot: %s", error_message)
