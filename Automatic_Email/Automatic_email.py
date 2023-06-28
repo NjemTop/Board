@@ -140,3 +140,5 @@ def send_notification(version):
     except Exception as error_message:
         print(f"Произошла общая ошибка: {error_message}")
         bot_error_logger.error("Произошла общая ошибка: %s", error_message)
+
+send_notification(2.64)
