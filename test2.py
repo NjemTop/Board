@@ -29,8 +29,8 @@ def transfer_data(old_endpoint, new_endpoint, auth):
         print(f"Ошибка получения данных с сервера. Ошибка: {response.text}")
 
 
-old_endpoint = "http://195.2.80.251:8137/api/clients/"
-new_endpoint = "http://10.6.75.81:8137/api/add_client"
+old_endpoint = "http://10.6.75.81:8137/api/clients/"
+new_endpoint = "http://195.2.80.251:8137/api/add_client"
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
