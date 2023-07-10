@@ -7,6 +7,17 @@ from logger.log_config import setup_logger, get_abs_log_path
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
 web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logging.INFO)
 
+# Указываем путь к файлу с данными
+CONFIG_FILE = "Main.config"
+
+# Читаем данные из файла
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    DATA = json.load(file)
+
+# Получаем значение ключа CLIENT_ID и CLIENT_SECRET в YANDEX_DISK
+CLIENT_ID = DATA['YANDEX_DISK']['CLIENT_ID']
+CLIENT_SECRET = DATA['YANDEX_DISK']['CLIENT_SECRET']
+
 def handler_get_yandex_oauth_callback():
         """Функция определения oauth яндекса"""
         # Извлеките авторизационный код из URL
@@ -18,9 +29,9 @@ def handler_get_yandex_oauth_callback():
         token_request_data = {
             "grant_type": "authorization_code",
             "code": authorization_code,
-            "client_id": "8525a645d7744d008ea42465c080b2a7",
-            "client_secret": "1b9335d34574471b894d1c2576305a11",
-            "redirect_uri": "http://194.37.1.214:3030/yandex_oauth_callback"
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "redirect_uri": "/yandex_oauth_callback"
         }
         token_response = requests.post('https://oauth.yandex.ru/token', data=token_request_data, timeout=30)
 
