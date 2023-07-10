@@ -6,7 +6,7 @@ from pathlib import Path
 from Web_Server.web_config import USERNAME, PASSWORD, require_basic_auth
 from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback, report
-from Web_Server.handler.API import data_release, BM_Info_onClient, client_card, connect_card, contact_card, integration, tech_account, bm_servers_card, connection_info, service, tech_information, all_clients
+from Web_Server.handler.API import data_release
 from DataBase import migrations
 from Web_Server.handler.API.connection_info import init_app
 
@@ -66,76 +66,6 @@ def create_app():
     app.add_url_rule('/api/report', 'get_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.get_report_tickets), methods=['GET'])
     app.add_url_rule('/api/report', 'post_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.post_report_tickets), methods=['POST'])
 
-    # Регистрация обработчика для API 
-    app.add_url_rule('/clients_all_info/api/all_clients', 'get_all_clients_api', require_basic_auth(USERNAME, PASSWORD)(all_clients.get_all_clients_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/all_clients', 'post_all_clients_api', require_basic_auth(USERNAME, PASSWORD)(all_clients.post_all_clients_api), methods=['POST'])
-
-    # Регистрация обработчика для API списка учёта версий клиентов
-    app.add_url_rule('/clients_all_info/api/clients', 'get_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(BM_Info_onClient.get_BM_Info_onClient_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/clients', 'post_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(BM_Info_onClient.post_BM_Info_onClient_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/clients', 'patch_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(BM_Info_onClient.patch_BM_Info_onClient_api), methods=['PATCH'])
-    app.add_url_rule('/clients_all_info/api/clients', 'delete_BM_Info_onClient_api', require_basic_auth(USERNAME, PASSWORD)(BM_Info_onClient.delete_BM_Info_onClient_api), methods=['DELETE'])
-
-    # Регистрация обработчика для API списка карточек клиента
-    app.add_url_rule('/clients_all_info/api/clients_card', 'get_client_card_api', require_basic_auth(USERNAME, PASSWORD)(client_card.get_client_card_api), methods=['GET'])
-    # Регистрация обработчика для API с параметром id в URL
-    app.route('/clients_all_info/api/client_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(client_card.get_client_by_id))
-    app.add_url_rule('/clients_all_info/api/clients_card', 'post_client_card_api', require_basic_auth(USERNAME, PASSWORD)(client_card.post_client_card_api), methods=['POST'])
-    app.route('/clients_all_info/api/client_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(client_card.post_client_card_api_by_id))
-    app.route('/clients_all_info/api/client_card/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(client_card.patch_client_card_api))
-    app.add_url_rule('/clients_all_info/api/clients_card', 'delete_client_card_api', require_basic_auth(USERNAME, PASSWORD)(client_card.delete_client_card_api), methods=['DELETE'])
-
-    # Регистрация обработчика для API списка контакта клиента
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'get_contacts_api', require_basic_auth(USERNAME, PASSWORD)(get_contacts_api), methods=['GET'])
-    app.route('/clients_all_info/api/contact_card/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.get_contact_by_client_id))
-    #app.add_url_rule('/clients_all_info/api/contacts_card', 'post_contacts_api', require_basic_auth(USERNAME, PASSWORD)(post_contacts_api), methods=['POST'])
-    app.route('/clients_all_info/api/contact_card/<int:id>', methods=['POST'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.post_contact_api_by_id))
-    app.route('/clients_all_info/api/contact_card/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.patch_contact_api_by_id))
-    app.route('/clients_all_info/api/contact_card/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(contact_card.delete_contact_api_by_id))
-    
-    # Регистрация обработчика для API информации по подключению к клиенту
-    app.add_url_rule('/clients_all_info/api/connect_info', 'get_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(connect_card.get_connect_info_api), methods=['GET'])
-    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(connect_card.get_connect_info_by_id))
-    app.add_url_rule('/clients_all_info/api/connect_info', 'post_connect_info_api', require_basic_auth(USERNAME, PASSWORD)(connect_card.post_connect_info_api), methods=['POST'])
-    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(connect_card.patch_connect_info_api))
-    app.route('/clients_all_info/api/connect_info/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(connect_card.delete_connect_info_api))
-
-    # Регистрация обработчика для API информация о тех УЗ клиента
-    app.add_url_rule('/clients_all_info/api/tech_accounts/', 'get_all_tech_accounts', require_basic_auth(USERNAME, PASSWORD)(tech_account.get_all_tech_accounts), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'get_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.get_tech_account_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'post_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.post_tech_account_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/tech_account/<int:client_id>', 'patch_tech_account_api', require_basic_auth(USERNAME, PASSWORD)(tech_account.patch_tech_account_api), methods=['PATCH'])
-    app.route('/clients_all_info/api/tech_account/<int:id>', methods=['DELETE'])(require_basic_auth(USERNAME, PASSWORD)(tech_account.delete_tech_account_api))
-
-    # Регистрация обработчика для API информация о серверах клиента
-    app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'get_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(bm_servers_card.get_bm_servers_card_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/bm_servers_card/<int:client_id>', 'post_bm_servers_card_api', require_basic_auth(USERNAME, PASSWORD)(bm_servers_card.post_bm_servers_card_api), methods=['POST'])
-
-    # Регистрация обработчика для API информация об интеграции клиента
-    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'get_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.get_integration_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'post_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.post_integration_api), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/integration/<int:client_id>', 'patch_integration_api', require_basic_auth(USERNAME, PASSWORD)(integration.patch_integration_api), methods=['PATCH'])
-
-    # Регистрация обработчика для API информация о настройки подключения к клиенту
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'get_uploaded_conn_files', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_uploaded_conn_files), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>/file', 'get_serve_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.get_serve_file), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'post_upload_conn_file', require_basic_auth(USERNAME, PASSWORD)(connection_info.post_upload_conn_file), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>', 'delete_all_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_all_connection_info), methods=['DELETE'])
-    app.add_url_rule('/clients_all_info/api/connection_info/<int:client_id>/<int:connection_info_id>', 'delete_specific_connection_info', require_basic_auth(USERNAME, PASSWORD)(connection_info.delete_specific_connection_info), methods=['DELETE'])
-    
-    # Регистрация обработчика для API информация о настройки подключения к клиенту
-    app.add_url_rule('/clients_all_info/api/services/', 'get_all_services_api', require_basic_auth(USERNAME, PASSWORD)(service.get_all_services_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'get_service_api', require_basic_auth(USERNAME, PASSWORD)(service.get_service_api), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'post_service_api', require_basic_auth(USERNAME, PASSWORD)(service.post_service_api), methods=['POST'])
-    app.route('/clients_all_info/api/services/<int:client_id>', methods=['PATCH'])(require_basic_auth(USERNAME, PASSWORD)(service.patch_service_api))
-    #app.add_url_rule('/clients_all_info/api/services/<int:client_id>', 'patch_service', require_basic_auth(USERNAME, PASSWORD)(service.patch_service), methods=['PATCH'])
-
-    # Регистрация обработчика для API информации о технической стороне клиента (версия, скины, локализация, АПИ)
-    app.add_url_rule('/clients_all_info/api/tech_information/', 'get_all_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_all_tech_information), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'get_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.get_tech_information), methods=['GET'])
-    app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'post_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.post_tech_information), methods=['POST'])
-    app.add_url_rule('/clients_all_info/api/tech_information/<int:client_id>', 'patch_tech_information', require_basic_auth(USERNAME, PASSWORD)(tech_information.patch_tech_information), methods=['PATCH'])
-
     return app
 
 if __name__ == '__main__':
@@ -144,13 +74,13 @@ if __name__ == '__main__':
         server_address = ('0.0.0.0', 3030)
         app = create_app()
 
-        # Запуск миграций и логирование
-        try:
-            migrations.create_migrations()
-            web_info_logger.info("Миграции успешно выполнены")
-        except Exception as migration_error:
-            web_error_logger.error("Ошибка при выполнении миграций: %s", migration_error)
-            raise migration_error
+        # # Запуск миграций и логирование
+        # try:
+        #     migrations.create_migrations()
+        #     web_info_logger.info("Миграции успешно выполнены")
+        # except Exception as migration_error:
+        #     web_error_logger.error("Ошибка при выполнении миграций: %s", migration_error)
+        #     raise migration_error
 
         web_info_logger.info('Сервер запущен. Порт работы: %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)
