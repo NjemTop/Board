@@ -31,8 +31,8 @@ def handler_get_yandex_oauth_callback():
         token_request_data = {
             "grant_type": "authorization_code",
             "code": authorization_code,
-            "client_id": "8525a645d7744d008ea42465c080b2a7",
-            "client_secret": "1b9335d34574471b894d1c2576305a11",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
             "redirect_uri": "/yandex_oauth_callback"
         }
         token_response = requests.post('https://oauth.yandex.ru/token', data=token_request_data, timeout=30)
