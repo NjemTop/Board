@@ -23,6 +23,7 @@ def handler_get_yandex_oauth_callback():
         """Функция определения oauth яндекса"""
         # Извлеките авторизационный код из URL
         authorization_code = request.args.get('code')
+        print(authorization_code)
         if not authorization_code:
             return Response('Ошибка: авторизационный код не найден', mimetype='text/plain')
 
@@ -32,7 +33,7 @@ def handler_get_yandex_oauth_callback():
             "code": authorization_code,
             "client_id": "8525a645d7744d008ea42465c080b2a7",
             "client_secret": "1b9335d34574471b894d1c2576305a11",
-            "redirect_uri": "http://194.37.1.214:3030/yandex_oauth_callback"
+            "redirect_uri": "/yandex_oauth_callback"
         }
         token_response = requests.post('https://oauth.yandex.ru/token', data=token_request_data, timeout=30)
 
