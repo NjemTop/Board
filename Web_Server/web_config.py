@@ -1,14 +1,22 @@
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from functools import wraps
+import json
 from flask import request, Response
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
 
-# Логин и пароль для доступа к API
-USERNAME = 'Njem'
-PASSWORD = generate_password_hash('Rfnzkj123123')
+# Читаем данные из файла
+with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+    DATA = json.load(file)
+
+# Получаем значение ключа WEB_SERVER и USERNAME в WEB_SERVER
+USERNAME = DATA['WEB_SERVER']['USERNAME']
+PASS = DATA['WEB_SERVER']['PASSWORD']
+
+# Хэшируем пароль
+PASSWORD = generate_password_hash(PASS)
 
 # Создаем функцию-декоратор для аутентификации Basic Auth
 def require_basic_auth(username, password):
