@@ -8,7 +8,6 @@ from logger.log_config import setup_logger, get_abs_log_path
 from Web_Server.handler.WEB import get, create_ticket, release_data, update_ticket, yandex_oauth_callback, report
 from Web_Server.handler.API import data_release
 from DataBase import migrations
-from Web_Server.handler.API.connection_info import init_app
 
 # Указываем настройки логов для нашего файла с классами
 web_error_logger = setup_logger('WebError', get_abs_log_path('web-errors.log'), logging.ERROR)
@@ -17,7 +16,6 @@ web_info_logger = setup_logger('WebInfo', get_abs_log_path('web-info.log'), logg
 def create_app():
     """Функция создания приложения ВЭБ-сервера"""
     app = Flask(__name__)
-    init_app(app)
     config_file = Path(__file__).parent / 'Web_Server' / 'web_config.py'
     app.config.from_pyfile(config_file)
 
