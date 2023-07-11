@@ -54,15 +54,15 @@ def create_app():
     app.add_url_rule('/yandex_oauth_callback', 'handler_get_yandex_oauth_callback', yandex_oauth_callback.handler_get_yandex_oauth_callback, methods=['GET'])
 
     # Регистрация обработчиков для API со списком версий отправки релиза
-    app.add_url_rule('/data_release/api/versions', 'api_data_release_versions', data_release.api_data_release_versions, methods=['GET'])
+    app.add_url_rule('/data_release/api/versions', 'api_data_release_versions', require_basic_auth(USERNAME, PASSWORD)(data_release.api_data_release_versions), methods=['GET'])
     # Регистрация обработчика для API с параметром version в URL
     app.route('/data_release/api/<string:version>', methods=['GET'])(require_basic_auth(USERNAME, PASSWORD)(data_release.api_data_release_number))
     # Регистрация обработчиков для URL спика всех отправленных версиях
-    app.add_url_rule('/data_release', 'data_release_html', release_data.data_release_html, methods=['GET'])
+    app.add_url_rule('/data_release', 'data_release_html', require_basic_auth(USERNAME, PASSWORD)(release_data.data_release_html), methods=['GET'])
 
     # Регистрация обработчиков для вывода информации о статистике (диаграммы/пироги)
     app.add_url_rule('/report', 'report_tickets', report.report_tickets, methods=['GET'])
-    app.add_url_rule('/api/web/report', 'post_api_report_tickets', report.post_api_report_tickets, methods=['POST'])
+    app.add_url_rule('/api/web/report', 'post_api_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.post_api_report_tickets), methods=['POST'])
     app.add_url_rule('/api/report', 'get_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.get_report_tickets), methods=['GET'])
     app.add_url_rule('/api/report', 'post_report_tickets', require_basic_auth(USERNAME, PASSWORD)(report.post_report_tickets), methods=['POST'])
 
