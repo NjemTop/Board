@@ -365,18 +365,17 @@ def send_test_distribution(message, version):
     button_send = telebot.types.KeyboardButton(text="Отправить")
     keyboard.add(button_send)
 
-    # Отправка сообщения с клавиатурой
-    bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
+    msg = bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
 
     # Отправка тестовой рассылки при нажатии кнопки "Отправить"
-    @bot.message_handler(func=lambda message: message.text == "Отправить")
+    @bot.message_handler(func=lambda message: message.text == "Отправить" and message.chat.id == chat_id)
     def send_test_distribution_email(message):
         send_test_email(version, recipient)
         bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
-        bot.clear_reply_handlers()  # Удаление всех обработчиков клавиатуры ответов
+        bot.clear_step_handler_by_chat_id(chat_id)  # Удаление обработчиков клавиатуры ответов
 
     # Удаляем временный обработчик после использования
-    bot.remove_message_handler(send_test_distribution_email)
+    bot.register_next_step_handler(msg, lambda _: None)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
