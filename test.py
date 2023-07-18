@@ -12,11 +12,11 @@ CREG_USERNAME = data["CREG"]["USERNAME"]
 CREG_PASSWORD = data["CREG"]["PASSWORD"]
 
 # Параметры авторизации
-source_auth = ('Njem', 'Rfnzkj123123')
+source_auth = (CREG_USERNAME, CREG_PASSWORD)
 target_auth = (CREG_USERNAME, CREG_PASSWORD)
 
 # URL-адреса
-source_url = 'http://195.2.80.251:3030/data_release/api/2.63'
+source_url = 'http://195.2.80.251:8137/api/data_release/2.65/version_info'
 target_url = 'http://10.6.75.81:8137/api/data_release/'
 
 # Получение данных с исходного сервера
@@ -32,11 +32,11 @@ else:
 # Преобразование данных в требуемый формат и отправка на целевой сервер
 for item in source_data:
     transformed_item = {
-        'date': '2023-06-28',  # Замена даты
-        'release_number': 2.64,
-        'client_name': item['Client'],
-        'main_contact': item['Contacts']['Main'],
-        'copy_contact': ', '.join([list(copy.values())[0] for copy in item['Contacts']['Copy']])  # Преобразование контактов копии
+        'date': '2023-07-18',  # Замена даты
+        'release_number': 2.65,
+        'client_name': item['client_name'],
+        'main_contact': item['main_contact'],
+        'copy_contact': item['copy_contact']
     }
 
     # Отправка каждого объекта данных на целевой сервер по отдельности
@@ -44,6 +44,6 @@ for item in source_data:
 
     # Проверка статуса ответа
     if response.status_code == 200 or response.status_code == 201:
-        print(f"Данные по клиенту {item['Client']} успешно отправлены на целевой сервер.")
+        print(f"Данные по клиенту {item['client_name']} успешно отправлены на целевой сервер.")
     else:
-        print(f"Не удалось отправить данные по клиенту {item['Client']} на целевой сервер. Код ошибки: {response.text}")
+        print(f"Не удалось отправить данные по клиенту {item['client_name']} на целевой сервер. Код ошибки: {response.text}")
