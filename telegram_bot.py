@@ -371,9 +371,9 @@ def send_test_distribution(message, version):
     def send_test_distribution_email(message):
         send_test_email(version, recipient)
         bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
-        bot.remove_next_step_handler(message)  # Удаление обработчика клавиатуры ответов
+        bot.remove_handler(send_test_distribution_email)  # Удаление обработчика клавиатуры ответов
 
-    # Привязка функции-обработчика к соответствующему сообщению
+    # Удаление обработчика при переходе к следующему шагу диалога
     bot.register_next_step_handler(message, send_test_distribution_email)
 
 
