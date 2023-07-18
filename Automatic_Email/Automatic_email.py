@@ -119,7 +119,6 @@ def send_notification(version):
                     server.send_message(msg)
                     print(f"Почта была отправлена ​​на {', '.join(to)} с копией на {', '.join(cc)}")
                     bot_info_logger.info("Почта была отправлена ​​на %s с копией на %s", {', '.join(to)}, {', '.join(cc)})
-                    time.sleep(30) # Задержка в 30 секунду после каждого отправленного письма
 
                 # Отправка POST-запроса
                 post_data = {
@@ -136,6 +135,8 @@ def send_notification(version):
                 else:
                     print(f"POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
                     bot_info_logger.info("POST-запрос успешно отправлен и данные о рассылке сохранены в БД")
+
+                time.sleep(60) # Задержка в 60 секунду после каждого отправленного письма
 
     except Exception as error_message:
         print(f"Произошла общая ошибка: {error_message}")
