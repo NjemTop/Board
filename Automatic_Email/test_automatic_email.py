@@ -11,7 +11,7 @@ from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
 
-def send_test_email(version):
+def send_test_email(version, email_send):
     try:
         # Указываем путь к файлу с данными
         CONFIG_FILE = "./Main.config"
@@ -23,7 +23,7 @@ def send_test_email(version):
         # Создание письма
         msg = MIMEMultipart()
         msg['From'] = mail_settings['FROM']
-        msg['To'] = 'adenalka@gmail.com'
+        msg['To'] = email_send
         msg['Subject'] = 'Обновление BoardMaps {}'.format(version)
 
         # Загрузка и обработка HTML шаблона
@@ -66,4 +66,4 @@ def send_test_email(version):
 
 
 # Вызываем функцию отправки тестового письма
-send_test_email(2.65)
+# send_test_email(2.65, 'adenalka@gmail.com')

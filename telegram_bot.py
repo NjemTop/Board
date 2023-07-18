@@ -24,6 +24,7 @@ from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
 from Automatic_Email.Automatic_email import send_notification
+from Automatic_Email.test_automatic_email import send_test_email
 from System_func.send_telegram_message import Alert
 from YandexDocsMove import download_and_upload_pdf_files
 from DistrMoveFromShare import move_distr_and_manage_share
@@ -325,6 +326,7 @@ def clients_message(message_clients):
         bot.send_message(message_clients.chat.id, 'Какую информацию хотите получить?', reply_markup=button_clients)
     else:
         bot.send_message(message_clients.chat.id,"К сожалению, у Вас отсутствует доступ.")
+
 # Обработчик вызова /update
 @bot.message_handler(commands=['update'])
 def sd_sb_message(message_update):
@@ -334,6 +336,49 @@ def sd_sb_message(message_update):
         bot.send_message(message_update.chat.id, 'Выберите раздел:', reply_markup=button_SD_update)
     else:
         bot.send_message(message_update.chat.id,"К сожалению, у Вас отсутствует доступ.")
+
+# Обработчик вызова /test_send_distribution
+@bot.message_handler(commands=['test_send_distribution'])
+def test_send_distribution(message):
+    # Отправляем запрос на номер версии отправки рассылки
+    bot.send_message(message.chat.id, "Введите номер версии отправки тестовой рассылки:")
+
+    # Устанавливаем состояние ожидания номера версии
+    bot.register_next_step_handler(message, ask_recipient)
+
+def ask_recipient(message):
+    # Получаем номер версии от предыдущего сообщения
+    version = message.text
+
+    # Отправляем запрос на получателя рассылки
+    bot.send_message(message.chat.id, "Кому отправить тестовую рассылку?")
+
+    # Устанавливаем состояние ожидания получателя рассылки
+    bot.register_next_step_handler(message, send_test_distribution, version)
+
+def send_test_distribution(message, version):
+    chat_id = message.chat.id
+    recipient = message.text
+
+    bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient))
+
+    # Создайте клавиатуру с кнопкой "Отправить"
+    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    button_send = telebot.types.KeyboardButton(text="Отправить")
+    keyboard.add(button_send)
+
+    # Отправка сообщения с клавиатурой
+    bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
+
+    # Отправка тестовой рассылки при нажатии кнопки "Отправить"
+    @bot.message_handler(func=lambda message: message.text == "Отправить")
+    def send_test_distribution_email(message):
+        send_test_email(version, recipient)
+        bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
+
+    # Удаляем временный обработчик после использования
+    bot.remove_message_handler(send_test_distribution_email)
+
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
         "button_version", "cancel_button_version", "button_templates", "button_tele2", "button_psb", "button_rez", "button_pochtaR"])
