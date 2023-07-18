@@ -358,19 +358,23 @@ def ask_recipient(message, version):
 
     # Создание клавиатуры с кнопкой "Отправить"
     keyboard = telebot.types.InlineKeyboardMarkup()
-    button_send = telebot.types.InlineKeyboardButton(text="Отправить", callback_data="send_test_distribution")
+    button_send = telebot.types.InlineKeyboardButton(text="Отправить", callback_data="send_test_distribution|{}|{}".format(recipient, version))
     keyboard.add(button_send)
 
     bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
 
-@bot.callback_query_handler(func=lambda call: call.data == "send_test_distribution")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("send_test_distribution"))
 def send_test_distribution_email(callback_query):
     chat_id = callback_query.message.chat.id
-    recipient = callback_query.message.text.split()[-1]  # Извлечение почты получателя
-    version = callback_query.message.text.split()[-1]  # Извлечение номера версии
+    data = callback_query.data.split("|")
+    recipient = data[1]
+    version = data[2]
 
     send_test_email(version, recipient)  # Вызов функции отправки тестовой рассылки
-    bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient.rstrip('?')))
+    bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
+
+    # Отвечаем на запрос обратного вызова
+    bot.answer_callback_query(callback_query.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
