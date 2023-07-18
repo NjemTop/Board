@@ -339,24 +339,20 @@ def sd_sb_message(message_update):
 
 # Обработчик вызова /test_send_distribution
 @bot.message_handler(commands=['test_send_distribution'])
-def test_send_distribution(message):
-    # Отправляем запрос на номер версии отправки рассылки
-    bot.send_message(message.chat.id, "Введите номер версии отправки тестовой рассылки:")
+def handle_test_send_distribution(message):
+    chat_id = message.chat.id
 
-    # Устанавливаем состояние ожидания номера версии
-    bot.register_next_step_handler(message, ask_recipient)
+    bot.send_message(chat_id, "Введите номер версии отправки тестовой рассылки:")
+    bot.register_next_step_handler(message, ask_version)
 
-def ask_recipient(message):
-    # Получаем номер версии от предыдущего сообщения
+def ask_version(message):
+    chat_id = message.chat.id
     version = message.text
 
-    # Отправляем запрос на получателя рассылки
-    bot.send_message(message.chat.id, "Кому отправить тестовую рассылку?")
+    bot.send_message(chat_id, "Кому отправить тестовую рассылку?")
+    bot.register_next_step_handler(message, ask_recipient, version)
 
-    # Устанавливаем состояние ожидания получателя рассылки
-    bot.register_next_step_handler(message, send_test_distribution, version)
-
-def send_test_distribution(message, version):
+def ask_recipient(message, version):
     chat_id = message.chat.id
     recipient = message.text
 
@@ -367,15 +363,14 @@ def send_test_distribution(message, version):
 
     bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
 
-    # Определение функции-обработчика для кнопки "Отправить"
-    @bot.callback_query_handler(func=lambda call: call.data == "send_test_distribution")
-    def send_test_distribution_email(callback_query):
-        send_test_email(version, recipient)
-        bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
-        bot.answer_callback_query(callback_query.id)
+@bot.callback_query_handler(func=lambda call: call.data == "send_test_distribution")
+def send_test_distribution_email(callback_query):
+    chat_id = callback_query.message.chat.id
+    recipient = callback_query.message.text.split()[-1]  # Извлечение почты получателя
+    version = callback_query.message.text.split()[-1]  # Извлечение номера версии
 
-    # Удаление обработчика после использования
-    bot.remove_message_handler(send_test_distribution_email)
+    send_test_email(version, recipient)  # Вызов функции отправки тестовой рассылки
+    bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient.rstrip('?')))
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
