@@ -361,20 +361,21 @@ def send_test_distribution(message, version):
     recipient = message.text
 
     # Создание клавиатуры с кнопкой "Отправить"
-    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
-    button_send = telebot.types.KeyboardButton(text="Отправить")
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    button_send = telebot.types.InlineKeyboardButton(text="Отправить", callback_data="send_test_distribution")
     keyboard.add(button_send)
 
     bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
 
-    # Отправка тестовой рассылки при нажатии кнопки "Отправить"
-    def send_test_distribution_email(message):
+    # Определение функции-обработчика для кнопки "Отправить"
+    @bot.callback_query_handler(func=lambda call: call.data == "send_test_distribution")
+    def send_test_distribution_email(callback_query):
         send_test_email(version, recipient)
         bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
-        bot.remove_handler(send_test_distribution_email)  # Удаление обработчика клавиатуры ответов
+        bot.answer_callback_query(callback_query.id)
 
-    # Удаление обработчика при переходе к следующему шагу диалога
-    bot.register_next_step_handler(message, send_test_distribution_email)
+    # Удаление обработчика после использования
+    bot.remove_message_handler(send_test_distribution_email)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
