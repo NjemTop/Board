@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  web_server:
+    image: dr.boardmaps.ru/devops/dbsbot:latest
+    command: gunicorn --bind 0.0.0.0:3030 "web_server:create_app()" --access-logfile - --access-logformat '%(h)s - %(u)s [%(t)s] "%(r)s" %(s)s %(b)s "-" "%({User-Agent}i)s"'
+    ports:
+      - "3030:3030"
+    volumes:
+      - /mnt/swarm_volume_1/dbsbot/logs:/app/logs
+      - /mnt/swarm_volume_1/dbsbot/db-data:/var/lib/sqlite
+      - /mnt/swarm_volume_1/dbsbot/DataBase:/app/DataBase
+      - /mnt/swarm_volume_1/dbsbot/connection_files:/app/connection_files
+    environment:
+      - TZ=Europe/Moscow
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  telegram_bot:
+    image: dr.boardmaps.ru/devops/dbsbot:latest
+    privileged: true
+    ports:
+      - "8443:8443"
+    volumes:
+      - /mnt/windows_share:/windows_share
+      - /mnt/swarm_volume_1/dbsbot/logs:/app/logs
+      - /mnt/swarm_volume_1/dbsbot/db-data:/var/lib/sqlite
+      - /mnt/swarm_volume_1/dbsbot/DataBase:/app/DataBase
+      - /mnt/swarm_volume_1/dbsbot/connection_files:/app/connection_files
+    environment:
+      - TZ=Europe/Moscow
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  db:
+    image: dr.boardmaps.ru/devops/dbsbot-db:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - /mnt/swarm_volume_1/dbsbot/db-data:/var/lib/sqlite
+      - /mnt/swarm_volume_1/dbsbot/DataBase:/app/DataBase
+      - /mnt/swarm_volume_1/dbsbot/connection_files:/app/connection_files
+    deploy:
+      mode: replicated
+      replicas: 1
+    healthcheck:
+      test: ["CMD", "sqlite3", "/var/lib/sqlite/database.db", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
