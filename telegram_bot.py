@@ -360,10 +360,8 @@ def send_test_distribution(message, version):
     chat_id = message.chat.id
     recipient = message.text
 
-    bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient))
-
-    # Создайте клавиатуру с кнопкой "Отправить"
-    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    # Создание клавиатуры с кнопкой "Отправить"
+    keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
     button_send = telebot.types.KeyboardButton(text="Отправить")
     keyboard.add(button_send)
 
@@ -375,6 +373,7 @@ def send_test_distribution(message, version):
     def send_test_distribution_email(message):
         send_test_email(version, recipient)
         bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
+        bot.clear_reply_handlers()  # Удаление всех обработчиков клавиатуры ответов
 
     # Удаляем временный обработчик после использования
     bot.remove_message_handler(send_test_distribution_email)
