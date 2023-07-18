@@ -23,8 +23,13 @@ $CSS_STYLE = @"
 "@
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
-$TO = "oleg.eliseev@boardmaps.ru"
-#, "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
+$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
+
+### УКАЗЫВАЕМ ПУТЬ К ФАЙЛУ С КРЕДИТАМИ
+$CONFIG_FILE = "./Main.config"
+
+### ЧТЕНИЕ СОДЕРЖИМОГО ФАЙЛА И ПРЕОБРАЗОВАНИЕ ЕГО В ОБЪЕКТ
+$CONFIG = Get-Content $CONFIG_FILE | ConvertFrom-Json
 
 ### ИЗВЛЕКАЕМ ЗНАЧЕНИЕ API_KEY и API_SECRET
 $API_KEY = $CONFIG.HAPPYFOX_SETTINGS.API_KEY
@@ -101,7 +106,7 @@ if ($GET_JSON_RESPONSE_FULL_GROUP) {
         ### ВЫТЯНИМ ИНФОРМАЦИЮ О КОНТАКТ ГРУППЕ
         $GET_JSON_RESPONSE_GROUP = Invoke-RestMethod -Method Get -Uri "$HF_ENDPOINT/api/1.1/json/contact_group/$($ID_GROUP)/" -Headers $HEADERS -ContentType "application/json"
         ### ПРОВЕРИМ КЛИЕНТА НА ГОЛД ИЛИ ПЛАТИНУМ
-        if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum1") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold1")) {
+        if (($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Platinum") -or ($GET_JSON_RESPONSE_GROUP.tagged_domains -cmatch "Gold")) {
             ### ОБНУЛИМ СПИСОК РАССЫЛКИ КЛИЕНТОВ
             $COPY_EMAIL = $null
             $MAIN_EMAIL = $null

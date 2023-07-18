@@ -16,7 +16,7 @@ source_auth = ('Njem', 'Rfnzkj123123')
 target_auth = (CREG_USERNAME, CREG_PASSWORD)
 
 # URL-адреса
-source_url = 'http://195.2.80.251:3030/data_release/api/2.62'
+source_url = 'http://195.2.80.251:3030/data_release/api/2.63'
 target_url = 'http://10.6.75.81:8137/api/data_release/'
 
 # Получение данных с исходного сервера
@@ -31,14 +31,8 @@ else:
 
 # Преобразование данных в требуемый формат и отправка на целевой сервер
 for item in source_data:
-    # Установка даты в зависимости от версии
-    date = '2023-03-23' if item['Number'] == 2.62 else '2023-05-24' if item['Number'] == 2.63 else None
-    if date is None:
-        print(f"Неизвестная версия: {item['Number']}. Пропускаем.")
-        continue
-
     transformed_item = {
-        'date': '2023-06-28',
+        'date': '2023-06-28',  # Замена даты
         'release_number': 2.64,
         'client_name': item['Client'],
         'main_contact': item['Contacts']['Main'],
