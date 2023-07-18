@@ -23,7 +23,7 @@ $CSS_STYLE = @"
 "@
 
 ### ПОЧТЫ ДЛЯ ОТПРАВКИ ОТЧЕТА
-$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru", "dmitriy.chaban@boardmaps.ru"
+$TO = "oleg.eliseev@boardmaps.ru", "gleb.chechelnitskiy@boardmaps.ru"
 
 ### УКАЗЫВАЕМ ПУТЬ К ФАЙЛУ С КРЕДИТАМИ
 $CONFIG_FILE = "./Main.config"

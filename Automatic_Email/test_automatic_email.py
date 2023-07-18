@@ -66,4 +66,4 @@ def send_test_email(version):
 
 
 # Вызываем функцию отправки тестового письма
-send_test_email(2.64)
+send_test_email(2.65)

@@ -1,10 +1,17 @@
 from atlassian import Confluence
 from bs4 import BeautifulSoup
+import json
 
 def get_release_notes(version):
-    # Логин и пароль для доступа к Confluence
-    username = 'oeliseev'
-    password = '@*AB15de'
+    # Указываем путь к файлу с данными
+    CONFIG_FILE = "Main.config"
+    # Открываем файл и загружаем данные
+    with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+        data = json.load(file)
+
+    # Получаем учётные данные из конфиг-файла для доступа к Confluence
+    USERNAME = data["FILE_SHARE"]["USERNAME"]
+    PASSWORD = data["FILE_SHARE"]["PASSWORD"]
 
     # Адрес Confluence
     url = 'https://confluence.boardmaps.ru'
@@ -13,8 +20,8 @@ def get_release_notes(version):
         # Создаем объект Confluence
         confluence = Confluence(
             url=url,
-            username=username,
-            password=password)
+            username=USERNAME,
+            password=PASSWORD)
     except Exception as error_message:
         print(f"Не удалось создать объект Confluence: {str(error_message)}")
         return
@@ -58,7 +65,7 @@ def get_release_notes(version):
 
     return extract_list(server_page_content), extract_list(ipad_page_content)
 
-server_notes, ipad_notes = get_release_notes("2.64")
+server_notes, ipad_notes = get_release_notes("2.65")
 print("Server Release Notes:")
 for note in server_notes:
     print(note)
