@@ -200,7 +200,7 @@ class HappyFoxConnector:
                 text = message.get('text')
                 if text:
                     last_message = text
-                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
+                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M")
                     break
 
         if last_message:
