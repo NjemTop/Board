@@ -173,7 +173,8 @@ class HappyFoxConnector:
             """Функция по формированию данных об открытом тикете"""
             ticket_id = ticket_data.get('id')
             subject = ticket_data.get('subject')
-            company = ticket_data.get('user', {}).get('contact_groups', {}).get('name', 'Компания отсутствует')
+            contact_groups = ticket_data.get('user', {}).get('contact_groups', [])
+            company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
             status = ticket_data.get('status').get('name')
             assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
 
