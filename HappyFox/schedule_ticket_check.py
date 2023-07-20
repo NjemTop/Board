@@ -22,7 +22,7 @@ happyfox = HappyFoxConnector(config_file_path)
 
 # Создадим задачу на отправку алертов в чат
 schedule.every().day.at("10:25").do(happyfox.get_tickets)
-schedule.every().day.at("21:00").do(happyfox.get_open_tickets)
+schedule.every().day.at("21:10").do(happyfox.get_open_tickets)
 check_info_logger.info('Задача на отправку алертов по 3х дневным простоям создана на 10:25')
 check_info_logger.info('Задача на отправку информации об открытых тикетах создана на 10:30')
 
