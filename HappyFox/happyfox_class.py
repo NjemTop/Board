@@ -229,10 +229,12 @@ class HappyFoxConnector:
                 business_days += 1
             last_message_date += datetime.timedelta(days=1)
 
-        if business_days < 3:
-            date_emoji = emoji.emojize(':eight_o’clock:')
-        else:
+        if business_days > 7:
+            date_emoji = emoji.emojize(':no_entry:')
+        elif business_days > 3:
             date_emoji = emoji.emojize(':firecracker:')
+        else:
+            date_emoji = emoji.emojize(':eight_o’clock:')
 
         ticket_info = (
             f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
