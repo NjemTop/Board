@@ -219,14 +219,15 @@ class HappyFoxConnector:
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
-        today = datetime.date.today()
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        last_message_date = last_message_time.date().strftime("%Y-%m-%d")
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
         business_days = 0
-        while today != last_message_time.date():
+        while today != last_message_date:
             if is_business_day(today):
                 business_days += 1
-            today += timedelta(days=1)
+            today = (datetime.datetime.strptime(today, "%Y-%m-%d") + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
         if business_days > 3:
             date_emoji = emoji.emojize(':firecracker:')
@@ -239,7 +240,7 @@ class HappyFoxConnector:
             f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
             f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
             f"{date_emoji} Дата: {last_message_time.strftime('%d-%m-%Y %H:%M')}\n"
-            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n"
+            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n\n"
             f"{truncated_message}"
         )
         chat_id = "-1001742909092"
