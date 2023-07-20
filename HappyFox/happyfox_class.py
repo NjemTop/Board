@@ -220,11 +220,10 @@ class HappyFoxConnector:
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
         today = datetime.date.today()
-        last_message_date = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").date()
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
         business_days = 0
-        while today != last_message_date:
+        while today != last_message_time.date():
             if is_business_day(today):
                 business_days += 1
             today += timedelta(days=1)

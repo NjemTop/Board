@@ -1,4 +1,5 @@
 import schedule
+import subprocess
 import logging
 import datetime
 import time
@@ -26,9 +27,11 @@ happyfox = HappyFoxConnector(config_file_path)
 
 # Создадим задачу на отправку алертов в чат
 schedule.every().day.at("10:25").do(happyfox.get_tickets)
-schedule.every().day.at("21:20").do(happyfox.get_open_tickets)
+schedule.every().day.at("21:28").do(happyfox.get_open_tickets)
+schedule.every().sunday.at("00:00").do(subprocess.run, ['pip', 'install', '--upgrade', 'holidays'])
 check_info_logger.info('Задача на отправку алертов по 3-х дневным простоям создана на 10:25')
 check_info_logger.info('Задача на отправку информации об открытых тикетах создана на 10:30')
+check_info_logger.info('Задача на автоматическое обновление библиотеки holidays создана на каждое воскресенье в 00:00')
 
 def is_business_day(date):
     if date.weekday() >= 5 or date in ru_holidays:
