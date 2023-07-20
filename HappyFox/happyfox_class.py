@@ -185,7 +185,9 @@ class HappyFoxConnector:
             message = update.get('message')
             if message:
                 last_message = message.get('text')
-        
+                if "С уважением" in last_message:
+                    last_message = last_message.split("С уважением")[0]
+
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
