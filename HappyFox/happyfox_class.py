@@ -184,28 +184,27 @@ class HappyFoxConnector:
         updates = ticket_data.get('updates', [])
         last_message = None
         last_message_time = None
-        for update in reversed(updates):  # Проходим по массиву обновлений в обратном порядке
+        for update in reversed(updates):
             message = update.get('message')
             if message:
                 text = message.get('text')
                 if text:
-                    index = None
-                    # Проверяем наличие фразы "С уважением" в тексте сообщения
-                    if 'с уважением' in text.lower():
-                        index = text.lower().index('с уважением')
-                    # Если фраза "С уважением" не найдена, ищем фразу "From: Boardmaps Customer Support"
-                    elif 'from: boardmaps customer support' in text.lower():
-                        index = text.lower().index('from: boardmaps customer support')
+                    last_message = text
+                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
+                    break
 
-                    if index is not None:
-                        # Обрезаем сообщение до найденной фразы
-                        last_message = text[:index]
-                        last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
-                        break
-                    else:
-                        # Если не найдено ни "С уважением", ни "From: Boardmaps Customer Support", берем последнее сообщение
-                        last_message = text
-                        last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
+        if last_message:
+            index = None
+            # Проверяем наличие фразы "С уважением" в тексте сообщения
+            if 'с уважением' in last_message.lower():
+                index = last_message.lower().index('с уважением')
+            # Если фраза "С уважением" не найдена, ищем фразу "From: Boardmaps Customer Support"
+            elif 'from: boardmaps customer support' in last_message.lower():
+                index = last_message.lower().index('from: boardmaps customer support')
+
+            if index is not None:
+                # Обрезаем сообщение до найденной фразы
+                last_message = last_message[:index]
 
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
