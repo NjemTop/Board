@@ -219,7 +219,7 @@ class HappyFoxConnector:
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
-        today = datetime.datetime.today().date()
+        today = datetime.date.today()
         last_message_date = last_message_time.date().strftime("%Y-%m-%d")
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
