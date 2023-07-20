@@ -220,19 +220,19 @@ class HappyFoxConnector:
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
         today = datetime.date.today()
-        last_message_date = last_message_time.date().strftime("%Y-%m-%d")
+        last_message_date = last_message_time.date()
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
         business_days = 0
-        while last_message_date <= today.strftime("%Y-%m-%d"):
-            if is_business_day(datetime.datetime.strptime(last_message_date, "%Y-%m-%d").date()):
+        while today > last_message_date:
+            if is_business_day(last_message_date):
                 business_days += 1
-            last_message_date = (datetime.datetime.strptime(last_message_date, "%Y-%m-%d") + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+            last_message_date += datetime.timedelta(days=1)
 
         if business_days < 3:
-            date_emoji = emoji.emojize(':firecracker:')
-        else:
             date_emoji = emoji.emojize(':eight_o’clock:')
+        else:
+            date_emoji = emoji.emojize(':firecracker:')
 
         ticket_info = (
             f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
