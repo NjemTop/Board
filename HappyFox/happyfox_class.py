@@ -170,33 +170,31 @@ class HappyFoxConnector:
 
 
     def process_open_ticket(self, ticket_data):
-            """Функция по формированию данных об открытом тикете"""
-            ticket_id = ticket_data.get('id')
-            subject = ticket_data.get('subject')
-            contact_groups = ticket_data.get('user', {}).get('contact_groups', [])
-            company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
-            status = ticket_data.get('status').get('name')
-            assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
-            updates = ticket_data.get('updates')
+        """Функция по формированию данных об открытом тикете"""
+        ticket_id = ticket_data.get('id')
+        subject = ticket_data.get('subject')
+        contact_groups = ticket_data.get('user', {}).get('contact_groups', [])
+        company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
+        status = ticket_data.get('status').get('name')
+        assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
 
-            # Получаем последнее сообщение из массива "updates"
-            if updates:
-                last_message = updates[-1].get('message', {}).get('text')
+        # Получаем последнее сообщение из массива "updates"
+        updates = ticket_data.get('updates', [])
+        last_message = None
+        for update in updates:
+            message = update.get('message')
+            if message:
+                last_message = message.get('text')
+        
+        # Обрезаем сообщение до 500 символов
+        truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
-                if last_message is not None:
-                    # Обрезаем сообщение до 500 символов
-                    truncated_message = last_message[:500] + '...' if len(last_message) > 500 else last_message
+        ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
+        chat_id = "-1001742909092"
 
-                    ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
-                    chat_id = "-1001742909092"
-
-                    # Отправляем сообщение в телеграм-группу
-                    alert.send_telegram_message(chat_id, ticket_info)
-                    hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
-                else:
-                    hf_class_info_logger.info('Открытый тикет не содержит сообщений: %s', ticket_id)
-            else:
-                hf_class_info_logger.info('Открытый тикет не содержит обновлений: %s', ticket_id)
+        # Отправляем сообщение в телеграм-группу
+        alert.send_telegram_message(chat_id, ticket_info)
+        hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
 
 
     def process_ticket(self, ticket_data):
