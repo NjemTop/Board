@@ -1,12 +1,14 @@
 import requests
 import json
-import emoji
 import logging
+import emoji
+import holidays
 import datetime
 from datetime import timedelta
 from System_func.send_telegram_message import Alert
 from HappyFox.ticket_utils import TicketUtils
 from logger.log_config import setup_logger, get_abs_log_path
+
 
 # Указываем настройки логов для нашего файла с классами
 hf_class_error_logger = setup_logger('HF_class_Error', get_abs_log_path('hf_class-errors.log'), logging.ERROR)
@@ -14,6 +16,14 @@ hf_class_info_logger = setup_logger('HF_class_Info', get_abs_log_path('hf_class-
 
 # Создаем объект класса Alert
 alert = Alert()
+
+
+def is_business_day(date):
+    us_holidays = holidays.US()
+    if date.weekday() >= 5 or date in us_holidays:
+        return False
+    return True
+
 
 class HappyFoxConnector:
     def __init__(self, config_file):
@@ -209,12 +219,27 @@ class HappyFoxConnector:
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
+        today = datetime.date.today()
+        last_message_date = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").date()
+
+        # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
+        business_days = 0
+        while today != last_message_date:
+            if is_business_day(today):
+                business_days += 1
+            today += timedelta(days=1)
+
+        if business_days > 3:
+            date_emoji = emoji.emojize(':firecracker:')
+        else:
+            date_emoji = emoji.emojize(':eight_o’clock:')
+
         ticket_info = (
             f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
             f"{emoji.emojize(':department_store:')} Компания: {company}\n"
             f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
             f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
-            f"{emoji.emojize(':eight_o’clock:')} Дата: {last_message_time}\n"
+            f"{date_emoji} Дата: {last_message_time}\n"
             f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n"
             f"{truncated_message}"
         )
