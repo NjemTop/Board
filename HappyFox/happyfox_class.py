@@ -1,6 +1,8 @@
 import requests
 import json
+import emoji
 import logging
+import datetime
 from datetime import timedelta
 from System_func.send_telegram_message import Alert
 from HappyFox.ticket_utils import TicketUtils
@@ -181,22 +183,32 @@ class HappyFoxConnector:
         # Получаем последнее сообщение из массива "updates"
         updates = ticket_data.get('updates', [])
         last_message = None
+        last_message_time = None
         for update in updates:
             message = update.get('message')
             if message:
                 text = message.get('text')
-                if text and 'С уважением' in text:
+                if text and 'с уважением' in text.lower():
                     # Обрезаем сообщение до фразы "С уважением"
-                    index = text.index('С уважением')
+                    index = text.lower().index('с уважением')
                     last_message = text[:index]
+                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
                     break
                 else:
                     last_message = text
-        
+                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
+
         # Обрезаем сообщение до 500 символов
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
-        ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
+        ticket_info = (
+            f"{emoji.emojize(':check_mark_button:')} Тема: {subject}\n"
+            f"{emoji.emojize(':department_store:')} Компания: {company}\n"
+            f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
+            f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
+            f"{emoji.emojize(':eight_o’clock:')} Дата: {last_message_time}\n"
+            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение: {truncated_message}"
+        )
         chat_id = "-1001742909092"
 
         # Отправляем сообщение в телеграм-группу
