@@ -227,7 +227,7 @@ class HappyFoxConnector:
         while today != last_message_date:
             if is_business_day(today):
                 business_days += 1
-            today = today + datetime.timedelta(days=1)
+            today = (today + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
         if business_days > 3:
             date_emoji = emoji.emojize(':firecracker:')
