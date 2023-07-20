@@ -229,7 +229,7 @@ class HappyFoxConnector:
                 business_days += 1
             today = today + datetime.timedelta(days=1)
 
-        if business_days > 3:
+        if business_days < 3:
             date_emoji = emoji.emojize(':firecracker:')
         else:
             date_emoji = emoji.emojize(':eight_o’clock:')
