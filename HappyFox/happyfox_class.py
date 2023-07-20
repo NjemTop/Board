@@ -181,20 +181,22 @@ class HappyFoxConnector:
 
             # Получаем последнее сообщение из массива "updates"
             if updates:
-                last_update = updates[-1]
-                last_message = last_update.get('message', {}).get('text')
+                last_message = updates[-1].get('message', {}).get('text')
 
-                # Обрезаем сообщение до 500 символов
-                truncated_message = last_message[:500] + '...' if len(last_message) > 500 else last_message
+                if last_message is not None:
+                    # Обрезаем сообщение до 500 символов
+                    truncated_message = last_message[:500] + '...' if len(last_message) > 500 else last_message
 
-                ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
-                chat_id = "-1001742909092"
+                    ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
+                    chat_id = "-1001742909092"
 
-                # Отправляем сообщение в телеграм-группу
-                alert.send_telegram_message(chat_id, ticket_info)
-                hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
+                    # Отправляем сообщение в телеграм-группу
+                    alert.send_telegram_message(chat_id, ticket_info)
+                    hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
+                else:
+                    hf_class_info_logger.info('Открытый тикет не содержит сообщений: %s', ticket_id)
             else:
-                hf_class_info_logger.info('Открытый тикет не содержит сообщений: %s', ticket_id)
+                hf_class_info_logger.info('Открытый тикет не содержит обновлений: %s', ticket_id)
 
 
     def process_ticket(self, ticket_data):
