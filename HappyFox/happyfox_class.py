@@ -184,13 +184,13 @@ class HappyFoxConnector:
         updates = ticket_data.get('updates', [])
         last_message = None
         last_message_time = None
-        for update in reversed(updates):
+        for update in reversed(updates):  # Проходим по массиву обновлений в обратном порядке
             message = update.get('message')
             if message:
                 text = message.get('text')
-                if text and 'с уважением' in text.lower():
-                    # Обрезаем сообщение до фразы "С уважением"
-                    index = text.lower().index('с уважением')
+                if text and ('с уважением' in text.lower() or 'from: boardmaps customer support' in text.lower()):
+                    # Обрезаем сообщение до фразы "С уважением" или "From: Boardmaps Customer Support"
+                    index = min(text.lower().find('с уважением'), text.lower().find('from: boardmaps customer support'))
                     last_message = text[:index]
                     last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%H:%M, %d-%m-%Y")
                     break
@@ -213,7 +213,7 @@ class HappyFoxConnector:
 
         # Отправляем сообщение в телеграм-группу
         alert.send_telegram_message(chat_id, ticket_info)
-        hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
+        hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', chat_id)
 
 
     def process_ticket(self, ticket_data):
