@@ -215,7 +215,8 @@ class HappyFoxConnector:
             f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
             f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
             f"{emoji.emojize(':eight_o’clock:')} Дата: {last_message_time}\n"
-            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение: {truncated_message}"
+            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n"
+            f"{truncated_message}"
         )
         chat_id = "-1001742909092"
 
