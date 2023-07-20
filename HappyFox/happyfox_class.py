@@ -224,10 +224,10 @@ class HappyFoxConnector:
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
         business_days = 0
-        while today.strftime("%Y-%m-%d") <= last_message_date:
-            if is_business_day(datetime.datetime.strptime(str(today), "%Y-%m-%d").date()):
+        while last_message_date <= today.strftime("%Y-%m-%d"):
+            if is_business_day(datetime.datetime.strptime(last_message_date, "%Y-%m-%d").date()):
                 business_days += 1
-            today = today + datetime.timedelta(days=1)
+            last_message_date = (datetime.datetime.strptime(last_message_date, "%Y-%m-%d") + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
         if business_days < 3:
             date_emoji = emoji.emojize(':firecracker:')
