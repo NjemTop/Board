@@ -183,27 +183,34 @@ class HappyFoxConnector:
 
     def process_open_ticket(self, ticket_data):
         """Функция по формированию данных об открытом тикете"""
-        ticket_id = ticket_data.get('id')
-        subject = ticket_data.get('subject')
-        contact_groups = ticket_data.get('user', {}).get('contact_groups', [])
-        company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
-        status = ticket_data.get('status').get('name')
-        assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
+        try:
+            ticket_id = ticket_data.get('id')
+            subject = ticket_data.get('subject')
+            contact_groups = ticket_data.get('user', {}).get('contact_groups', [])
+            company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
+            status = ticket_data.get('status').get('name')
+            assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
 
-        # Получаем последнее сообщение из массива "updates"
-        updates = ticket_data.get('updates', [])
-        last_message = None
-        last_message_time = None
-        for update in reversed(updates):
-            message = update.get('message')
-            if message:
-                text = message.get('text')
-                if text:
-                    last_message = text
-                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S")
-                    break
+            # Получаем последнее сообщение из массива "updates"
+            updates = ticket_data.get('updates', [])
+            if not updates:
+                hf_class_error_logger.error("Нет доступных обновлений для тикета с ID: %s", ticket_id)
+                return
+            last_message = None
+            last_message_time = None
+            for update in reversed(updates):
+                message = update.get('message')
+                if message:
+                    text = message.get('text')
+                    if text:
+                        last_message = text
+                        last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S")
+                        break
 
-        if last_message:
+            if not last_message or not last_message_time:
+                hf_class_error_logger.error("Нет доступной информации о последнем сообщении для тикета с ID: %s", ticket_id)
+                return
+
             index = None
             # Проверяем наличие фразы "С уважением" в тексте сообщения
             if 'с уважением' in last_message.lower():
@@ -216,40 +223,49 @@ class HappyFoxConnector:
                 # Обрезаем сообщение до найденной фразы
                 last_message = last_message[:index]
 
-        # Обрезаем сообщение до 500 символов
-        truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
+            # Обрезаем сообщение до 500 символов
+            truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
-        today = datetime.date.today()
-        last_message_date = last_message_time.date()
+            today = datetime.date.today()
+            last_message_date = last_message_time.date()
 
-        # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
-        business_days = 0
-        while today > last_message_date:
-            if is_business_day(last_message_date):
-                business_days += 1
-            last_message_date += datetime.timedelta(days=1)
+            if today <= last_message_date:
+                hf_class_error_logger.error("Некорректная дата последнего сообщения для тикета с ID: %s", ticket_id)
+                return
 
-        if business_days > 7:
-            date_emoji = emoji.emojize(':no_entry:')
-        elif business_days > 3:
-            date_emoji = emoji.emojize(':firecracker:')
-        else:
-            date_emoji = emoji.emojize(':eight_o’clock:')
+            # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
+            business_days = 0
+            while today > last_message_date:
+                if is_business_day(last_message_date):
+                    business_days += 1
+                last_message_date += datetime.timedelta(days=1)
 
-        ticket_info = (
-            f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
-            f"{emoji.emojize(':department_store:')} Компания: {company}\n"
-            f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
-            f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
-            f"{date_emoji} Дата: {last_message_time.strftime('%d-%m-%Y %H:%M')}\n"
-            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n\n"
-            f"{truncated_message}"
-        )
-        chat_id = "-1001742909092"
+            if business_days > 7:
+                date_emoji = emoji.emojize(':no_entry:')
+            elif business_days > 3:
+                date_emoji = emoji.emojize(':firecracker:')
+            else:
+                date_emoji = emoji.emojize(':eight_o’clock:')
 
-        # Отправляем сообщение в телеграм-группу
-        alert.send_telegram_message(chat_id, ticket_info)
-        hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', chat_id)
+            ticket_info = (
+                f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
+                f"{emoji.emojize(':department_store:')} Компания: {company}\n"
+                f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
+                f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
+                f"{date_emoji} Дата: {last_message_time.strftime('%d-%m-%Y %H:%M')}\n"
+                f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n\n"
+                f"{truncated_message}"
+            )
+            chat_id = "-1001742909092"
+
+            # Отправляем сообщение в телеграм-группу
+            if alert.send_telegram_message(chat_id, ticket_info):
+                hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', chat_id)
+            else:
+                hf_class_error_logger.error("Ошибка отправки информации о тикете с ID: %s в группу: %s", ticket_id, chat_id)
+
+        except Exception as error_message:
+            hf_class_error_logger.error("Произошла ошибка при обработке тикета с ID: %s - %s", ticket_id, str(error_message))
 
 
     def process_ticket(self, ticket_data):
