@@ -184,7 +184,7 @@ class HappyFoxConnector:
         updates = ticket_data.get('updates', [])
         last_message = None
         last_message_time = None
-        for update in updates:
+        for update in reversed(updates):
             message = update.get('message')
             if message:
                 text = message.get('text')
@@ -202,7 +202,7 @@ class HappyFoxConnector:
         truncated_message = last_message[:500] + '...' if last_message and len(last_message) > 500 else last_message
 
         ticket_info = (
-            f"{emoji.emojize(':check_mark_button:')} Тема: {subject}\n"
+            f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
             f"{emoji.emojize(':department_store:')} Компания: {company}\n"
             f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
             f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"

@@ -40,7 +40,12 @@ subject = 'Просим оказать содействие с установк�
 client_name = 'Дмитрий Попов'
 priority_name = 'Medium'
 assignee_name = 'Oleg Eliseev'
+assigned_name = 'Oleg Eliseev'
 client_email = 'Email'
+company = 'Тестовое название компании'
+status = 'In Progress'
+last_message_time = '07:41, 11-07-2023'
+truncated_message = 'Тут большое сообщение в ограничение 500 символов'
 agent_ticket_url = 'https://boardmaps.happyfox.com/staff/ticket/6280'
 ping_ticket_message = (
     f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *три* часа.\n"
@@ -90,4 +95,14 @@ alert_message_for_release = (
     f"https://creg.boardmaps.ru/\n\n"
     f"Всем спасибо!"
 )
-send_telegram_message(320851571, alert_message_for_release)
+
+ticket_info = (
+            f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
+            f"{emoji.emojize(':department_store:')} Компания: {company}\n"
+            f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
+            f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
+            f"{emoji.emojize(':eight_o’clock:')} Дата: {last_message_time}\n"
+            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение: {truncated_message}"
+        )
+
+send_telegram_message(320851571, ticket_info)
