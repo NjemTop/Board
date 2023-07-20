@@ -200,7 +200,7 @@ class HappyFoxConnector:
                 text = message.get('text')
                 if text:
                     last_message = text
-                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S").strftime("%d-%m-%Y %H:%M")
+                    last_message_time = datetime.datetime.strptime(update['timestamp'], "%Y-%m-%d %H:%M:%S")
                     break
 
         if last_message:
@@ -238,7 +238,7 @@ class HappyFoxConnector:
             f"{emoji.emojize(':department_store:')} Компания: {company}\n"
             f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
             f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
-            f"{date_emoji} Дата: {last_message_time}\n"
+            f"{date_emoji} Дата: {last_message_time.strftime('%d-%m-%Y %H:%M')}\n"
             f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n"
             f"{truncated_message}"
         )
