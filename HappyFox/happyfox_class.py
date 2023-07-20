@@ -29,6 +29,7 @@ class HappyFoxConnector:
         self.api_secret = data_config['HAPPYFOX_SETTINGS']['API_SECRET']
         self.headers = {'Content-Type': 'application/json'}
 
+
     def get_filtered_tickets(self, start_date, end_date, contact_group_id):
         """
         Функция для получения списка тикетов, отфильтрованных по заданным параметрам:
@@ -76,7 +77,8 @@ class HappyFoxConnector:
             page += 1
         hf_class_info_logger.info('Вывод тикеты отправлены')
         return all_tickets
-    
+
+
     def get_tickets(self):
         """Функция проверки тикетов, у которых нет ответа"""
         hf_class_info_logger.info('Задача запущена')
@@ -120,7 +122,79 @@ class HappyFoxConnector:
                 data = response.json()
                 for ticket_data in data.get('data'):
                     self.process_ticket(ticket_data)
-                    
+
+
+    def get_open_tickets(self):
+        """Функция получения информации об открытых тикетах"""
+        hf_class_info_logger.info('Задача запущена (информация об открытых тикетах)')
+        params = {
+            'category': '1',
+            'status': '_pending',
+        }
+        url = self.api_endpoint + '/tickets/?size=1&page=1'
+        try:
+            response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as error_message:
+                hf_class_error_logger.error("Ошибка HTTP запроса: %s", error_message)
+                return
+        except requests.exceptions.Timeout as error_message:
+            hf_class_error_logger.error("Ошибка тайм-аута: %s", error_message)
+        except requests.exceptions.RequestException as error_message:
+            hf_class_error_logger.error("Общая ошибка: %s", error_message)
+        
+        data_res = response.json()
+        page_info = data_res.get('page_info')
+        last_index = page_info.get('last_index')
+        if last_index == 0:
+            print('Нет открытых тикетов')
+        else:
+            for page in range(last_index):
+                url = self.api_endpoint + f'/tickets/?size=1&page={page + 1}'
+                # проверка на доступность сервера, если сервер недоступен, выводит ошибку
+                try:
+                    response = requests.get(url, auth=(self.api_key, self.api_secret), headers=self.headers, params=params, timeout=10)
+                    try:
+                        response.raise_for_status()
+                    except requests.exceptions.HTTPError as error_message:
+                        hf_class_error_logger.error("Ошибка HTTP запроса: %s", error_message)
+                        return
+                except requests.exceptions.Timeout as error_message:
+                    hf_class_error_logger.error("Ошибка тайм-аута: %s", error_message)
+                except requests.exceptions.RequestException as error_message:
+                    hf_class_error_logger.error("Общая ошибка: %s", error_message)
+                data = response.json()
+                for ticket_data in data.get('data'):
+                    self.process_open_ticket(ticket_data)
+
+
+    def process_open_ticket(self, ticket_data):
+            """Функция по формированию данных об открытом тикете"""
+            ticket_id = ticket_data.get('id')
+            subject = ticket_data.get('subject')
+            company = ticket_data.get('user', {}).get('contact_groups', {}).get('name', 'Компания отсутствует')
+            status = ticket_data.get('status').get('name')
+            assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
+
+            # Получаем последнее сообщение из массива "updates"
+            if updates:
+                last_update = updates[-1]
+                last_message = last_update.get('message', {}).get('text')
+
+                # Обрезаем сообщение до 500 символов
+                truncated_message = last_message[:500] + '...' if len(last_message) > 500 else last_message
+
+                ticket_info = f"Тема: {subject}\nКомпания: {company}\nСтатус: {status}\nНазначен: {assigned_name}\nДата+Сообщение: {truncated_message}"
+                chat_id = "-1001742909092"
+
+                # Отправляем сообщение в телеграм-группу
+                alert.send_telegram_message(chat_id, ticket_info)
+                hf_class_info_logger.info('Информация об открытом тикете отправлена в группу: %s', ticket_id)
+            else:
+                hf_class_info_logger.info('Открытый тикет не содержит сообщений: %s', ticket_id)
+
+
     def process_ticket(self, ticket_data):
         """Функция по формированию данных из тикета"""
         status = ticket_data.get('status').get('behavior')
