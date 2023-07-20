@@ -17,3 +17,4 @@ peewee_migrate==1.7.1
 flask-swagger-ui==4.11.1
 emoji==2.2.0
 atlassian-python-api==3.39.0
+holidays==0.29
