@@ -177,6 +177,7 @@ class HappyFoxConnector:
             company = contact_groups[0].get('name', 'Компания отсутствует') if contact_groups else 'Компания отсутствует'
             status = ticket_data.get('status').get('name')
             assigned_name = ticket_data.get('assigned_to', {}).get('name', 'Нет исполнителя')
+            updates = ticket_data.get('updates')
 
             # Получаем последнее сообщение из массива "updates"
             if updates:
