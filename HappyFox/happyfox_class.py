@@ -196,6 +196,7 @@ class HappyFoxConnector:
             if not updates:
                 hf_class_error_logger.error("Нет доступных обновлений для тикета с ID: %s", ticket_id)
                 return
+
             last_message = None
             last_message_time = None
             for update in reversed(updates):
@@ -228,10 +229,6 @@ class HappyFoxConnector:
 
             today = datetime.date.today()
             last_message_date = last_message_time.date()
-
-            if today <= last_message_date:
-                hf_class_error_logger.error("Некорректная дата последнего сообщения для тикета с ID: %s", ticket_id)
-                return
 
             # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
             business_days = 0
