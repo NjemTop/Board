@@ -93,7 +93,7 @@ class HappyFoxConnector:
 
     def get_tickets(self):
         """Функция проверки тикетов, у которых нет ответа"""
-        hf_class_info_logger.info('Задача запущена')
+        hf_class_info_logger.info('Задача запущена (информация о не отвеченных тикетах за 3 дня)')
         params = {
             'category': '1',
             'status': '_pending',
@@ -224,7 +224,7 @@ class HappyFoxConnector:
 
         # Вычисляем количество рабочих дней между текущей датой и датой последнего сообщения
         business_days = 0
-        while today.strftime("%Y-%m-%d") != last_message_date:
+        while today.strftime("%Y-%m-%d") <= last_message_date:
             if is_business_day(datetime.datetime.strptime(str(today), "%Y-%m-%d").date()):
                 business_days += 1
             today = today + datetime.timedelta(days=1)
