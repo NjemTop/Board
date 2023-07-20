@@ -19,8 +19,8 @@ alert = Alert()
 
 
 def is_business_day(date):
-    us_holidays = holidays.US()
-    if date.weekday() >= 5 or date in us_holidays:
+    ru_holidays = holidays.RU()
+    if date.weekday() >= 5 or date in ru_holidays:
         return False
     return True
 
