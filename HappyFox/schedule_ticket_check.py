@@ -34,7 +34,7 @@ check_info_logger.info('Задача на отправку информации 
 check_info_logger.info('Задача на автоматическое обновление библиотеки holidays создана на каждое воскресенье в 00:00')
 
 def is_business_day(date):
-    if date.weekday() >= 5 or date in ru_holidays:
+    if date.weekday() >= 5 or date in ru_holidays or date.weekday() == 0:
         return False
     return True
 
