@@ -37,7 +37,7 @@ def get_release_notes(version):
     except Exception as error_message:
         print(f"Не удалось получить страницы: {str(error_message)}")
         return
-    
+
     if server_page_content is None:
         print(f"Статья для сервера '{server_title}' не найдена")
         return
@@ -65,10 +65,10 @@ def get_release_notes(version):
 
     return extract_list(server_page_content), extract_list(ipad_page_content)
 
-server_notes, ipad_notes = get_release_notes("2.65")
-print("Server Release Notes:")
-for note in server_notes:
-    print(note)
-print("\niPad Release Notes:")
-for note in ipad_notes:
-    print(note)
+# server_notes, ipad_notes = get_release_notes("2.68")
+# print("Server Release Notes:")
+# for note in server_notes:
+#     print(note)
+# print("\niPad Release Notes:")
+# for note in ipad_notes:
+#     print(note)

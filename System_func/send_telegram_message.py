@@ -34,7 +34,7 @@ class Alert():
         data = {
             'chat_id': alert_chat_id,
             'text': f'{alert_text}',
-            'parse_mode': 'Markdown'
+            'parse_mode': 'HTML'
         }
         # Отправляем запрос через наш бот
         response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)

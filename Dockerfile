@@ -1,44 +1,32 @@
-FROM python:3.10
+FROM python:3.10-slim
 
-# Устанавливаем PowerShell
-RUN wget -q https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN apt-get update && apt-get install -y powershell
-
-# Устанавливаем локаль ru_RU.UTF-8
 RUN apt-get update && \
-    apt-get install -y locales && \
+    apt-get install -y locales wget && \
     echo "ru_RU.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen ru_RU.UTF-8 && \
-    update-locale LANG=ru_RU.UTF-8
-ENV LANG ru_RU.UTF-8
-ENV LANGUAGE ru_RU:en
-ENV LC_ALL ru_RU.UTF-8
-
-# Создаём папку на хост машине в директории проекта
-RUN mkdir -p ./backup
-
-# Копируем файлы проекта в контейнер
-COPY . /app
-
-# Создаем директорию logs внутри контейнера
-RUN mkdir -p /app/logs
-
-# Создаем директорию backup внутри контейнера
-RUN mkdir -p /app/backup
-
-# Обновляем pip
-RUN pip install --upgrade pip
-
-# Устанавливаем зависимости
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Очищаем кэш и обновляем список пакетов
-RUN apt-get clean && \
+    update-locale LANG=ru_RU.UTF-8 && \
+    wget -q https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get install -y powershell && \
+    apt-get clean && \
     apt-get update --fix-missing
 
-# Задаем рабочую директорию
+RUN mkdir -p ./backup && \
+    mkdir -p /app/logs && \
+    mkdir -p /app/backup
+
+RUN apt-get update && \
+    apt-get install -y smbclient cifs-utils
+
+RUN mkdir /mnt/windows_share
+
+ENV LANG=ru_RU.UTF-8 LANGUAGE=ru_RU:en LC_ALL=ru_RU.UTF-8
+
+COPY . /app
+
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
 WORKDIR /app
 
-# Запускаем команду для запуска приложения
 CMD ["python", "main.py"]

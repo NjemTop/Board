@@ -5,6 +5,7 @@ import emoji
 import holidays
 import datetime
 from datetime import timedelta
+from Web_Server.web_config import CONFIG_FILE
 from System_func.send_telegram_message import Alert
 from HappyFox.ticket_utils import TicketUtils
 from logger.log_config import setup_logger, get_abs_log_path
@@ -255,7 +256,11 @@ class HappyFoxConnector:
                 f"{emoji.emojize(':envelope_with_arrow:')} Сообщение:\n\n"
                 f"{truncated_message}"
             )
-            chat_id = "-1001742909092"
+             # открываем файл и загружаем данные
+            with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as file:
+                data = json.load(file)
+            # извлекаем значения GROUP_TICKETS из SEND_ALERT
+            chat_id = data['SEND_ALERT']['GROUP_TICKETS']
 
             # Отправляем сообщение в телеграм-группу
             if alert.send_telegram_message(chat_id, ticket_info):

@@ -23,11 +23,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
-from Automatic_Email.Automatic_email import send_notification
+from Automatic_Email.Automatic_email import send_notification_v2, send_notification_v3
 from Automatic_Email.test_automatic_email import send_test_email
 from System_func.send_telegram_message import Alert
-from YandexDocsMove import download_and_upload_pdf_files
-from DistrMoveFromShare import move_distr_and_manage_share
+from scripts.YandexDocsMove import download_and_upload_pdf_files, update_local_documentation
+from scripts.DistrMoveFromShare import move_distr_and_manage_share
+from scripts.SkinMoveFromShare import move_skins_and_manage_share
 from DataBase.database_result_update import upload_db_result
 from Telegram_Bot.ButtonClasses.button_clients import ButtonClients
 from Telegram_Bot.ButtonClasses.button_update import ButtonUpdate
@@ -337,9 +338,9 @@ def sd_sb_message(message_update):
     else:
         bot.send_message(message_update.chat.id,"К сожалению, у Вас отсутствует доступ.")
 
-# Обработчик вызова /test_send_distribution
-@bot.message_handler(commands=['test_send_distribution'])
-def handle_test_send_distribution(message):
+# Обработчик вызова /test_mailing
+@bot.message_handler(commands=['test_mailing'])
+def handle_test_mailing(message):
     chat_id = message.chat.id
 
     bot.send_message(chat_id, "Введите номер версии отправки тестовой рассылки:")
@@ -369,6 +370,17 @@ def send_test_distribution_email(callback_query):
     data = callback_query.data.split("|")
     recipient = data[1]
     version = data[2]
+
+    # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
+    updated_folder_paths = [folder_path.format(version_SB=version) for folder_path in YANDEX_DISK_FOLDERS]
+    # Запускаем скрипт на скачивание доков "Список изменений"
+    update_local_documentation(YANDEX_OAUTH_TOKEN, version, updated_folder_paths)
+    bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version)
+
+    # bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем, номер версии рассылки: %s", version)
+    # move_distr_and_manage_share(version)
+    # bot_info_logger.info("Запуск скрипта по перемещению файлов скинов клиентов, номер версии рассылки: %s", version)
+    # move_skins_and_manage_share(version)
 
     send_test_email(version, recipient)  # Вызов функции отправки тестовой рассылки
     print("Была отправлена тестовая рассылка на почту:", recipient)
@@ -511,13 +523,16 @@ def inline_button_SD_update(call):
             updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
             # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
             bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
+            # download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
             # Запускаем процесс перемещения дистрибутива на NextCloud
             bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            move_distr_and_manage_share(version_release)
+            # move_distr_and_manage_share(version_release)
             bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+            # Запускаем скрипт на скачивание доков "Список изменений"
+            update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
+            bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
             # Запускаем скрипт по отправке рассылки клиентам
-            send_notification(version_release)
+            send_notification_v3(version_release)
             # извлекаем значения GROUP_RELEASE из SEND_ALERT
             alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
             # Формируем сообщение для отправки в группу
@@ -525,9 +540,9 @@ def inline_button_SD_update(call):
                 f"{emoji.emojize(':check_mark_button:')} "
                 f"{emoji.emojize(':check_mark_button:')} "
                 f"{emoji.emojize(':check_mark_button:')}\n\n"
-                f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
-                f"Отчёт по рассылке можно посмотреть здесь:\n"
-                f"https://creg.boardmaps.ru/\n\n"
+                f"Рассылка о релизе версии <b>BM {version_release}</b> успешно отправлена!\n\n"
+                f"Отчёт по рассылке можно посмотреть "
+                f'<a href="https://creg.boardmaps.ru/release_info/">здесь</a>.\n\n'
                 f"Всем спасибо!"
             )
             # Отправляем сообщение в телеграм-бот
@@ -539,18 +554,7 @@ def inline_button_SD_update(call):
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes.add(main_menu, row_width=2)
         bot_info_logger.info("Рассылка клиентам успешно отправлена.")
-        bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. Файл с результатами отправлен на почту.', reply_markup=button_choise_yes)   
-        try:
-            os.remove(f'/app/logs/report_send({version_release}).log')
-        except FileNotFoundError as error_message:
-            bot_error_logger.error('Файл не найден: %s', error_message)
-            print('Файл не найден: %s', error_message)
-        except PermissionError as error_message:
-            bot_error_logger.error('Недостаточно прав для удаления файла: %s', error_message)
-            print('Недостаточно прав для удаления файла: %s', error_message)
-        except OSError as error_message:
-            bot_error_logger.error('Ошибка при удалении файла: %s', error_message)
-            print('Ошибка при удалении файла: %s', error_message)
+        bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)   
     elif call.data == "cancel_SD_update":
         user_states[call.message.chat.id] = "canceled"
         # Возвращаемся на уровень выше

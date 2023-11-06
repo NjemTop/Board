@@ -1,6 +1,7 @@
 import requests
 import json
 import emoji
+from urllib.parse import quote
 
 # Указываем путь к файлу с данными
 CONFIG_FILE = "Main.config"
@@ -27,7 +28,7 @@ def send_telegram_message(alert_chat_id, alert_text):
     data = {
         'chat_id': alert_chat_id,
         'text': f'{alert_text}',
-        'parse_mode': 'Markdown'
+        'parse_mode': 'HTML'
     }
     # Отправляем запрос через наш бот
     response = requests.post(url, headers=headers_server, data=json.dumps(data), timeout=30)
@@ -40,15 +41,13 @@ subject = 'Просим оказать содействие с установк�
 client_name = 'Дмитрий Попов'
 priority_name = 'Medium'
 assignee_name = 'Oleg Eliseev'
-assigned_name = 'Oleg Eliseev'
 client_email = 'Email'
-company = 'Тестовое название компании'
-status = 'In Progress'
-last_message_time = '07:41, 11-07-2023'
-truncated_message = 'Тут большое сообщение в ограничение 500 символов'
+display_id = '#BCS00006630'
 agent_ticket_url = 'https://boardmaps.happyfox.com/staff/ticket/6280'
 ping_ticket_message = (
-    f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{ticket_id}]({agent_ticket_url}) без ответа *три* часа.\n"
+    f"{emoji.emojize(':red_exclamation_mark:')} Тикет "
+    f'<a href="{agent_ticket_url}">{display_id}</a> '
+    f'<b>час</b> без ответа.\n'
     f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
     f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
     f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -57,7 +56,7 @@ ping_ticket_message = (
 
 ticket_message = (
     f"{emoji.emojize(':hand_with_fingers_splayed:')}Новое сообщение в тикете "
-    f"[{ticket_id}]({agent_ticket_url})\n"
+    f'<a href="{agent_ticket_url}">{display_id}</a>.\n'
     f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
     f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
     f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -83,26 +82,15 @@ alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
 
 print(alert_chat_id)
 
-version_release = 2.65
+version_release = 2.68
 
 alert_message_for_release = (
     f"{emoji.emojize(':check_mark_button:')} "
     f"{emoji.emojize(':check_mark_button:')} "
     f"{emoji.emojize(':check_mark_button:')}\n\n"
-    f"Рассылка версии *BM {version_release}* успешно отправлена!\n\n"
-    f"Отчёт по рассылки можно посмотреть в разделе\n"
-    f'"Информация об отправке релиза" здесь:\n'
-    f"https://creg.boardmaps.ru/\n\n"
+    f"Рассылка о релизе версии <b>BM {version_release}</b> успешно отправлена!\n\n"
+    f"Отчёт по рассылке можно посмотреть "
+    f'<a href="https://creg.boardmaps.ru/release_info/">здесь</a>.\n\n'
     f"Всем спасибо!"
 )
-
-ticket_info = (
-            f"{emoji.emojize(':eyes:')} Тема: {subject}\n"
-            f"{emoji.emojize(':department_store:')} Компания: {company}\n"
-            f"{emoji.emojize(':credit_card:')} Статус: {status}\n"
-            f"{emoji.emojize(':disguised_face:')} Назначен: {assigned_name}\n"
-            f"{emoji.emojize(':eight_o’clock:')} Дата: {last_message_time}\n"
-            f"{emoji.emojize(':envelope_with_arrow:')} Сообщение: {truncated_message}"
-        )
-
-send_telegram_message(320851571, ticket_info)
+send_telegram_message(alert_chat_id, alert_message_for_release)

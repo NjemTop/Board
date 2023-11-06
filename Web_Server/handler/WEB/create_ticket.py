@@ -1,6 +1,6 @@
 import json
 import logging
-from flask import request, Response
+from flask import request, Response, jsonify
 import emoji
 from Web_Server.function import parse_json_message
 from Web_Server.web_config import CONFIG_FILE
@@ -26,11 +26,18 @@ def handler_get_create_ticket():
 def handler_post_create_ticket():
         """Функция обработки создания тикета из HappyFox"""
         try:
-            message = request.data.decode('utf-8')
-            # парсим JSON-строку
-            json_data, error = parse_json_message(message)
-            if error:
-                return error, 400
+            # message = request.data.decode('utf-8')
+            # web_info_logger.info("Содержимое запроса: %s", message)
+
+            json_data = request.get_json()
+            if not json_data:
+                web_error_logger.error("JSON не найден в запросе.")
+                return Response("JSON не найден в запросе.", status=400)
+
+            # # парсим JSON-строку
+            # json_data, error = parse_json_message(message)
+            # if error:
+            #     return error, 400
             # находим значения для ключей
             display_id = json_data.get("display_id")
             subject = json_data.get("subject")
@@ -41,7 +48,7 @@ def handler_post_create_ticket():
             # отправляем сообщение в телеграм-бот
             new_ticket_message = (
                 f"{emoji.emojize(':tired_face:')} Новый тикет: "
-                f"[{display_id}]({agent_ticket_url})\n"
+                f'<a href="{agent_ticket_url}">{display_id}</a>\n'
                 f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')} Автор: {client_name} ({client_email})\n"
                 f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"

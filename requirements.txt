@@ -18,3 +18,5 @@ flask-swagger-ui==4.11.1
 emoji==2.2.0
 atlassian-python-api==3.39.0
 holidays==0.29
+graypy==2.1.0
+Werkzeug==2.2.2

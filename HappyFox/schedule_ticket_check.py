@@ -27,24 +27,43 @@ happyfox = HappyFoxConnector(config_file_path)
 
 # Создадим задачу на отправку алертов в чат
 schedule.every().day.at("10:25").do(happyfox.get_tickets)
-schedule.every().day.at("10:30").do(happyfox.get_open_tickets)
-schedule.every().sunday.at("00:00").do(subprocess.run, ['pip', 'install', '--upgrade', 'holidays'])
+# schedule.every().day.at("10:30").do(happyfox.get_open_tickets)
 check_info_logger.info('Задача на отправку алертов по 3-х дневным простоям создана на 10:25')
-check_info_logger.info('Задача на отправку информации об открытых тикетах создана на 10:30')
-check_info_logger.info('Задача на автоматическое обновление библиотеки holidays создана на каждое воскресенье в 00:00')
+# check_info_logger.info('Задача на отправку информации об открытых тикетах создана на 10:30')
 
 def is_business_day(date):
-    if date.weekday() >= 5 or date in ru_holidays or date.weekday() == 0:
+    if date.weekday() >= 5 or date in ru_holidays:
         return False
     return True
+
+def update_holidays_library():
+    subprocess.run(['pip', 'install', '--upgrade', 'holidays'])
+
+check_info_logger.info('Задача на автоматическое обновление библиотеки holidays создана на каждое воскресенье в 00:00')
 
 def start_check_tickets():
     while True:
         # Получаем текущую дату и время
         now = datetime.datetime.now()
-        # Проверяем, является ли текущий день рабочим (будним)
-        if is_business_day(now):
-            # Запускаем отложенные задачи
-            schedule.run_pending()
+        # Проверяем, является ли текущий день воскресеньем
+        if now.weekday() == 6 and now.hour == 0 and now.minute == 0:
+            # Если это воскресенье в 00:00, выполняем задачу обновления библиотеки
+            update_holidays_library()
+        else:
+            # Если текущее время не соответствует 00:00 воскресенья, выполняем другие задачи
+            if is_business_day(now):
+                # Запускаем отложенные задачи
+                schedule.run_pending()
         # Ждём 1 секунду перед проверкой снова
         time.sleep(1)
+
+# def start_check_tickets():
+#     while True:
+#         # Получаем текущую дату и время
+#         now = datetime.datetime.now()
+#         # Проверяем, является ли текущий день рабочим (будним)
+#         if is_business_day(now):
+#             # Запускаем отложенные задачи
+#             schedule.run_pending()
+#         # Ждём 1 секунду перед проверкой снова
+#         time.sleep(1)

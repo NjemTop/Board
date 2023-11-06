@@ -8,8 +8,8 @@ services:
     volumes:
       - ./logs:/app/logs
       - db-data:/var/lib/sqlite
-      - bot_tg_backup:/app/backup
       - db-files:/app/DataBase
+      - connection_files:/app/connection_files
     restart: always
     environment:
       - TZ=Europe/Moscow
@@ -23,10 +23,13 @@ services:
     container_name: telegram_bot
     ports:
       - "8443:8443"
+    privileged: true
     volumes:
+      - /mnt/windows_share:/mnt/windows_share
       - ./logs:/app/logs
       - db-data:/var/lib/sqlite
       - db-files:/app/DataBase
+      - connection_files:/app/connection_files
     restart: always
     environment:
       - TZ=Europe/Moscow
@@ -42,6 +45,7 @@ services:
     volumes:
       - db-data:/var/lib/sqlite
       - db-files:/app/DataBase
+      - connection_files:/app/connection_files
     restart: always
     ports:
       - "5000:5000"
@@ -64,15 +68,15 @@ networks:
 
 volumes:
   db-data:
-  bot_tg_backup:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/backup
-      o: bind
   db-files:
     driver: local
     driver_opts:
       type: none
       device: ${PWD}/DataBase
+      o: bind
+  connection_files:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/connection_files
       o: bind

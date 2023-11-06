@@ -72,13 +72,13 @@ if __name__ == '__main__':
         server_address = ('0.0.0.0', 3030)
         app = create_app()
 
-        # # Запуск миграций и логирование
-        # try:
-        #     migrations.create_migrations()
-        #     web_info_logger.info("Миграции успешно выполнены")
-        # except Exception as migration_error:
-        #     web_error_logger.error("Ошибка при выполнении миграций: %s", migration_error)
-        #     raise migration_error
+        # Запуск миграций и логирование
+        try:
+            migrations.create_migrations()
+            web_info_logger.info("Миграции успешно выполнены")
+        except Exception as migration_error:
+            web_error_logger.error("Ошибка при выполнении миграций: %s", migration_error)
+            raise migration_error
 
         web_info_logger.info('Сервер запущен. Порт работы: %s', server_address[1])
         app.run(host=server_address[0], port=server_address[1], debug=True)

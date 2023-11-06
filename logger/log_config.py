@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
+import graypy
 import os
 
 def get_abs_log_path(log_filename):
@@ -31,5 +32,10 @@ def setup_logger(logger_name, log_file, level=logging.INFO, max_size=10, backup_
     # Удаляем все обработчики, если они уже есть, и добавляем новый
     logger.handlers = []
     logger.addHandler(handler)
+
+    # Добавляем обработчик для отправки логов в Graylog через GELF
+    graylog_handler = graypy.GELFTCPHandler('10.6.75.81', port=12201)
+    graylog_handler.facility = 'telegram_bot'
+    logger.addHandler(graylog_handler)
 
     return logger

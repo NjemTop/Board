@@ -58,7 +58,7 @@ def handle_client_reply(json_data):
         # Формируем сообщение в текст отправки
         ticket_message = (
             f"{emoji.emojize(':hand_with_fingers_splayed:')}Новое сообщение в тикете "
-            f"[{display_id}]({agent_ticket_url})\n"
+            f'<a href="{agent_ticket_url}">{display_id}</a>.\n'
             f"{emoji.emojize(':man_tipping_hand:')}Тема: {subject}\n"
             f"{emoji.emojize(':man_mechanic:')}Автор: {client_name}\n"
             f"{emoji.emojize(':high_voltage:')}Приоритет: {priority_name}\n"
@@ -138,7 +138,9 @@ def handle_unresponded_info_60(json_data):
         if unresponded_info.get("name") == "Unresponded for 60 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) *час* без ответа.\n"
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет "
+                f'<a href="{agent_ticket_url}">{display_id}</a> '
+                f'<b>час</b> без ответа.\n'
                 f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
@@ -180,7 +182,9 @@ def handle_unresponded_info_120(json_data):
         if unresponded_info.get("name") == "Unresponded for 120 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':red_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *два* часа.\n"
+                f"{emoji.emojize(':red_exclamation_mark:')} Тикет "
+                f'<a href="{agent_ticket_url}">{display_id}</a> '
+                f'<b>два часа</b> без ответа.\n'
                 f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
@@ -223,7 +227,9 @@ def handle_unresponded_info_180(json_data):
         if unresponded_info.get("name") == "Unresponded for 180 min":
             # Формируем сообщение в текст отправки
             ping_ticket_message = (
-                f"{emoji.emojize(':double_exclamation_mark:')} Тикет [{display_id}]({agent_ticket_url}) без ответа *три* часа.\n"
+                f"{emoji.emojize(':double_exclamation_mark:')} Тикет "
+                f'<a href="{agent_ticket_url}">{display_id}</a> '
+                f'<b>три часа</b> без ответа.\n'
                 f"{emoji.emojize(':man_tipping_hand:')} Тема: {subject}\n"
                 f"{emoji.emojize(':man_mechanic:')} Автор: {client_name}\n"
                 f"{emoji.emojize(':high_voltage:')} Приоритет: {priority_name}\n"
