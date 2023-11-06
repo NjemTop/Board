@@ -9,14 +9,6 @@
     </header_footer>
   </user>
   <user>
-    <access email="dmitriy.chaban@boardmaps.ru" />
-    <header_footer id="4">
-      <name>Dmitriy Chaban</name>
-      <role id="1">Admin</role>
-      <chat_id>596907325</chat_id>
-    </header_footer>
-  </user>
-  <user>
     <access email="gleb.chechelnitskiy@boardmaps.ru" />
     <header_footer id="6">
       <name>Gleb Chechelnitskiy</name>
