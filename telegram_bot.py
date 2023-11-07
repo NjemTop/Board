@@ -506,9 +506,8 @@ def inline_button_SD_update(call):
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
     elif call.data == "pre_button_release":
         """ УРОВЕНЬ 3: ОТПРАВИТЬ РАССЫЛКУ. """
-        bot.edit_message_text('Отлично', call.message.chat.id, call.message.message_id)
-        #pre_button_release = ButtonUpdate.pre_button_release()
-        #bot.edit_message_text('Выберите тип рассылки:', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
+        pre_button_release = ButtonUpdate.pre_button_release()
+        bot.edit_message_text('Выберите тип рассылки:', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
     elif call.data == "pre_button_release_standart":
         pre_button_release_standart = ButtonUpdate.pre_button_release_standart()
         ask_version_update = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60 или 3.6.', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release_standart)
