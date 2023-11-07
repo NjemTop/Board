@@ -519,9 +519,13 @@ def inline_button_SD_update(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        elif version_release in "2.":
-            bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-            try:
+        else:
+            button_choise_yes = types.InlineKeyboardMarkup()
+            button_choise_yes_cancel = types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            button_choise_yes.add(button_choise_yes_cancel, main_menu, row_width=2)
+            if "2." in version_release:
+                bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
                 # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
                 updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
@@ -550,14 +554,12 @@ def inline_button_SD_update(call):
                     f"Всем спасибо!"
                 )
                 # Отправляем сообщение в телеграм-бот
-                alert.send_telegram_message(alert_chat_id, alert_message_for_release)
+                # alert.send_telegram_message(alert_chat_id, alert_message_for_release)
                 bot_info_logger.info("Рассылка клиентам успешно отправлена.")
-                bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)
-            except subprocess.CalledProcessError as error_message:
-                bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
-                bot.send_message(call.from_user.id, text=f'Произошла ошибка при отправке рассылки: {error_message}', reply_markup=button_choise_yes)
-        elif version_release in "3.":
-            try:
+                bot.send_message(call.from_user.id, text='Выберите действие:', reply_markup=button_choise_yes)
+                bot.edit_message_text(f'Процесс отправки рассылки {version_release} завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', call.message.chat.id, call.message.message_id)
+            elif "3." in version_release:
+                bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
                 # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
                 updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
@@ -586,15 +588,12 @@ def inline_button_SD_update(call):
                     f"Всем спасибо!"
                 )
                 # Отправляем сообщение в телеграм-бот
-                alert.send_telegram_message(alert_chat_id, alert_message_for_release)
+                # alert.send_telegram_message(alert_chat_id, alert_message_for_release)
                 bot_info_logger.info("Рассылка клиентам успешно отправлена.")
-                bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)
-            except subprocess.CalledProcessError as error_message:
-                bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
-                bot.send_message(call.from_user.id, text=f'Произошла ошибка при отправке рассылки: {error_message}', reply_markup=button_choise_yes)
-        button_choise_yes = types.InlineKeyboardMarkup()
-        main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_choise_yes.add(main_menu, row_width=2)
+                bot.send_message(call.from_user.id, text='Выберите действие:', reply_markup=button_choise_yes)
+                bot.edit_message_text(f'Процесс отправки рассылки {version_release} завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', call.message.chat.id, call.message.message_id)
+            else:
+                bot.send_message(call.from_user.id, text=f'Ничего нет, пошёл нахер!{version_release}', reply_markup=button_choise_yes)
     elif call.data == "pre_button_release_filter":
         bot.edit_message_text('На ремонте', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
     elif call.data == "cancel_SD_update":
@@ -834,3 +833,5 @@ def start_telegram_bot():
     except Exception as error_message:
         print(f"Общая ошибка в Telegram bot: {error_message}")
         bot_error_logger.error("Общая ошибка в Telegram bot: %s", error_message)
+
+start_telegram_bot()
