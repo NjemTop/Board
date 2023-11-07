@@ -506,7 +506,11 @@ def inline_button_SD_update(call):
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
     elif call.data == "pre_button_release":
         """ УРОВЕНЬ 3: ОТПРАВИТЬ РАССЫЛКУ. """
-        pre_button_release = ButtonUpdate.pre_button_release()
+        pre_button_release = types.InlineKeyboardMarkup()
+        pre_button_release_standart = types.InlineKeyboardButton(text='Отправить стандартную рассылку', callback_data='pre_button_release_standart')
+        pre_button_release_filter = types.InlineKeyboardButton(text='Отправить рассылку клиентам с учетом фильтра', callback_data='pre_button_release_filter')
+        pre_button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update')
+        pre_button_release.add(pre_button_release_standart, pre_button_release_filter, pre_button_release_cancel, row_width=1)
         bot.edit_message_text('Выберите тип рассылки:', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
     elif call.data == "pre_button_release_standart":
         pre_button_release_standart = ButtonUpdate.pre_button_release_standart()
