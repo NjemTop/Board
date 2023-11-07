@@ -516,45 +516,82 @@ def inline_button_SD_update(call):
         if support_response_id is None:
             bot.edit_message_text('У Вас нет прав на отправку рассылки. Пожалуйста, обратитесь к администратору.', call.message.chat.id, call.message.message_id)
             return
-        bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
-        try:
-            name_who_run_script = get_name_by_chat_id(call.message.chat.id)
-            # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
-            updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
-            # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
-            bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            # download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
-            # Запускаем процесс перемещения дистрибутива на NextCloud
-            bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            # move_distr_and_manage_share(version_release)
-            bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
-            # Запускаем скрипт на скачивание доков "Список изменений"
-            update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
-            bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
-            # Запускаем скрипт по отправке рассылки клиентам
-            send_notification_v3(version_release)
-            # извлекаем значения GROUP_RELEASE из SEND_ALERT
-            alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
-            # Формируем сообщение для отправки в группу
-            alert_message_for_release = (
-                f"{emoji.emojize(':check_mark_button:')} "
-                f"{emoji.emojize(':check_mark_button:')} "
-                f"{emoji.emojize(':check_mark_button:')}\n\n"
-                f"Рассылка о релизе версии <b>BM {version_release}</b> успешно отправлена!\n\n"
-                f"Отчёт по рассылке можно посмотреть "
-                f'<a href="https://creg.boardmaps.ru/release_info/">здесь</a>.\n\n'
-                f"Всем спасибо!"
-            )
-            # Отправляем сообщение в телеграм-бот
-            alert.send_telegram_message(alert_chat_id, alert_message_for_release)
-        except subprocess.CalledProcessError as error_message:
-            bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
-            print("Ошибка запуска скрипта по отправке рассылки:", error_message)
+        elif version_release in "2.":
+            bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
+            try:
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
+                updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
+                # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
+                bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
+                # Запускаем процесс перемещения дистрибутива на NextCloud
+                bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # move_distr_and_manage_share(version_release)
+                bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # Запускаем скрипт на скачивание доков "Список изменений"
+                update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
+                bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
+                # Запускаем скрипт по отправке рассылки клиентам
+                send_notification_v2(version_release)
+                # извлекаем значения GROUP_RELEASE из SEND_ALERT
+                alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
+                # Формируем сообщение для отправки в группу
+                alert_message_for_release = (
+                    f"{emoji.emojize(':check_mark_button:')} "
+                    f"{emoji.emojize(':check_mark_button:')} "
+                    f"{emoji.emojize(':check_mark_button:')}\n\n"
+                    f"Рассылка о релизе версии <b>BM {version_release}</b> успешно отправлена!\n\n"
+                    f"Отчёт по рассылке можно посмотреть "
+                    f'<a href="https://creg.boardmaps.ru/release_info/">здесь</a>.\n\n'
+                    f"Всем спасибо!"
+                )
+                # Отправляем сообщение в телеграм-бот
+                alert.send_telegram_message(alert_chat_id, alert_message_for_release)
+                bot_info_logger.info("Рассылка клиентам успешно отправлена.")
+                bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)
+            except subprocess.CalledProcessError as error_message:
+                bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
+                bot.send_message(call.from_user.id, text=f'Произошла ошибка при отправке рассылки: {error_message}', reply_markup=button_choise_yes)
+        elif version_release in "3.":
+            try:
+                name_who_run_script = get_name_by_chat_id(call.message.chat.id)
+                # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
+                updated_folder_paths = [folder_path.format(version_SB=version_release) for folder_path in YANDEX_DISK_FOLDERS]
+                # Запускаем процесс перемещения предыдущей папки документации в другую директорию и создания и заполнения новой папки документации
+                bot_info_logger.info("Запуск скрипта по перемещению документации, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # download_and_upload_pdf_files(YANDEX_OAUTH_TOKEN, NEXTCLOUD_URL, NEXTCLOUD_USER, NEXTCLOUD_PASSWORD, version_release, updated_folder_paths)
+                # Запускаем процесс перемещения дистрибутива на NextCloud
+                bot_info_logger.info("Запуск скрипта по перемещению дистрибутива, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # move_distr_and_manage_share(version_release)
+                bot_info_logger.info("Запуск скрипта по отправке рассылки, пользователем: %s, номер версии рассылки: %s", name_who_run_script, version_release)
+                # Запускаем скрипт на скачивание доков "Список изменений"
+                update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
+                bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
+                # Запускаем скрипт по отправке рассылки клиентам
+                send_notification_v3(version_release)
+                # извлекаем значения GROUP_RELEASE из SEND_ALERT
+                alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
+                # Формируем сообщение для отправки в группу
+                alert_message_for_release = (
+                    f"{emoji.emojize(':check_mark_button:')} "
+                    f"{emoji.emojize(':check_mark_button:')} "
+                    f"{emoji.emojize(':check_mark_button:')}\n\n"
+                    f"Рассылка о релизе версии <b>BM {version_release}</b> успешно отправлена!\n\n"
+                    f"Отчёт по рассылке можно посмотреть "
+                    f'<a href="https://creg.boardmaps.ru/release_info/">здесь</a>.\n\n'
+                    f"Всем спасибо!"
+                )
+                # Отправляем сообщение в телеграм-бот
+                alert.send_telegram_message(alert_chat_id, alert_message_for_release)
+                bot_info_logger.info("Рассылка клиентам успешно отправлена.")
+                bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)
+            except subprocess.CalledProcessError as error_message:
+                bot_error_logger.error("Ошибка запуска скрипта по отправке рассылки: %s", error_message)
+                bot.send_message(call.from_user.id, text=f'Произошла ошибка при отправке рассылки: {error_message}', reply_markup=button_choise_yes)
         button_choise_yes = types.InlineKeyboardMarkup()
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes.add(main_menu, row_width=2)
-        bot_info_logger.info("Рассылка клиентам успешно отправлена.")
-        bot.send_message(call.from_user.id, text='Процесс отправки рассылки завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', reply_markup=button_choise_yes)   
     elif call.data == "cancel_SD_update":
         user_states[call.message.chat.id] = "canceled"
         # Возвращаемся на уровень выше
