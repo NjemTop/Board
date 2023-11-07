@@ -4,28 +4,36 @@ class ButtonUpdate():
     def button_SD_update():
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Локализация | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
         button_SD_update = types.InlineKeyboardMarkup()
-        button_release = types.InlineKeyboardButton(text='Отправить рассылку', callback_data='button_release')
+        pre_button_release = types.InlineKeyboardButton(text='Отправить рассылку', callback_data='pre_button_release')
         button_localizable = types.InlineKeyboardButton(text='Локализация', callback_data='button_localizable')
         button_reply_request = types.InlineKeyboardButton(text='Повторный запрос сервисного окна (G&P)', callback_data='button_reply_request')
         button_update_statistics = types.InlineKeyboardButton(text='Статистика по тикетам', callback_data='button_update_statistics')
         back_from_mainmenu = types.InlineKeyboardButton(text= 'Назад', callback_data='mainmenu')
-        button_SD_update.add(button_release, button_localizable, button_reply_request, button_update_statistics, back_from_mainmenu, row_width=1)
+        button_SD_update.add(pre_button_release, button_localizable, button_reply_request, button_update_statistics, back_from_mainmenu, row_width=1)
         return button_SD_update
-    def button_release():
-        """переход к вопросу "напишите номер версии". и дальше по списку"""
-        button_release = types.InlineKeyboardMarkup()
-        button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update')
-        button_release.add(button_release_cancel, row_width=1)
-        return button_release
+    def pre_button_release():
+        """переход к выбору типа рассылки"""
+        pre_button_release = types.InlineKeyboardMarkup()
+        pre_button_release_standart = types.InlineKeyboardButton(text='Отправить стандартную рассылку', callback_data='pre_button_release_standart')
+        pre_button_release_filter = types.InlineKeyboardButton(text='Отправить рассылку клиентам с учетом фильтра', callback_data='pre_button_release_filter')
+        pre_button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='cancel_SD_update')
+        pre_button_release.add(pre_button_release_standart, pre_button_release_filter, pre_button_release_cancel, row_width=1)
+        return pre_button_release
+    def pre_button_release_standart():
+        """при выборе стандартной рассылки, переход к "напишите номер версии". и дальше по списку"""
+        pre_button_release_standart = types.InlineKeyboardMarkup()
+        pre_button_release_cancel = types.InlineKeyboardButton(text= 'Отмена', callback_data='pre_button_release')
+        pre_button_release_standart.add(pre_button_release_cancel, row_width=1)
+        return pre_button_release_standart
     def correct_version_release(version_release):
-        button_release = types.InlineKeyboardMarkup()
+        pre_button_release_standart = types.InlineKeyboardMarkup()
         button_choise_yes = types.InlineKeyboardButton(text= 'Да', callback_data='button_choise_yes')
-        button_release.add(button_choise_yes, row_width=1)
-        back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
+        pre_button_release_standart.add(button_choise_yes, row_width=1)
+        back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release')
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-        button_release.add(back_from_result_update_version, main_menu, row_width=2)
+        pre_button_release_standart.add(back_from_result_update_version, main_menu, row_width=2)
         question = 'Просьба проверить, корректна ли тема будущей рассылки: "Обновление BoardMaps ' + str(version_release)  + '". \n\n Для запуска процесса формирования тикетов,нажмите "Да". Если тема некорректна, нажмите "Главное меню".'
-        return button_release, question
+        return pre_button_release_standart, question
 
     def button_localizable():
         """переход к списку клиентов для создания файла локализации"""

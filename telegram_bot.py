@@ -498,16 +498,19 @@ def inline_button_clients(call):
     elif call.data == "cancel_button_pr":
         user_states[call.message.chat.id] = "canceled"
 # Добавляем подуровни к разделу Обновление версии
-@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable", "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
+@bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "pre_button_release", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable", "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
 def inline_button_SD_update(call):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
         button_SD_update = ButtonUpdate.button_SD_update()
         bot.edit_message_text('Выберите раздел:', call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
-    elif call.data == "button_release":
-        """ УРОВЕНЬ 3: ОБНОВЛЕНИЕ ВЕРСИИ. """
-        button_release = ButtonUpdate.button_release()
-        ask_version_update = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60.', call.message.chat.id, call.message.message_id,reply_markup=button_release)
+    elif call.data == "pre_button_release":
+        """ УРОВЕНЬ 3: ОТПРАВИТЬ РАССЫЛКУ. """
+        pre_button_release = ButtonUpdate.pre_button_release()
+        bot.edit_message_text('Выберите тип рассылки:', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
+    elif call.data == "pre_button_release_standart":
+        pre_button_release_standart = ButtonUpdate.pre_button_release_standart()
+        ask_version_update = bot.edit_message_text('Пожалуйста, напишите в чат номер версии. Пример: 2.60 или 3.6.', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release_standart)
         user_states[call.message.chat.id] = "waiting_for_client_name"
         bot.register_next_step_handler(ask_version_update, send_text_for_create)
     elif call.data == "button_choise_yes":
@@ -592,6 +595,8 @@ def inline_button_SD_update(call):
         button_choise_yes = types.InlineKeyboardMarkup()
         main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
         button_choise_yes.add(main_menu, row_width=2)
+    elif call.data == "pre_button_release_filter":
+        bot.edit_message_text('На ремонте', call.message.chat.id, call.message.message_id,reply_markup=pre_button_release)
     elif call.data == "cancel_SD_update":
         user_states[call.message.chat.id] = "canceled"
         # Возвращаемся на уровень выше
@@ -644,14 +649,14 @@ def send_text_for_create(result_update_version):
         global version_release
         version_release = result_update_version.text 
         if '.' in version_release:
-            button_release, question = ButtonUpdate.correct_version_release(version_release)
-            bot.send_message(result_update_version.from_user.id, text=question, reply_markup=button_release)   
+            pre_button_release_standart, question = ButtonUpdate.correct_version_release(version_release)
+            bot.send_message(result_update_version.from_user.id, text=question, reply_markup=pre_button_release_standart)   
         else:
-            button_release = types.InlineKeyboardMarkup()
-            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='button_release')
+            pre_button_release_standart = types.InlineKeyboardMarkup()
+            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release_standart')
             main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
-            button_release.add(back_from_result_update_version, main_menu, row_width=2)
-            bot.send_message(result_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=button_release) 
+            pre_button_release_standart.add(back_from_result_update_version, main_menu, row_width=2)
+            bot.send_message(result_update_version.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=pre_button_release_standart) 
     else:
         pass
 
