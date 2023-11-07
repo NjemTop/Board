@@ -833,5 +833,3 @@ def start_telegram_bot():
     except Exception as error_message:
         print(f"Общая ошибка в Telegram bot: {error_message}")
         bot_error_logger.error("Общая ошибка в Telegram bot: %s", error_message)
-
-start_telegram_bot()
