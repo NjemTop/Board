@@ -543,7 +543,7 @@ def inline_button_clients(call):
         user_states[call.message.chat.id] = "canceled"
 # Добавляем подуровни к разделу Обновление версии
 @bot.callback_query_handler(func=lambda call: call.data in ["button_SD_update", "pre_button_release", "pre_button_release_standart", "pre_button_release_filter", "button_choise_yes", "cancel_SD_update", "button_localizable", "button_AFK_localizable", "button_reply_request", "button_reply_request_yes", "button_update_statistics", "cancel_SD_update_statistics", "button_update_statistics_yes"])
-def inline_button_SD_update(call):
+def inline_button_SD_update(call, version_release_mobile):
     if call.data == "button_SD_update":
         """ УРОВЕНЬ 2: ОБНОВЛЕНИЕ ВЕРСИИ. Добавляем кнопки [ Отправить рассылку | Повторный запрос сервисного окна (G&P) | Статистика по тикетам ] """
         button_SD_update = ButtonUpdate.button_SD_update()
@@ -568,7 +568,8 @@ def inline_button_SD_update(call):
             button_choise_yes_cancel = types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release')
             main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
             button_choise_yes.add(button_choise_yes_cancel, main_menu, row_width=2)
-            if "2." in version_release:
+            version_prefix = version_release.split('.')[0]
+            if version_prefix == '2':
                 bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
                 # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
@@ -602,7 +603,7 @@ def inline_button_SD_update(call):
                 bot_info_logger.info("Рассылка клиентам успешно отправлена.")
                 bot.send_message(call.from_user.id, text='Выберите действие:', reply_markup=button_choise_yes)
                 bot.edit_message_text(f'Процесс отправки рассылки {version_release} завершен. В группу релизов отправлено сообщение (Отчёт в Creg отправлен).', call.message.chat.id, call.message.message_id)
-            elif "3." in version_release:
+            elif version_prefix == '3':
                 bot.edit_message_text('Отлично! Начат процесс отправки рассылки. Пожалуйста, ожидайте.', call.message.chat.id, call.message.message_id)
                 name_who_run_script = get_name_by_chat_id(call.message.chat.id)
                 # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
@@ -618,7 +619,7 @@ def inline_button_SD_update(call):
                 update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
                 bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
                 # Запускаем скрипт по отправке рассылки клиентам
-                send_notification(version_release)
+                send_notification(version_release_mobile)
                 # извлекаем значения GROUP_RELEASE из SEND_ALERT
                 alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
                 # Формируем сообщение для отправки в группу
@@ -684,6 +685,26 @@ def inline_button_SD_update(call):
             bot_error_logger.error("Ошибка запуска скрипта по формированию статистики: %s", error_message)
         bot.edit_message_text(('Статистика по обновлению версии  "' + str(version_stat) + '" :\n' + str(result.stdout)), call.message.chat.id, call.message.message_id,reply_markup=button_SD_update)
 # ФУНКЦИИ К КНОПКЕ СОЗДАНИЯ ТИКЕТОВ [общ.]
+
+@bot.chosen_inline_handler(func=lambda answer_3_mobile_version: True)
+def answer_3_mobile_version(mobile_version_number, version_release):
+    """Функция по обработке номера версии от пользака и подтверждению темы"""
+    user_answer_for_3x = user_states.get(mobile_version_number.chat.id)
+    if user_answer_for_3x == "waiting_for_client_name":
+        version_release_mobile = mobile_version_number.text 
+        version_prefix = version_release_mobile.split('.')[0]
+        if version_prefix == '2':
+            pre_button_release_standart, question = ButtonUpdate.correct_version_release(version_release)
+            bot.send_message(mobile_version_number.from_user.id, text=question, reply_markup=pre_button_release_standart) 
+        else:
+            pre_button_release_standart = types.InlineKeyboardMarkup()
+            back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release_standart')
+            main_menu = types.InlineKeyboardButton(text= 'Главное меню', callback_data='mainmenu')
+            pre_button_release_standart.add(back_from_result_update_version, main_menu, row_width=2)
+            bot.send_message(mobile_version_number.from_user.id, text='Запрос не соответствует условиям. Пожалуйста, вернитесь назад и повторите попытку.', reply_markup=pre_button_release_standart)     
+    else:
+        pass
+
 @bot.chosen_inline_handler(func=lambda result_update_version: True)
 def send_text_for_create(result_update_version):
     """Функция по обработке номера версии от пользака и подтверждению темы"""
@@ -691,9 +712,13 @@ def send_text_for_create(result_update_version):
     if user_state == "waiting_for_client_name":
         global version_release
         version_release = result_update_version.text 
-        if '.' in version_release:
+        version_prefix = version_release.split('.')[0]
+        if version_prefix == '2':
             pre_button_release_standart, question = ButtonUpdate.correct_version_release(version_release)
-            bot.send_message(result_update_version.from_user.id, text=question, reply_markup=pre_button_release_standart)   
+            bot.send_message(result_update_version.from_user.id, text=question, reply_markup=pre_button_release_standart)  
+        elif version_prefix == '3':
+            ask_mobile_vers = bot.send_message(result_update_version.from_user.id, text='Пожалуйста, укажите номер версии обновления мобильного приложения.', reply_markup=pre_button_release_standart)
+            bot.register_next_step_handler(ask_mobile_vers, answer_3_mobile_version)
         else:
             pre_button_release_standart = types.InlineKeyboardMarkup()
             back_from_result_update_version= types.InlineKeyboardButton(text= 'Назад', callback_data='pre_button_release_standart')
