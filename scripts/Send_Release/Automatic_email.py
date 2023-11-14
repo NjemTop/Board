@@ -13,7 +13,7 @@ from email import encoders
 import logging
 from logger.log_config import setup_logger, get_abs_log_path
 import time
-from scripts.Automatic_Email.Confluence_get_info import get_release_notes
+from scripts.Send_Release.Confluence_get_info import get_release_notes
 
 
 # Указываем настройки логов для нашего файла с классами

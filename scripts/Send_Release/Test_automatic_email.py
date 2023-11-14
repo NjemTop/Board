@@ -11,7 +11,7 @@ from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
 from email.utils import make_msgid
-from scripts.Automatic_Email.Confluence_get_info import get_release_notes
+from scripts.Send_Release.Confluence_get_info import get_release_notes
 
 
 def format_updates_to_html(updates):
