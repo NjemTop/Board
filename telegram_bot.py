@@ -23,8 +23,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.header import Header
 from writexml import create_xml
-from Automatic_Email.Automatic_email import send_notification_v2, send_notification_v3
-from Automatic_Email.test_automatic_email import send_test_email
+from scripts.Send_Release.Automatic_email import send_notification
+from scripts.Send_Release.Test_automatic_email import send_test_email
 from System_func.send_telegram_message import Alert
 from scripts.YandexDocsMove import download_and_upload_pdf_files, update_local_documentation
 from scripts.DistrMoveFromShare import move_distr_and_manage_share
@@ -341,36 +341,65 @@ def sd_sb_message(message_update):
 # Обработчик вызова /test_mailing
 @bot.message_handler(commands=['test_mailing'])
 def handle_test_mailing(message):
+    """
+    Эта функция обрабатывает команду /test_mailing в Telegram боте.
+    Когда пользователь вводит эту команду, функция отправляет сообщение
+    с просьбой ввести номер версии рассылки и устанавливает следующий обработчик шага на ask_version.
+    """
     chat_id = message.chat.id
 
     bot.send_message(chat_id, "Введите номер версии отправки тестовой рассылки:")
     bot.register_next_step_handler(message, ask_version)
 
 def ask_version(message):
+    """
+    Функция запрашивает у пользователя номер версии. 
+    Если версия начинается с 3, бот дополнительно запрашивает релиз мобильной версии.
+    В противном случае переходит к запросу адреса для отправки рассылки.
+    """
     chat_id = message.chat.id
     version = message.text
 
-    bot.send_message(chat_id, "Кому отправить тестовую рассылку?")
-    bot.register_next_step_handler(message, ask_recipient, version)
+    version_prefix = version.split('.')[0]
+    if version_prefix == '3':
+        msg = bot.send_message(chat_id, "Какой релиз мобильной версии необходимо указать?")
+        bot.register_next_step_handler(msg, ask_mobile_version, version)
+    else:
+        bot.send_message(chat_id, "Кому отправить тестовую рассылку?")
+        bot.register_next_step_handler(message, ask_recipient, version)
 
-def ask_recipient(message, version):
+def ask_mobile_version(message, server_version):
+    """
+    Эта функция вызывается, если версия начинается с 3. 
+    Она получает номер мобильной версии от пользователя
+    и затем переходит к запросу адреса для отправки рассылки.
+    """
+    mobile_version = message.text
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Кому отправить тестовую рассылку?")
+    bot.register_next_step_handler(message, ask_recipient, server_version, mobile_version)
+
+def ask_recipient(message, server_version, mobile_version=None):
+    """
+    Функция запрашивает у пользователя адрес электронной почты для отправки рассылки. 
+    Создает кнопку в интерфейсе для подтверждения отправки.
+    """
     chat_id = message.chat.id
     recipient = message.text
 
     # Создание клавиатуры с кнопкой "Отправить"
     keyboard = telebot.types.InlineKeyboardMarkup()
-    button_send = telebot.types.InlineKeyboardButton(text="Отправить", callback_data="send_test_distribution|{}|{}".format(recipient, version))
+    button_send = telebot.types.InlineKeyboardButton(text="Отправить", callback_data="send_test_distribution|{}|{}|{}".format(recipient, server_version, mobile_version if mobile_version else server_version))
     keyboard.add(button_send)
 
     bot.send_message(chat_id, "Отправить тестовую рассылку на почту {}?".format(recipient), reply_markup=keyboard)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("send_test_distribution"))
-def send_test_distribution_email(callback_query):
-    chat_id = callback_query.message.chat.id
-    data = callback_query.data.split("|")
-    recipient = data[1]
-    version = data[2]
-
+def continue_sending_email(version, recipient, chat_id, mobile_version=None, callback_query_id=None):
+    """
+    Эта функция выполняет отправку тестовой рассылки. 
+    Она обрабатывает подготовку данных и логирование, 
+    а также фактически отправляет рассылку.
+    """
     # Замена {version_SB} на соответствующую версию и добавление обновленных папок в новый список
     updated_folder_paths = [folder_path.format(version_SB=version) for folder_path in YANDEX_DISK_FOLDERS]
     # Запускаем скрипт на скачивание доков "Список изменений"
@@ -382,13 +411,28 @@ def send_test_distribution_email(callback_query):
     # bot_info_logger.info("Запуск скрипта по перемещению файлов скинов клиентов, номер версии рассылки: %s", version)
     # move_skins_and_manage_share(version)
 
-    send_test_email(version, recipient)  # Вызов функции отправки тестовой рассылки
-    print("Была отправлена тестовая рассылка на почту:", recipient)
+    send_test_email(version, recipient, mobile_version)  # Вызов функции отправки тестовой рассылки
     bot_info_logger.info("Была отправлена тестовая рассылка на почту: %s, номер версии рассылки: %s", recipient, version)
     bot.send_message(chat_id, "Тестовая рассылка отправлена на почту {}.".format(recipient))
 
     # Отвечаем на запрос обратного вызова
-    bot.answer_callback_query(callback_query.id)
+    if callback_query_id:
+        bot.answer_callback_query(callback_query_id)
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("send_test_distribution"))
+def send_test_distribution_email(callback_query):
+    """
+    Функция обрабатывает нажатие кнопки "Отправить" в интерфейсе пользователя. 
+    Получает необходимые данные из запроса обратного вызова
+    и вызывает continue_sending_email для отправки рассылки.
+    """
+    chat_id = callback_query.message.chat.id
+    data = callback_query.data.split("|")
+    recipient = data[1]
+    server_version = data[2]
+    mobile_version = data[3] if len(data) > 3 else None
+
+    continue_sending_email(server_version, recipient, chat_id, mobile_version, callback_query.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ["mainmenu", "button_clients", "button_list_of_clients", "button_clients_version", "button_version_main_list", 
@@ -540,7 +584,7 @@ def inline_button_SD_update(call):
                 update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
                 bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
                 # Запускаем скрипт по отправке рассылки клиентам
-                send_notification_v2(version_release)
+                send_notification(version_release)
                 # извлекаем значения GROUP_RELEASE из SEND_ALERT
                 alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
                 # Формируем сообщение для отправки в группу
@@ -574,7 +618,7 @@ def inline_button_SD_update(call):
                 update_local_documentation(YANDEX_OAUTH_TOKEN, version_release, updated_folder_paths)
                 bot_info_logger.info("Файлы списка изменений PDF версии: %s, были успешно скачены локально.", version_release)
                 # Запускаем скрипт по отправке рассылки клиентам
-                send_notification_v3(version_release)
+                send_notification(version_release)
                 # извлекаем значения GROUP_RELEASE из SEND_ALERT
                 alert_chat_id = DATA['SEND_ALERT']['GROUP_RELEASE']
                 # Формируем сообщение для отправки в группу

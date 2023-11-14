@@ -200,3 +200,22 @@ def update_local_documentation(access_token, version, folder_paths):
     except Exception as error:
         print(f"Произошла общая ошибка: {error}")
         bot_error_logger.error("Произошла общая ошибка: %s", error)
+
+
+# access_token = "y0_AgAEA7qkB2AWAAlIKgAAAADel0HQaYRTiTBYSu6efA-81KEa9Yxw9eM"
+# nextcloud_url = "https://cloud.boardmaps.ru"
+# username = "ncloud"
+# password = "G6s6kWaZWyOC0oLt"
+
+# version = "2.65"
+# folder_paths = [
+#     f"/Документация BoardMaps/iPad/{version}/RU",
+#     f"/Документация BoardMaps/Server/{version}/RU",
+#     f"/Документация BoardMaps/Server/{version}/RU/USERS",
+#     f"/Документация BoardMaps/Server/{version}/RU/ADMINISTRATORS",
+# ]
+
+# # Вызываем функцию для обновления локальной документации
+# update_local_documentation(access_token, version, folder_paths)
+
+# download_and_upload_pdf_files(access_token, nextcloud_url, username, password, version, folder_paths)
