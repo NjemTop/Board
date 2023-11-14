@@ -28,7 +28,7 @@ def format_updates_to_html(updates):
     return html_updates
 
 
-def send_notification(version, email_send, mobile_version=None):
+def send_notification(version, mobile_version=None):
     """
     Функция по отправке рассылки клиентам.
     Информация берётся из сервиса Creg, в котором есть перечень клиентов,
